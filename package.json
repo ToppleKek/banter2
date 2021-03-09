@@ -4,8 +4,12 @@
   "description": "final banter rewrite",
   "main": "run.js",
   "dependencies": {
+    "cycle": "^1.0.3",
+    "define-property": "^2.0.2",
     "discord.js": "12.5.1",
+    "duplexer": "^0.1.2",
     "forever": "^3.0.4",
+    "safe-regex": "^2.1.1",
     "sqlite3": "^5.0.2"
   },
   "scripts": {

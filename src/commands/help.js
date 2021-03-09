@@ -3,7 +3,14 @@ const Bot = require("../bot");
 
 module.exports.help = 'Display command help list';
 module.exports.usage = '#PREFIXhelp';
-module.exports.args = '?command:string';
+module.exports.args =  {
+    position_independent: false,
+    args: [{
+        name: 'cmd',
+        optional: true,
+        type: 'string'
+    }]
+};
 
 
 /**

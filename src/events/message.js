@@ -96,7 +96,7 @@ function check_command(bot, msg) {
                 else if (msg.guild.roles.cache.get(buf))
                     tokens.push( {type: 'role_id', value: buf });
                 else
-                    tokens.push({ type: 'id', value: buf }); // idk generic id could be a guild
+                    tokens.push({ type: 'unknown_id', value: buf }); // idk generic id could be a guild
             } else if (new RegExp(/^<@!?[0-9]{17,19}>$/g).test(buf))
                 tokens.push({ type: 'user_mention', value: buf.replace(/<|@|!|>/g, '') });
             else if (new RegExp(/^<#[0-9]{17,19}>$/g).test(buf))
@@ -125,6 +125,11 @@ function check_command(bot, msg) {
         }
     } else {
         for (let i = 0; i < tokens.length; ++i) {
+            if (commands.arg_list.args[i].optional && commands.arg_list.args[i].type === tokens[i].type)
+                args.set(command.arg_list.args[i].name, tokens[i].value);
+            else
+                continue;
+
             if (commands.arg_list.args[i].type === tokens[i].type)
                 args.set(commands.arg_list.args[i].name, tokens[i].value);
             else

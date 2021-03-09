@@ -28,6 +28,10 @@ class Bot {
     }
 
     start() {
+        Discord.Message.prototype.respond_info = function(msg) {
+            this.send(`INFO: ${msg}`);
+        };
+        
         /** @type {Discord.Client} */
         this.client = new Discord.Client({ autoReconnect: true, disableEveryone: true });
 

@@ -1,0 +1,16 @@
+{
+  "name": "banter",
+  "version": "1.0.0",
+  "description": "final banter rewrite",
+  "main": "run.js",
+  "dependencies": {
+    "discord.js": "12.5.1",
+    "forever": "^3.0.4",
+    "sqlite3": "^5.0.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ToppleKek",
+  "license": "MIT"
+}

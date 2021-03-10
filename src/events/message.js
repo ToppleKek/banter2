@@ -1,15 +1,15 @@
 const { Message } = require("discord.js");
 const Bot = require("../bot");
 const util = require('util');
+const CommandError = require("../command_error");
 
 
 function main(msg) {
-    this.logger.debug('on message fired: msg.content: ' + msg.content);
-
     try {
         check_command(this, msg);
     } catch (err) {
-
+        if (err instanceof CommandError)
+            msg.respond_command_error(err.type, err.msg);
     }
 }
 
@@ -53,7 +53,7 @@ function check_command(bot, msg) {
         !usr:user,?time:number,?reason:string
     */
     // const tokens = [];
-    // const arg_list_str = command.args.split('');
+    // const arg_list_str = command.args_list.split('');
     // const arg_list = {
     //     position_independent: false,
     //     /*
@@ -110,39 +110,52 @@ function check_command(bot, msg) {
         }
     }
 
-    bot.logger.debug(`check_command: parsed args to: ${util.inspect(tokens)}`);
+    bot.logger.debug(`check_command: parsed args to: ${util.inspect(tokens)}\nargs needed: ${util.inspect(command.args_list)}`);
 
     const args = new Map();
+    const optional_args = new Map();
 
-    if (commands.arg_list.position_independent) {
+    if (command.args_list.position_independent) {
         for (let i = 0; i < tokens.length; ++i) {
-            for (let j = 0; j < commands.arg_list.args; ++j) {
-                if (commands.arg_list.args[j].type === tokens[i].type) {
-                    args.set(commands.arg_list.args[j].name, tokens[i].value);
+            for (let j = 0; j < command.args_list.args.length; ++j) {
+                if (command.args_list.args[j].types.length === 1 && command.args_list.args[j].types[0] === 'string') {
+                    args.set(command.args_list.args[i].name, new String(tokens[i].value));
+                    break;
+                } else if (command.args_list.args[j].types.includes(tokens[i].type)) {
+                    args.set(command.args_list.args[j].name, tokens[i].value);
                     break;
                 }
             }
         }
     } else {
-        for (let i = 0; i < tokens.length; ++i) {
-            if (commands.arg_list.args[i].optional && commands.arg_list.args[i].type === tokens[i].type)
-                args.set(command.arg_list.args[i].name, tokens[i].value);
+        let i;
+        for (i = 0; i < tokens.length; ++i) {
+            if (command.args_list.args.length <= i)
+                break;
+            if (command.args_list.args[i].types.length === 1 && command.args_list.args[i].types[0] === 'string')
+                args.set(command.args_list.args[i].name, new String(tokens[i].value));
+            else if (command.args_list.args[i].types.includes(tokens[i].type))
+                args.set(command.args_list.args[i].name, tokens[i].value);
             else
-                continue;
-
-            if (commands.arg_list.args[i].type === tokens[i].type)
-                args.set(commands.arg_list.args[i].name, tokens[i].value);
-            else
-                throw Error(`Expected type: ${commands.arg_list.args[i].type}` + 
-                            `for argument: ${commands.arg_list.args[i].name}`  +
+                throw new CommandError('SyntaxError', `Expected type: ${command.args_list.args[i].types.join(' or ')} ` + 
+                            `for argument: ${command.args_list.args[i].name} `  +
                             `but got: ${tokens[i].value} (${tokens[i].type}) instead`);
+        }
+
+        for (let j = 0; i < tokens.length; ++i, ++j) {
+            if (command.args_list.optional_args.length <= i)
+                break;
+            if (command.args_list.optional_args[j].types.length === 1 && command.args_list.optional_args[j].types[0] === 'string')
+                optional_args.set(command.args_list.optional_args[j].name, new String(tokens[i].value));
+            else if (command.args_list.optional_args[j].types.includes(tokens[i].type))
+                optional_args.set(command.args_list.optional_args[j].name, tokens[i].value);
         }
     }
 
-    if (args.size !== commands.arg_list.args.length)
-        throw Error(`Expected ${command.arg_list.args.length} args but ${args.size} were provided`);
+    if (args.size !== command.args_list.args.length)
+        throw new CommandError('Argument Error', `Expected ${command.args_list.args.length} args but ${args.size} were provided`);
 
-    command.main(bot, args, msg);
+    command.main(bot, new Map([...args, ...optional_args]), msg);
 }
 
 module.exports.main = main;

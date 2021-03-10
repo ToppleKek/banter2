@@ -29,7 +29,11 @@ class Bot {
 
     start() {
         Discord.Message.prototype.respond_info = function(msg) {
-            this.send(`INFO: ${msg}`);
+            this.channel.send(`INFO: ${msg}`);
+        };
+
+        Discord.Message.prototype.respond_command_error = function(type, msg) {
+            this.channel.send(`COMMAND_ERROR: ${type}: ${msg}`);
         };
         
         /** @type {Discord.Client} */

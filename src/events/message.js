@@ -100,6 +100,17 @@ function check_command(bot, msg) {
             let buf = "";
             let num;
 
+            if (content.charAt(i) === '"') {
+                while (content.charAt(i) !== '"') {
+                    buf += content.charAt(i++);
+                    if (i >= content.length)
+                        throw new CommandError('SyntaxError', 'Missing closing quote');
+                }
+
+                tokens.push({ type: 'string', value: buf });
+                continue;
+            }
+                
             while (content.charAt(i) !== ' ' && i < content.length)
                 buf += content.charAt(i++);
 
@@ -122,10 +133,17 @@ function check_command(bot, msg) {
                 tokens.push({ type: 'role_mention', value: buf.replace(/<|@|&|>/g, '') });
             else if ((num = Number.parseFloat(buf)) == buf)
                 tokens.push({ type: 'number', value: num });
-            else {
+            else
                 tokens.push({ type: 'string', value: buf });
-            }
+        }
+    }
 
+    // Merge strings
+    let buf = "";
+    for (let i = 0; i < tokens.length; ++i) {
+        if (tokens[i].type === 'string') {
+            while (tokens[i].type === 'string' && i < tokens.length)
+                buf += new String(tokens[i++].value);
         }
     }
 

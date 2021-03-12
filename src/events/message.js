@@ -13,6 +13,23 @@ function main(msg) {
     }
 }
 
+function join_token_string(i, tokens) {
+    let buf;
+    
+    for (; i < tokens.length; ++i) {
+        if (tokens[i].type === 'string')
+            buf += new String(token[i].value);
+        else
+            break;
+    }
+
+    return buf;
+}
+
+function get_token(buf) {
+    
+}
+
 /**
  * Check a message for a command and execute it if found
  * @param {Bot} bot the bot
@@ -105,8 +122,10 @@ function check_command(bot, msg) {
                 tokens.push({ type: 'role_mention', value: buf.replace(/<|@|&|>/g, '') });
             else if ((num = Number.parseFloat(buf)) == buf)
                 tokens.push({ type: 'number', value: num });
-            else
+            else {
                 tokens.push({ type: 'string', value: buf });
+            }
+
         }
     }
 
@@ -118,8 +137,8 @@ function check_command(bot, msg) {
     if (command.args_list.position_independent) {
         for (let i = 0; i < tokens.length; ++i) {
             for (let j = 0; j < command.args_list.args.length; ++j) {
-                if (command.args_list.args[j].types.length === 1 && command.args_list.args[j].types[0] === 'string') {
-                    args.set(command.args_list.args[i].name, new String(tokens[i].value));
+                if (token[i].type === 'string' && command.args_list.args[j].types.includes('string')) {
+                    args.set(command.args_list.args[i].name, join_token_string(i, tokens));
                     break;
                 } else if (command.args_list.args[j].types.includes(tokens[i].type)) {
                     args.set(command.args_list.args[j].name, tokens[i].value);
@@ -133,7 +152,7 @@ function check_command(bot, msg) {
             if (command.args_list.args.length <= i)
                 break;
             if (command.args_list.args[i].types.length === 1 && command.args_list.args[i].types[0] === 'string')
-                args.set(command.args_list.args[i].name, new String(tokens[i].value));
+                args.set(command.args_list.args[i].name, join_token_string(tokens));
             else if (command.args_list.args[i].types.includes(tokens[i].type))
                 args.set(command.args_list.args[i].name, tokens[i].value);
             else

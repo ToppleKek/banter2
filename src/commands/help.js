@@ -6,12 +6,10 @@ module.exports.help = 'Display command help list';
 module.exports.usage = '#PREFIXhelp';
 module.exports.args_list =  {
     position_independent: false,
-    args: [{
-        name: 'cmd',
-        types: ['number']
-    }],
+    args: [],
     optional_args: [{
-        
+        name: 'cmd',
+        types: ['string']
     }]
 };
 

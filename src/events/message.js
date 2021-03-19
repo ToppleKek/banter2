@@ -18,16 +18,12 @@ function join_token_string(i, tokens) {
     
     for (; i < tokens.length; ++i) {
         if (tokens[i].type === 'string')
-            buf += new String(token[i].value);
+            buf += ' ' + new String(token[i].value);
         else
             break;
     }
 
     return buf;
-}
-
-function get_token(buf) {
-    
 }
 
 /**
@@ -139,11 +135,16 @@ function check_command(bot, msg) {
     }
 
     // Merge strings
+    // [num, str, str, str, mention] -> [num, merged_string, mention]
     let buf = "";
     for (let i = 0; i < tokens.length; ++i) {
         if (tokens[i].type === 'string') {
+            let j = i;
             while (tokens[i].type === 'string' && i < tokens.length)
                 buf += new String(tokens[i++].value);
+
+            tokens[j] = { type: 'string', value: buf };
+            tokens.splice(j + 1, i - j - 1);
         }
     }
 
@@ -169,6 +170,8 @@ function check_command(bot, msg) {
         for (i = 0; i < tokens.length; ++i) {
             if (command.args_list.args.length <= i)
                 break;
+            
+            // If there is only one argument required and it is a string, then just turn the whole message into a string.
             if (command.args_list.args[i].types.length === 1 && command.args_list.args[i].types[0] === 'string')
                 args.set(command.args_list.args[i].name, join_token_string(tokens));
             else if (command.args_list.args[i].types.includes(tokens[i].type))

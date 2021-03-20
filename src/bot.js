@@ -12,6 +12,7 @@ class Bot {
         this.token         = config.token;
         this.prefix        = config.prefix;
         this.owner_id      = config.owner_id;
+        this.appid         = config.appid;
         this.error_channel = config.error_channel;
         this.commands      = {};
         this.events        = {};
@@ -29,7 +30,10 @@ class Bot {
 
     start() {
         Discord.Message.prototype.respond_info = function(msg) {
-            this.channel.send(`INFO: ${msg}`);
+            this.channel.send({embed: {
+                color: 0x0000AA,
+                description: msg,
+            }});
         };
 
         Discord.Message.prototype.respond_command_error = function(type, msg) {

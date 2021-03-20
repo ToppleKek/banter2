@@ -22,7 +22,7 @@ function register_command(cmd) {
         cmd_payload.options.push({
             name: arg.name,
             type: TYPES[arg.types[0]],
-            description: 'unknown',
+            description: arg.description,
             required: true
         });
     }
@@ -31,19 +31,21 @@ function register_command(cmd) {
         cmd_payload.options.push({
             name: arg.name,
             type: TYPES[arg.types[0]],
-            description: '(optional) unknown',
+            description: arg.description,
             required: false
         });
     }
 
     const payload = JSON.stringify(cmd_payload);
 
+    console.log(payload);
+
     const options = {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             "Content-Length": payload.length,
-            "User-Agent": "Banter2 (https://github.com/ToppleKek/banter2)",
+            "User-Agent": "DiscordBot (https://github.com/ToppleKek/banter2)",
             Authorization: `Bot ${TOKEN}`
         }
     };

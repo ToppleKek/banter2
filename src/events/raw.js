@@ -27,8 +27,10 @@ function handle_slash_command(bot, data) {
             const cmd = data.data.name;
             const tokens = [];
 
-            for (let option of data.data.options)
-                tokens.push(CommandUtils.get_token(bot, option.value));
+            if (data.data.options) {
+                for (let option of data.data.options)
+                    tokens.push(CommandUtils.get_token(bot, option.value));
+            }
 
             // find message
             const channel = bot.client.channels.cache.get(data.channel_id);

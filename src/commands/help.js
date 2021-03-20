@@ -8,11 +8,13 @@ module.exports.args_list =  {
     position_independent: false,
     args: [],
     optional_args: [{
-        name: 'cmd',
-        types: ['string'],
-    }, {
         name: 'page',
-        types: ['number']
+        type: 'number',
+        description: 'Page number to display'
+    }, {
+        name: 'cmd',
+        type: 'string',
+        description: 'Command to get details on'
     }]
 };
 

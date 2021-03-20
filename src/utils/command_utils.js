@@ -1,4 +1,5 @@
 const util = require('util');
+const CommandError = require("../command_error");
 
 module.exports = {
     join_token_string(i, tokens) {
@@ -10,24 +11,24 @@ module.exports = {
         return buf.trimEnd();
     },
 
-    get_token(buf) {
+    get_token(bot, buf) {
         if (new RegExp(/^[0-9]{17,19}$/g).test(buf)) {
             if (bot.client.users.cache.get(buf))
-                return { type: 'user_id', value: buf };
+                return { type: 'user', value: buf };
             else if (bot.client.channels.cache.get(buf))
-                return { type: 'channel_id', value: buf };
+                return { type: 'channel', value: buf };
             else if (msg.channel.messages.cache.get(buf))
-                return  {type: 'message_id', value: buf };
+                return  {type: 'message', value: buf };
             else if (msg.guild.roles.cache.get(buf))
-                return  {type: 'role_id', value: buf };
+                return  {type: 'role', value: buf };
             else
                 return { type: 'unknown_id', value: buf }; // idk generic id could be a guild
         } else if (new RegExp(/^<@!?[0-9]{17,19}>$/g).test(buf))
-            return { type: 'user_mention', value: buf.replace(/<|@|!|>/g, '') };
+            return { type: 'user', value: buf.replace(/<|@|!|>/g, '') };
         else if (new RegExp(/^<#[0-9]{17,19}>$/g).test(buf))
-            return { type: 'channel_mention', value: buf.replace(/<|#|>/g, '') };
+            return { type: 'channel', value: buf.replace(/<|#|>/g, '') };
         else if (new RegExp(/^<@&[0-9]{17,19}>$/g).test(buf))
-            return { type: 'role_mention', value: buf.replace(/<|@|&|>/g, '') };
+            return { type: 'role', value: buf.replace(/<|@|&|>/g, '') };
         else if ((num = Number.parseFloat(buf)) == buf)
             return { type: 'number', value: num };
         else
@@ -59,10 +60,10 @@ module.exports = {
         if (command.args_list.position_independent) {
             for (let i = 0; i < tokens.length; ++i) {
                 for (let j = 0; j < command.args_list.args.length; ++j) {
-                    if (token[i].type === 'string' && command.args_list.args[j].types.includes('string')) {
+                    if (token[i].type === 'string' && command.args_list.args[j].type === 'string') {
                         args.set(command.args_list.args[i].name, { type: 'string', value: module.exports.join_token_string(i, tokens) });
                         break;
-                    } else if (command.args_list.args[j].types.includes(tokens[i].type)) {
+                    } else if (command.args_list.args[j].type === tokens[i].type) {
                         args.set(command.args_list.args[j].name, tokens[i]);
                         break;
                     }
@@ -70,28 +71,32 @@ module.exports = {
             }
         } else {
             let i;
-            for (i = 0; i < tokens.length; ++i) {
-                if (command.args_list.args.length <= i)
+            let j;
+            for (i = 0, j = 0; j < command.args_list.args.length; ++j) {
+                if (tokens.length <= i)
                     break;
                 
                 // If there is only one argument required and it is a string, then just turn the whole message into a string.
-                if (command.args_list.args[i].types.length === 1 && command.args_list.args[i].types[0] === 'string')
-                    args.set(command.args_list.args[i].name, {type: 'string', value: module.exports.join_token_string(i, tokens) });
-                else if (command.args_list.args[i].types.includes(tokens[i].type))
-                    args.set(command.args_list.args[i].name, tokens[i]);
+                if (command.args_list.args.length === 1 && command.args_list.args[j].type === 'string')
+                    args.set(command.args_list.args[j].name, {type: 'string', value: module.exports.join_token_string(i++, tokens)});
+                else if (command.args_list.args[j].type === 'string')
+                    args.set(command.args_list.args[i].name, {type: 'string', value: new String(tokens[i++].value)});
+                else if (command.args_list.args[j].type === tokens[i].type)
+                    args.set(command.args_list.args[j].name, tokens[i++]);
                 else
-                    throw new CommandError('SyntaxError', `Expected type: ${command.args_list.args[i].types.join(' or ')} ` + 
-                                `for argument: ${command.args_list.args[i].name} `  +
+                    throw new CommandError('SyntaxError', `Expected type: ${command.args_list.args[j].type} ` + 
+                                `for argument: ${command.args_list.args[j].name} `  +
                                 `but got: ${tokens[i].value} (${tokens[i].type}) instead`);
             }
 
-            for (let j = 0; i < tokens.length; ++i, ++j) {
-                if (command.args_list.optional_args.length <= i)
+            for (j = 0; j < command.args_list.optional_args.length; ++j) {
+                if (tokens.length <= i)
                     break;
-                if (command.args_list.optional_args[j].types.length === 1 && command.args_list.optional_args[j].types[0] === 'string')
-                    optional_args.set(command.args_list.optional_args[j].name, {type: 'string', value: module.exports.join_token_string(i, tokens) });
-                else if (command.args_list.optional_args[j].types.includes(tokens[i].type))
-                    optional_args.set(command.args_list.optional_args[j].name, tokens[i]);
+
+                if (command.args_list.optional_args.length === 1 && command.args_list.optional_args[j].type === 'string')
+                    optional_args.set(command.args_list.optional_args[j].name, {type: 'string', value: module.exports.join_token_string(i++, tokens)});
+                else if (command.args_list.optional_args[j].type === tokens[i].type)
+                    optional_args.set(command.args_list.optional_args[j].name, tokens[i++]);
             }
         }
 

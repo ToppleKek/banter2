@@ -26,15 +26,15 @@ function handle_slash_command(bot, data) {
         .then((response) => {
             const cmd = data.data.name;
             const tokens = [];
-        
-            for (let option in data.options)
-                tokens.push(CommandUtils.get_token(option.value));
-        
+
+            for (let option of data.data.options)
+                tokens.push(CommandUtils.get_token(bot, option.value));
+
             // find message
             const channel = bot.client.channels.cache.get(data.channel_id);
             const msgs = channel.messages.cache.first(20).filter(msg => msg.content.startsWith(`</${data.data.name}:${data.data.id}>`) && msg.author.id === data.member.user.id);
             msgs.sort((msg1, msg2) => msg2.createdTimestamp - msg1.createdTimestamp);
-        
+
             CommandUtils.execute_command(bot, msgs[0], bot.commands[cmd], tokens);
         })
         .catch((err) => {

@@ -43,21 +43,23 @@ function check_command(bot, msg) {
             let num;
 
             if (content.charAt(i) === '"') {
+                i++;
                 while (content.charAt(i) !== '"') {
                     buf += content.charAt(i++);
+
                     if (i >= content.length)
                         throw new CommandError('SyntaxError', 'Missing closing quote');
                 }
 
                 tokens.push({ type: 'string', value: buf });
+                // skip closing quote
                 continue;
             }
-                
+
             while (content.charAt(i) !== ' ' && i < content.length)
                 buf += content.charAt(i++);
 
-            bot.logger.debug("buf: " + buf);
-            tokens.push(CommandUtils.get_token(buf));
+            tokens.push(CommandUtils.get_token(bot, buf));
         }
     }
 

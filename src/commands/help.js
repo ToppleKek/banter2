@@ -9,10 +9,12 @@ module.exports.args_list =  {
     args: [],
     optional_args: [{
         name: 'cmd',
-        types: ['string']
+        types: ['string'],
+    }, {
+        name: 'page',
+        types: ['number']
     }]
 };
-
 
 /**
  * @param {Bot} bot Bot object that called
@@ -21,10 +23,28 @@ module.exports.args_list =  {
  */
 module.exports.main = async (bot, args, msg) => {
     bot.logger.debug(`help: got args: ${util.inspect(args)}`);
-    msg.reply('Help me');
-    // const pages  = [];
-    // const 
-    // for (let command of bot.commands) {
+    const pages = [];
+    const cmds = [];
 
-    // }
+    for (const command in bot.commands) {
+        cmds.push({
+            name: `${bot.prefix}${command}`,
+            value: `${bot.commands[command].help}`,
+            inline: false
+        });
+    }
+
+    while (cmds.length)
+        pages.push(cmds.splice(0, 10));
+
+    msg.channel.send({embed: {
+        author: {
+            name: msg.author.username,
+            iconURL: msg.author.displayAvatarURL()
+        },
+        color: 0xAA00FF,
+        title: 'Banter3',
+        description: `For details, use ${bot.prefix}help <cmd>`,
+        fields: pages[0]
+    }});
 }

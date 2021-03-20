@@ -61,10 +61,10 @@ module.exports = {
             for (let i = 0; i < tokens.length; ++i) {
                 for (let j = 0; j < command.args_list.args.length; ++j) {
                     if (token[i].type === 'string' && command.args_list.args[j].type === 'string') {
-                        args.set(command.args_list.args[i].name, { type: 'string', value: module.exports.join_token_string(i, tokens) });
+                        args.set(command.args_list.args[i].name, module.exports.join_token_string(i, tokens));
                         break;
                     } else if (command.args_list.args[j].type === tokens[i].type) {
-                        args.set(command.args_list.args[j].name, tokens[i]);
+                        args.set(command.args_list.args[j].name, tokens[i].value);
                         break;
                     }
                 }
@@ -78,11 +78,11 @@ module.exports = {
                 
                 // If there is only one argument required and it is a string, then just turn the whole message into a string.
                 if (command.args_list.args.length === 1 && command.args_list.args[j].type === 'string')
-                    args.set(command.args_list.args[j].name, {type: 'string', value: module.exports.join_token_string(i++, tokens)});
+                    args.set(command.args_list.args[j].name, module.exports.join_token_string(i++, tokens));
                 else if (command.args_list.args[j].type === 'string')
-                    args.set(command.args_list.args[i].name, {type: 'string', value: new String(tokens[i++].value)});
+                    args.set(command.args_list.args[i].name, new String(tokens[i++].value));
                 else if (command.args_list.args[j].type === tokens[i].type)
-                    args.set(command.args_list.args[j].name, tokens[i++]);
+                    args.set(command.args_list.args[j].name, tokens[i++].value);
                 else
                     throw new CommandError('SyntaxError', `Expected type: ${command.args_list.args[j].type} ` + 
                                 `for argument: ${command.args_list.args[j].name} `  +
@@ -94,9 +94,9 @@ module.exports = {
                     break;
 
                 if (command.args_list.optional_args.length === 1 && command.args_list.optional_args[j].type === 'string')
-                    optional_args.set(command.args_list.optional_args[j].name, {type: 'string', value: module.exports.join_token_string(i++, tokens)});
+                    optional_args.set(command.args_list.optional_args[j].name, module.exports.join_token_string(i++, tokens));
                 else if (command.args_list.optional_args[j].type === tokens[i].type)
-                    optional_args.set(command.args_list.optional_args[j].name, tokens[i++]);
+                    optional_args.set(command.args_list.optional_args[j].name, tokens[i++].value);
             }
         }
 

@@ -28,6 +28,37 @@ module.exports.main = async (bot, args, msg) => {
     const pages = [];
     const cmds = [];
 
+    if (args.get('cmd')) {
+        const cmd = args.get('cmd');
+        const cmd_args = [];
+
+        for (const arg of bot.commands[cmd].args_list.args) {
+            cmd_args.push({
+                name: `${arg.name} (${arg.type})`,
+                value: arg.description,
+                inline: false
+            });
+        }
+
+        for (const arg of bot.commands[cmd].args_list.optional_args) {
+            cmd_args.push({
+                name: `(optional) ${arg.name} (${arg.type})`,
+                value: arg.description,
+                inline: false
+            });
+        }
+
+        const embed = {
+            title: `**${bot.prefix}${cmd}**`,
+            description: `${bot.commands[cmd].help}\n**Usage**\n${bot.commands[cmd].usage.replace('#PREFIX', bot.prefix)}`,
+            fields: cmd_args,
+            color: Math.floor(Math.random() * 0xFFFFFF)
+        };
+
+        msg.channel.send({embed});
+        return;
+    }
+
     for (const command in bot.commands) {
         cmds.push({
             name: `${bot.prefix}${command}`,
@@ -46,7 +77,7 @@ module.exports.main = async (bot, args, msg) => {
         },
         color: 0xAA00FF,
         title: 'Banter3',
-        description: `For details, use ${bot.prefix}help <cmd>`,
+        description: `For details, use ${bot.prefix}help <cmd> change pages with ${bot.prefix}help <#>`,
         fields: pages[0]
     }});
 }

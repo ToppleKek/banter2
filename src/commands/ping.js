@@ -1,0 +1,20 @@
+const { Message } = require("discord.js");
+const Bot = require("../bot");
+const util = require('util');
+
+module.exports.help = 'Pong';
+module.exports.usage = '#PREFIXping';
+module.exports.args_list =  {
+    position_independent: false,
+    args: [],
+    optional_args: []
+};
+
+/**
+ * @param {Bot} bot Bot object that called
+ * @param {Array} args Array of arguments 
+ * @param {Message} msg Message Object
+ */
+module.exports.main = async (bot, args, msg) => {
+    msg.respond_info(`Pong: \`${Date.now() - msg.createdAt.getTime()}ms\`\nClient: \`${Math.floor(bot.client.ws.ping)}ms\``);
+}

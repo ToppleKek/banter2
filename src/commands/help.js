@@ -30,10 +30,14 @@ module.exports.main = async (bot, args, msg) => {
     const cmds = [];
 
     if (args.get('cmd')) {
-        const cmd = args.get('cmd');
+        const cmd_name = args.get('cmd');
         const cmd_args = [];
+        const cmd = bot.commands[cmd_name];
 
-        for (const arg of bot.commands[cmd].args_list.args) {
+        if (!cmd)
+            return msg.respond_command_error('Argument Error', 'Command not found');
+
+        for (const arg of cmd.args_list.args) {
             cmd_args.push({
                 name: `${arg.name} (${arg.type})`,
                 value: arg.description,
@@ -41,7 +45,7 @@ module.exports.main = async (bot, args, msg) => {
             });
         }
 
-        for (const arg of bot.commands[cmd].args_list.optional_args) {
+        for (const arg of cmd.args_list.optional_args) {
             cmd_args.push({
                 name: `(optional) ${arg.name} (${arg.type})`,
                 value: arg.description,
@@ -50,8 +54,9 @@ module.exports.main = async (bot, args, msg) => {
         }
 
         const embed = {
-            title: `**${bot.prefix}${cmd}**`,
-            description: `${bot.commands[cmd].help}\n**Usage**\n${bot.commands[cmd].usage.replace('#PREFIX', bot.prefix)}`,
+            title: `**${bot.prefix}${cmd_name}**`,
+            description: `${cmd.help}\n**Usage**\n${cmd.usage.replace('#PREFIX', bot.prefix)}
+            **Permission required**\n${cmd.permission === '' ? 'none' : cmd.permission}`,
             fields: cmd_args,
             color: Math.floor(Math.random() * 0xFFFFFF)
         };
@@ -71,14 +76,17 @@ module.exports.main = async (bot, args, msg) => {
     while (cmds.length)
         pages.push(cmds.splice(0, 10));
 
+    const page = args.get('page') || 0;
+    if (page >= pages.length)
+        return msg.respond_command_error('Argument Error', 'Page not found');
     msg.channel.send({embed: {
         author: {
             name: msg.author.username,
             iconURL: msg.author.displayAvatarURL()
         },
-        color: 0xAA00FF,
+        color: Math.floor(Math.random() * 0xFFFFFF),
         title: 'Banter3',
         description: `For details, use ${bot.prefix}help <cmd> change pages with ${bot.prefix}help <#>`,
-        fields: pages[0]
+        fields: pages[args.get('page') || 0]
     }});
 }

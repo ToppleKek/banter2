@@ -1,5 +1,8 @@
+const { Message } = require('discord.js');
 const util = require('util');
+const Bot = require('../bot');
 const CommandError = require("../command_error");
+const Utils = require('./utils');
 
 module.exports = {
     join_token_string(i, tokens) {
@@ -35,7 +38,19 @@ module.exports = {
             return { type: 'string', value: buf };
     },
 
+    /**
+     * 
+     * @param {Bot} bot 
+     * @param {Message} msg 
+     * @param {Object} command 
+     * @param {Array} tokens 
+     */
     execute_command(bot, msg, command, tokens) {
+        if (!Utils.check_permissions(msg.member, command.required_permissions)) {
+            throw new CommandError('Permission Error',
+                `You must have ${command.required_permissions.join(' or ')} to execute this command.`);
+        }
+
         // Merge strings
         // [num, str, str, str, mention] -> [num, merged_string, mention]
         let buf = "";

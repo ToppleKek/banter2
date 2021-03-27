@@ -2,6 +2,7 @@ const { Message } = require("discord.js");
 const util = require('util');
 const Https = require('https');
 const CommandUtils = require('../utils/command_utils');
+const CommandError = require("../command_error");
 
 function main(event) {
     if (event.t === 'INTERACTION_CREATE')

@@ -31,7 +31,15 @@ function handle_slash_command(bot, data) {
             const msgs = channel.messages.cache.first(20).filter(msg => msg.content.startsWith(`</${data.data.name}:${data.data.id}>`) && msg.author.id === data.member.user.id);
             msgs.sort((msg1, msg2) => msg2.createdTimestamp - msg1.createdTimestamp);
 
-            CommandUtils.execute_command(bot, msgs[0], bot.commands[cmd], tokens);
+            try {
+                CommandUtils.execute_command(bot, msgs[0], bot.commands[cmd], tokens);
+            } catch (err) {
+                if (err instanceof CommandError)
+                    msgs[0].respond_command_error(err.type, err.msg);
+                else
+                    bot.logger.error(`handle_slash_command: error: ${err}`);
+            }
+            
         })
         .catch((err) => {
             bot.logger.error(`Failed to respond to interaction: ${err}`);

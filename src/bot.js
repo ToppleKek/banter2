@@ -31,13 +31,40 @@ class Bot {
     start() {
         Discord.Message.prototype.respond_info = function(msg) {
             this.channel.send({embed: {
-                color: 0x0000AA,
+                color: 0x259EF5,
                 description: msg,
             }});
         };
 
         Discord.Message.prototype.respond_command_error = function(type, msg) {
-            this.channel.send(`COMMAND_ERROR: ${type}: ${msg}`);
+            const fields = [{
+                name: 'Type',
+                value: type,
+                inline: false
+            }, {
+                name: 'Details',
+                value: msg,
+                inline: false
+            }];
+
+            if (msg.command) {
+                fields.push({
+                    name: 'Usage',
+                    value: this.command.usage,
+                    inline: false
+                });
+            }
+
+            this.channel.send({embed: {
+                author: {
+                    name: `Command executed by ${this.author.username}#${this.author.discriminator}`,
+                    iconURL: this.author.displayAvatarURL()
+                },
+                title: 'Command Error',
+                fields,
+                color: 0xFF6640,
+                timestamp: Date.now()
+            }});
         };
         
         /** @type {Discord.Client} */

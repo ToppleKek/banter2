@@ -20,7 +20,7 @@ module.exports.args_list =  {
 
 /**
  * @param {Bot} bot Bot object that called
- * @param {Array} args Array of arguments 
+ * @param {Map} args Map of arguments
  * @param {Message} msg Message Object
  */
 module.exports.main = async (bot, args, msg) => {

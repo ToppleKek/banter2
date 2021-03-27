@@ -116,8 +116,9 @@ module.exports = {
         }
 
         if (args.size !== command.args_list.args.length)
-            throw new CommandError('Argument Error', `Expected ${command.args_list.args.length} args but ${args.size} were provided`);
+            throw new CommandError('Argument Error', `Expected ${command.args_list.args.length} arguments but ${args.size} were provided`);
 
+        Object.defineProperty(msg, 'command', { value: command });
         command.main(bot, new Map([...args, ...optional_args]), msg);
     }
 }

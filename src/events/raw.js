@@ -12,14 +12,7 @@ function main(event) {
 
 function handle_slash_command(bot, data) {
     const cmd_payload = {
-        type: 4,
-        data: {
-            embeds: [{
-                description: `Handing off this interaction to the main bot... (command_id=${data.data.id} command=${data.data.name})`,
-                color: 0xAA00FF
-            }],
-            flags: 64
-        }
+        type: 5
     };
 
     const payload = JSON.stringify(cmd_payload);

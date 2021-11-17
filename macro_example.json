@@ -1,0 +1,40 @@
+{
+    "name": "plarp",
+    "event": "message",
+    "conditionals": [
+        {
+            "lhs_src": "content",
+            "operator": "equals",
+            "rhs": "hello",
+            "logic_op": "or"
+        },
+        {
+            "lhs_src": "content",
+            "operator": "starts_with",
+            "rhs": "hi",
+            "logic_op": "and"
+        },
+        {
+            "lhs_src": "content",
+            "operator": "!ends_with",
+            "rhs": "goodbye",
+            "logic_op": ""
+        }
+    ],
+    "responses": [
+        {
+            "action": "send_message",
+            "args": [
+                "<channel_id> (where)",
+                "Hello $USER (content)"
+            ]
+        },
+        {
+            "action": "give_role",
+            "args": [
+                "<role id>"
+            ]
+        }
+    ]
+
+}

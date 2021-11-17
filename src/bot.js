@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const SQLite3 = require('sqlite3').verbose();
 const Logger = require('./logger');
 const fs = require('fs');
+const BanterGuild = require('./banter_guild');
 
 /**
  * @type {Bot}
@@ -17,6 +18,7 @@ class Bot {
         this.commands      = {};
         this.events        = {};
         this.logger        = new Logger(`./logs/${Date.now()}_LOG.txt`);
+        this.guilds        = new Map();
 
         this.db = new SQLite3.Database(config.db_file, (err) => {
             if (err) {
@@ -66,12 +68,28 @@ class Bot {
                 timestamp: Date.now()
             }});
         };
+
+        Discord.Message.prototype.respond_error = function(msg) {
+            this.channel.send({embed: {
+                color: 0xFF6640,
+                description: msg,
+            }});
+        };
         
         /** @type {Discord.Client} */
         this.client = new Discord.Client({ autoReconnect: true, disableEveryone: true });
 
         this.client.on('ready', async () => {
             this.logger.info('bot is ready');
+
+            this.logger.info('setting up servers');
+
+            const guilds = this.client.guilds.cache.each((guild) => {
+                this.logger.info(`setting up: ${guild.name} - ${guild.id}`);
+                this.guilds.set(guild.id, new BanterGuild(this, guild.id));
+            });
+
+            this.logger.info('done setting up servers');
         });
 
         this.logger.info('Loading commands...');

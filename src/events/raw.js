@@ -10,40 +10,49 @@ function main(event) {
 
 }
 
-function handle_slash_command(bot, data) {
+function subscribe(guild, macro) {
+    // subscribed_macros.push({
+    //     guild,
+    //     payload: macro
+    // });
+}
+
+async function handle_slash_command(bot, data) {
+    console.log(util.inspect(data));
     const cmd_payload = {
         type: 5
     };
 
     const payload = JSON.stringify(cmd_payload);
-    interaction_respond(payload, data.id, data.token)
-        .then((response) => {
-            const cmd = data.data.name;
-            const tokens = [];
-
-            if (data.data.options) {
-                for (let option of data.data.options)
-                    tokens.push(CommandUtils.get_token(bot, option.value));
-            }
-
-            // find message
-            const channel = bot.client.channels.cache.get(data.channel_id);
-            const msgs = channel.messages.cache.first(20).filter(msg => msg.content.startsWith(`</${data.data.name}:${data.data.id}>`) && msg.author.id === data.member.user.id);
-            msgs.sort((msg1, msg2) => msg2.createdTimestamp - msg1.createdTimestamp);
-
-            try {
-                CommandUtils.execute_command(bot, msgs[0], bot.commands[cmd], tokens);
-            } catch (err) {
-                if (err instanceof CommandError)
-                    msgs[0].respond_command_error(err.type, err.msg);
-                else
-                    bot.logger.error(`handle_slash_command: error: ${err}`);
-            }
-            
-        })
+    const response = await interaction_respond(payload, data.id, data.token)
         .catch((err) => {
             bot.logger.error(`Failed to respond to interaction: ${err}`);
         });
+    
+    const cmd = data.data.name;
+    const tokens = [];
+
+    if (data.data.options) {
+        for (let option of data.data.options)
+            tokens.push(CommandUtils.get_token(bot, option.value));
+    }
+
+    // find message
+    const channel = await bot.client.channels.fetch(data.channel_id)
+        .catch((err) => bot.logger.error(err));
+    const msgs = (await channel.messages.fetch({limit: 20})).filter(msg => msg.content.startsWith(`</${data.data.name}:${data.data.id}>`) && msg.author.id === data.member.user.id);
+    msgs.sort((msg1, msg2) => msg2.createdTimestamp - msg1.createdTimestamp);
+    console.dir(msgs);
+
+    try {
+        CommandUtils.execute_command(bot, msgs[0], bot.commands[cmd], tokens);
+    } catch (err) {
+        if (err instanceof CommandError)
+            msgs[0].respond_command_error(err.type, err.msg);
+        else
+            bot.logger.error(`handle_slash_command: error: ${err}\n${err.stack}`);
+    }
+
 }
 
 function interaction_respond(payload, id, token) {
@@ -56,13 +65,13 @@ function interaction_respond(payload, id, token) {
                 "User-Agent": "DiscordBot (https://github.com/ToppleKek/banter2)"
             }
         };
-    
+
         let response_data = "";
         const request = Https.request(`https://discord.com/api/v8/interactions/${id}/${token}/callback`, options, (response) => {
             response.on('data', (chunk) => {
                 response_data += chunk;
             });
-    
+
             response.on('end', () => {
                 resolve(response_data);
             });
@@ -71,7 +80,7 @@ function interaction_respond(payload, id, token) {
                 reject(err);
             });
         });
-    
+
         request.write(payload);
         request.end();
     });

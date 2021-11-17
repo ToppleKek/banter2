@@ -21,9 +21,9 @@ module.exports = {
             else if (bot.client.channels.cache.get(buf))
                 return { type: 'channel', value: buf };
             else if (msg.channel.messages.cache.get(buf))
-                return  {type: 'message', value: buf };
+                return { type: 'message', value: buf };
             else if (msg.guild.roles.cache.get(buf))
-                return  {type: 'role', value: buf };
+                return { type: 'role', value: buf };
             else
                 return { type: 'unknown_id', value: buf }; // idk generic id could be a guild
         } else if (new RegExp(/^<@!?[0-9]{17,19}>$/g).test(buf))
@@ -36,6 +36,36 @@ module.exports = {
             return { type: 'number', value: num };
         else
             return { type: 'string', value: buf };
+    },
+
+    _try_cast(bot, msg, type, token_value) {
+        let result;
+
+        switch (type) {
+            case 'user':
+                result = bot.client.users.cache.find(user => user.username === token_value);
+
+                if (result)
+                    return { type: 'user', value: result };
+
+                break;
+
+            case 'channel':
+                result = bot.client.channels.cache.find(channel => channel.name === token_value);
+
+                if (result)
+                    return { type: 'channel', value: result };
+
+                break;
+
+            case 'role':
+                result = msg.guild.roles.cache.find(role => role.name === token_value);
+
+                if (result)
+                    return { type: 'role', value: result };
+        }
+
+        return { type: `failed_cast`, value: token_value };
     },
 
     /**
@@ -71,15 +101,26 @@ module.exports = {
 
         const args = new Map();
         const optional_args = new Map();
+        const cast_errors = [];
 
         if (command.args_list.position_independent) {
             for (let i = 0; i < tokens.length; ++i) {
                 for (let j = 0; j < command.args_list.args.length; ++j) {
-                    if (token[i].type === 'string' && command.args_list.args[j].type === 'string') {
+                    if (tokens[i].type === 'string' && command.args_list.args[j].type === 'string') {
                         args.set(command.args_list.args[i].name, module.exports.join_token_string(i, tokens));
                         break;
                     } else if (command.args_list.args[j].type === tokens[i].type) {
                         args.set(command.args_list.args[j].name, tokens[i].value);
+                        break;
+                    }
+                }
+                
+                for (let j = 0; j < command.args_list.optional_args.length; ++j) {
+                    if (tokens[i].type === 'string' && command.args_list.optional_args[j].type === 'string') {
+                        args.set(command.args_list.optional_args[i].name, module.exports.join_token_string(i, tokens));
+                        break;
+                    } else if (command.args_list.optional_args[j].type === tokens[i].type) {
+                        args.set(command.args_list.optional_args[j].name, tokens[i].value);
                         break;
                     }
                 }
@@ -91,17 +132,32 @@ module.exports = {
                 if (tokens.length <= i)
                     break;
                 
+                bot.logger.debug(`command_utils: ${command.args_list.args.length === 1 && command.args_list.optional_args.length === 0}`);
                 // If there is only one argument required and it is a string, then just turn the whole message into a string.
-                if (command.args_list.args.length === 1 && command.args_list.args[j].type === 'string')
+                if (command.args_list.args.length === 1 && command.args_list.optional_args.length === 0 && command.args_list.args[j].type === 'string')
                     args.set(command.args_list.args[j].name, module.exports.join_token_string(i++, tokens));
                 else if (command.args_list.args[j].type === 'string')
-                    args.set(command.args_list.args[i].name, new String(tokens[i++].value));
+                    args.set(command.args_list.args[j].name, new String(tokens[i++].value));
                 else if (command.args_list.args[j].type === tokens[i].type)
                     args.set(command.args_list.args[j].name, tokens[i++].value);
-                else
-                    throw new CommandError('SyntaxError', `Expected type: ${command.args_list.args[j].type} ` + 
-                                `for argument: ${command.args_list.args[j].name} `  +
-                                `but got: ${tokens[i].value} (${tokens[i].type}) instead`);
+                else if (tokens[i].type === 'string') {
+                    const new_token = module.exports._try_cast(bot, msg, command.args_list.args[j].type, tokens[i].value);
+
+                    if (new_token.type === 'failed_cast') {
+                        throw new CommandError('SyntaxError', `Expected type: \`${command.args_list.args[j].type}\` ` + 
+                        `for argument: ${command.args_list.args[j].name} ` +
+                        `but got: "${tokens[i].value}" (\`${tokens[i].type}\`) instead` +
+                        `\nNOTE: Attempted implicit cast from: \`string\` ->` +
+                            `\`${command.args_list.args[j].type}\` failed (not found)`);
+                    }
+                    
+                    tokens[i] = new_token;
+                    args.set(command.args_list.args[j].name, tokens[i++].value);
+                } else {
+                    throw new CommandError('SyntaxError', `Expected type: \`${command.args_list.args[j].type}\` ` + 
+                        `for argument: ${command.args_list.args[j].name} `  +
+                        `but got: "${tokens[i].value}" (\`${tokens[i].type}\`) instead`);
+                }
             }
 
             for (j = 0; j < command.args_list.optional_args.length; ++j) {
@@ -112,6 +168,18 @@ module.exports = {
                     optional_args.set(command.args_list.optional_args[j].name, module.exports.join_token_string(i++, tokens));
                 else if (command.args_list.optional_args[j].type === tokens[i].type)
                     optional_args.set(command.args_list.optional_args[j].name, tokens[i++].value);
+                else if (tokens[i].type === 'string') {
+                    const new_token = module.exports._try_cast(bot, msg, command.args_list.optional_args[j].type, tokens[i].value);
+                
+                    if (new_token.type === 'failed_cast') {
+                        msg.channel.send({embed: {
+                            description: `Warning: Attempted implicit cast from \`string\` -> \`${command.args_list.optional_args[j].type}\` failed.`
+                        }});
+                    } else {
+                        tokens[i] = new_token;
+                        optional_args.set(command.args_list.args[j].name, tokens[i++].value);
+                    }
+                }    
             }
         }
 

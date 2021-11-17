@@ -6,7 +6,10 @@
   "dependencies": {
     "discord.js": "12.5.1",
     "forever": "^3.0.4",
-    "sqlite3": "^5.0.2"
+    "sqlite3": "^5.0.2",
+    "ajv": "^8.6.0",
+    "atob": "^2.1.2",
+    "btoa": "^1.2.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

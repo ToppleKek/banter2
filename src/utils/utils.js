@@ -15,5 +15,24 @@ module.exports = {
             return member.user.id === CONFIG.owner_id;
 
         return member.permissions.any(permissions, true);
-    }
+    },
+
+    /**
+     * Get a user object from an ID or the author's user object if one is not found
+     * @param {Bot} bot
+     * @param {String} id
+     * @param {import('discord.js').Message} msg
+     * @return {Promise<import('discord.js').User>} The user object from the ID or the message author's if not found
+     */
+    user_or_author(bot, id, msg) {
+        return new Promise(async (resolve, reject) => {
+            const user = await bot.client.users.fetch(id)
+                .catch((err) => resolve(msg.author));
+
+            if (user)
+                resolve(user);
+            else
+                resolve(msg.author);
+        });
+    },
 };

@@ -9,7 +9,7 @@ const TYPES = {
     "user": 6,
     "channel": 7,
     "role": 8
-}
+};
 
 function register_command(cmd) {
     const cmd_payload = {

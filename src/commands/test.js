@@ -26,5 +26,5 @@ module.exports.args_list =  {
  */
 module.exports.main = async (bot, args, msg) => {
     bot.logger.debug(`test command: got args: ${util.inspect(args)}`);
-    msg.respond_info(`hello ${bot.client.users.cache.get(args.get("arg2")).username} you said ${args.get("arg1")}`);
+    msg.respond_info(`hello ${args.get("arg2").username} you said ${args.get("arg1")}`);
 }

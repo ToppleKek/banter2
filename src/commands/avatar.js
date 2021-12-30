@@ -6,7 +6,7 @@ module.exports.help = 'Get a user\'s avatar';
 module.exports.usage = '#PREFIXavatar @TopKek';
 module.exports.required_permissions = [];
 module.exports.args_list = {
-    position_independent: true,
+    position_independent: false,
     args: [],
     optional_args: [{
         name: 'user',
@@ -22,11 +22,11 @@ module.exports.args_list = {
  */
 module.exports.main = async (bot, args, msg) => {
     console.dir(args);
-    const user = await Utils.user_or_author(bot, args.get('user'), msg);
+    const user = args.get('user') || msg.author;
     const embed = {
         title: `${user.username}#${user.discriminator}'s avatar`,
         image: {
-            url: user.avatarURL({ size: 4096, dynamic: true, format: 'png'})
+            url: user.avatarURL({ size: 4096, dynamic: true, format: 'png' })
         }
     };
 

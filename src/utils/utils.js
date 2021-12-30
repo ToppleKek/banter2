@@ -1,5 +1,6 @@
 const { GuildMember } = require('discord.js');
 const CONFIG = require('../../config.json');
+const CommandError = require('../command_error');
 
 module.exports = {
     /**
@@ -35,4 +36,15 @@ module.exports = {
                 resolve(msg.author);
         });
     },
+
+    /**
+     * Require a optional arg during command runtime
+     * @param {String} key
+     * @param {Map} args
+     */
+    require_optional(key, args) {
+        if (!args.has(key))
+            throw new CommandError('ArgumentError', `Optional argument \`${key}\` is required in this context.`);
+    }
+
 };

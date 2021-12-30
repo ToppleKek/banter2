@@ -277,7 +277,7 @@ function check_command(bot, msg) {
                         throw new CommandError('SyntaxError', 'Missing closing quote');
                 }
 
-                tokens.push({ type: 'string', value: buf });
+                tokens.push({ type: 'string', value: buf, literal: true });
                 // skip closing quote
                 continue;
             }
@@ -285,7 +285,14 @@ function check_command(bot, msg) {
             while (content.charAt(i) !== ' ' && i < content.length)
                 buf += content.charAt(i++);
 
-            tokens.push(CommandUtils.get_token(bot, buf));
+            const t = CommandUtils.get_token(bot, msg, buf) || null;
+
+            // TODO: I don't really know if I want to pass null users around. Is it better than passing around an invalid ID and
+            // making the command do all the checking every time? idk
+            // if (!t)
+            //     throw new CommandError('ArgumentError', `Unexpected null token: invalid mention`);
+
+            tokens.push(t);
         }
     }
 

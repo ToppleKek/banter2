@@ -32,17 +32,17 @@ async function handle_slash_command(bot, data) {
     const cmd = data.data.name;
     const tokens = [];
 
-    if (data.data.options) {
-        for (let option of data.data.options)
-            tokens.push(CommandUtils.get_token(bot, option.value));
-    }
-
     // find message
     const channel = await bot.client.channels.fetch(data.channel_id)
         .catch((err) => bot.logger.error(err));
     const msgs = (await channel.messages.fetch({limit: 20})).filter(msg => msg.content.startsWith(`</${data.data.name}:${data.data.id}>`) && msg.author.id === data.member.user.id);
     msgs.sort((msg1, msg2) => msg2.createdTimestamp - msg1.createdTimestamp);
     console.dir(msgs);
+    
+    if (data.data.options) {
+        for (let option of data.data.options)
+            tokens.push(CommandUtils.get_token(bot, msgs[0], option.value));
+    }
 
     try {
         CommandUtils.execute_command(bot, msgs[0], bot.commands[cmd], tokens);

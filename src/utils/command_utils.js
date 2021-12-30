@@ -9,33 +9,34 @@ module.exports = {
         let buf = '';
         
         for (; i < tokens.length; ++i)
-            buf += new String(tokens[i].value) + ' ';
+            buf += String(tokens[i].value) + ' ';
     
         return buf.trimEnd();
     },
 
-    get_token(bot, buf) {
-        if (new RegExp(/^[0-9]{17,19}$/g).test(buf)) {
-            if (bot.client.users.cache.get(buf))
-                return { type: 'user', value: buf };
-            else if (bot.client.channels.cache.get(buf))
-                return { type: 'channel', value: buf };
-            else if (msg.channel.messages.cache.get(buf))
-                return { type: 'message', value: buf };
-            else if (msg.guild.roles.cache.get(buf))
-                return { type: 'role', value: buf };
+    get_token(bot, msg, buf) {
+        if (new RegExp(/^[0-9]{17,19}$/g).test(buf)) { // ID
+            let ret;
+            if (ret = bot.client.users.cache.get(buf))
+                return { type: 'user', value: ret };
+            else if (ret = bot.client.channels.cache.get(buf))
+                return { type: 'channel', value: ret };
+            else if (ret = msg.channel.messages.cache.get(buf))
+                return { type: 'message', value: ret };
+            else if (ret = msg.guild.roles.cache.get(buf))
+                return { type: 'role', value: ret };
             else
                 return { type: 'unknown_id', value: buf }; // idk generic id could be a guild
-        } else if (new RegExp(/^<@!?[0-9]{17,19}>$/g).test(buf))
-            return { type: 'user', value: buf.replace(/<|@|!|>/g, '') };
-        else if (new RegExp(/^<#[0-9]{17,19}>$/g).test(buf))
-            return { type: 'channel', value: buf.replace(/<|#|>/g, '') };
-        else if (new RegExp(/^<@&[0-9]{17,19}>$/g).test(buf))
-            return { type: 'role', value: buf.replace(/<|@|&|>/g, '') };
+        } else if (new RegExp(/^<@!?[0-9]{17,19}>$/g).test(buf)) // USER MENTION
+            return { type: 'user', value: bot.client.users.cache.get(buf.replace(/<|@|!|>/g, '')) };
+        else if (new RegExp(/^<#[0-9]{17,19}>$/g).test(buf)) // CHANNEL MENTION
+            return { type: 'channel', value: bot.client.channels.cache.get(buf.replace(/<|#|>/g, '')) };
+        else if (new RegExp(/^<@&[0-9]{17,19}>$/g).test(buf)) // ROLE MENTION
+            return { type: 'role', value: msg.guild.roles.cache.get(buf.replace(/<|@|&|>/g, '')) };
         else if ((num = Number.parseFloat(buf)) == buf)
             return { type: 'number', value: num };
         else
-            return { type: 'string', value: buf };
+            return { type: 'string', value: buf, literal: false };
     },
 
     _try_cast(bot, msg, type, token_value) {
@@ -85,10 +86,10 @@ module.exports = {
         // [num, str, str, str, mention] -> [num, merged_string, mention]
         let buf = "";
         for (let i = 0; i < tokens.length; ++i) {
-            if (tokens[i].type === 'string') {
+            if (tokens[i].type === 'string' && !tokens[i].literal) {
                 let j = i;
-                while (tokens[i] && tokens[i].type === 'string')
-                    buf += new String(tokens[i++].value) + ' ';
+                while (tokens[i] && tokens[i].type === 'string' && !tokens[i].literal)
+                    buf += String(tokens[i++].value) + ' ';
 
                 buf = buf.trimEnd();
 
@@ -137,7 +138,7 @@ module.exports = {
                 if (command.args_list.args.length === 1 && command.args_list.optional_args.length === 0 && command.args_list.args[j].type === 'string')
                     args.set(command.args_list.args[j].name, module.exports.join_token_string(i++, tokens));
                 else if (command.args_list.args[j].type === 'string')
-                    args.set(command.args_list.args[j].name, new String(tokens[i++].value));
+                    args.set(command.args_list.args[j].name, String(tokens[i++].value));
                 else if (command.args_list.args[j].type === tokens[i].type)
                     args.set(command.args_list.args[j].name, tokens[i++].value);
                 else if (tokens[i].type === 'string') {
@@ -177,7 +178,7 @@ module.exports = {
                         }});
                     } else {
                         tokens[i] = new_token;
-                        optional_args.set(command.args_list.args[j].name, tokens[i++].value);
+                        optional_args.set(command.args_list.optional_args[j].name, tokens[i++].value);
                     }
                 }    
             }
@@ -187,6 +188,12 @@ module.exports = {
             throw new CommandError('Argument Error', `Expected ${command.args_list.args.length} arguments but ${args.size} were provided`);
 
         Object.defineProperty(msg, 'command', { value: command });
-        command.main(bot, new Map([...args, ...optional_args]), msg);
+
+        command.main(bot, new Map([...args, ...optional_args]), msg).catch((err) => {
+            if (err instanceof CommandError)
+                msg.respond_command_error(err.type, err.msg);
+            else
+                bot.logger.error(`execute_command (async): error: ${err}\n${err.stack}`);
+        });
     }
 }

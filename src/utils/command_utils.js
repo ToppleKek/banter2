@@ -174,7 +174,8 @@ module.exports = {
                 
                     if (new_token.type === 'failed_cast') {
                         msg.channel.send({embed: {
-                            description: `Warning: Attempted implicit cast from \`string\` -> \`${command.args_list.optional_args[j].type}\` failed.`
+                            description: `Warning: Attempted implicit cast for argument \`${command.args_list.optional_args[j].name}\` ` +
+                                         `from "${new_token.value}" (\`string\`) -> \`${command.args_list.optional_args[j].type}\` failed.`
                         }});
                     } else {
                         tokens[i] = new_token;

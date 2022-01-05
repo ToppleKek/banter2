@@ -17,15 +17,14 @@ class Bot {
         this.error_channel = config.error_channel;
         this.commands      = {};
         this.events        = {};
-        this.logger        = new Logger(`./logs/${Date.now()}_LOG.txt`);
         this.guilds        = new Map();
 
         this.db = new SQLite3.Database(config.db_file, (err) => {
             if (err) {
-                this.logger.error(`Failed to connect to database! ${err}`);
+                Logger.error(`Failed to connect to database! ${err}`);
                 process.exit(1);
             } else {
-                this.logger.info('Connected to database');
+                Logger.info('Connected to database');
             }
         });
     }
@@ -80,31 +79,31 @@ class Bot {
         this.client = new Discord.Client({ autoReconnect: true, disableEveryone: true });
 
         this.client.on('ready', async () => {
-            this.logger.info('bot is ready');
+            Logger.info('bot is ready');
 
-            this.logger.info('setting up servers');
+            Logger.info('setting up servers');
 
-            const guilds = this.client.guilds.cache.each((guild) => {
-                this.logger.info(`setting up: ${guild.name} - ${guild.id}`);
+            this.client.guilds.cache.each((guild) => {
+                Logger.info(`setting up: ${guild.name} - ${guild.id}`);
                 this.guilds.set(guild.id, new BanterGuild(this, guild.id));
             });
 
-            this.logger.info('done setting up servers');
+            Logger.info('done setting up servers');
         });
 
-        this.logger.info('Loading commands...');
-        this.logger.debug(__dirname);
+        Logger.info('Loading commands...');
+        Logger.debug(__dirname);
         const command_files = fs.readdirSync(`${__dirname}/commands`);
 
         for (let file of command_files) {
             if (file.endsWith('.js')) {
                 this.commands[file.slice(0, -3)] = require(`${__dirname}/commands/${file}`);
-                this.logger.info(`Loaded command file: ${file}`);
+                Logger.info(`Loaded command file: ${file}`);
             }
         }
 
-        this.logger.info('All commands loaded');
-        this.logger.info('Loading events...');
+        Logger.info('All commands loaded');
+        Logger.info('Loading events...');
         const event_files = fs.readdirSync(`${__dirname}/events`);
 
         for (let file of event_files) {
@@ -112,7 +111,7 @@ class Bot {
                 const event = file.slice(0, -3);
                 this.events[event] = require(`${__dirname}/events/${file}`);
                 this.client.on(event, this.events[event].main.bind(this));
-                this.logger.info(`Loaded event file: ${file}`);
+                Logger.info(`Loaded event file: ${file}`);
             }
         }
 

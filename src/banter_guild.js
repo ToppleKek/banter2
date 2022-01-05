@@ -1,3 +1,5 @@
+const Logger = require('./logger');
+
 class BanterGuild {
     constructor(bot, id) {
         this.id = id;
@@ -11,7 +13,7 @@ class BanterGuild {
                 if (err)
                     reject(err);
                 else if (!row || !row[field])
-                    reject(null);
+                    reject('null row or null field');
                 else
                     resolve(row[field]);
             });
@@ -52,7 +54,7 @@ class BanterGuild {
     }
 
     async get_auto_roles() {
-        const db_response = await db_get('autoroles');
+        const db_response = await this.db_get('autoroles').catch(Logger.error);
         return db_response ? db_response.split(',') : [];
     }
 

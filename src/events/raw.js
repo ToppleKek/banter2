@@ -3,6 +3,7 @@ const util = require('util');
 const Https = require('https');
 const CommandUtils = require('../utils/command_utils');
 const CommandError = require("../command_error");
+const Logger = require('../logger');
 
 function main(event) {
     if (event.t === 'INTERACTION_CREATE')
@@ -34,7 +35,7 @@ async function handle_slash_command(bot, data) {
 
     // find message
     const channel = await bot.client.channels.fetch(data.channel_id)
-        .catch((err) => bot.logger.error(err));
+        .catch((err) => Logger.error(err));
     const msgs = (await channel.messages.fetch({limit: 20})).filter(msg => msg.content.startsWith(`</${data.data.name}:${data.data.id}>`) && msg.author.id === data.member.user.id);
     msgs.sort((msg1, msg2) => msg2.createdTimestamp - msg1.createdTimestamp);
     console.dir(msgs);
@@ -50,7 +51,7 @@ async function handle_slash_command(bot, data) {
         if (err instanceof CommandError)
             msgs[0].respond_command_error(err.type, err.msg);
         else
-            bot.logger.error(`handle_slash_command: error: ${err}\n${err.stack}`);
+            Logger.error(`handle_slash_command: error: ${err}\n${err.stack}`);
     }
 
 }

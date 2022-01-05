@@ -25,7 +25,6 @@ module.exports.args_list =  {
  * @param {Message} msg Message Object
  */
 module.exports.main = async (bot, args, msg) => {
-    bot.logger.debug(`help: got args: ${util.inspect(args)}`);
     const pages = [];
     const cmds = [];
 

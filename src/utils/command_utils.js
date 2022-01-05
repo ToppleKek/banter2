@@ -3,6 +3,7 @@ const util = require('util');
 const Bot = require('../bot');
 const CommandError = require("../command_error");
 const Utils = require('./utils');
+const Logger = require('../logger');
 
 module.exports = {
     join_token_string(i, tokens) {
@@ -98,7 +99,7 @@ module.exports = {
             }
         }
 
-        bot.logger.debug(`check_command: parsed args to: ${util.inspect(tokens)}\nargs needed: ${util.inspect(command.args_list)}`);
+        Logger.debug(`check_command: parsed args to: ${util.inspect(tokens)}\nargs needed: ${util.inspect(command.args_list)}`);
 
         const args = new Map();
         const optional_args = new Map();
@@ -133,7 +134,7 @@ module.exports = {
                 if (tokens.length <= i)
                     break;
                 
-                bot.logger.debug(`command_utils: ${command.args_list.args.length === 1 && command.args_list.optional_args.length === 0}`);
+                Logger.debug(`command_utils: ${command.args_list.args.length === 1 && command.args_list.optional_args.length === 0}`);
                 // If there is only one argument required and it is a string, then just turn the whole message into a string.
                 if (command.args_list.args.length === 1 && command.args_list.optional_args.length === 0 && command.args_list.args[j].type === 'string')
                     args.set(command.args_list.args[j].name, module.exports.join_token_string(i++, tokens));
@@ -194,7 +195,7 @@ module.exports = {
             if (err instanceof CommandError)
                 msg.respond_command_error(err.type, err.msg);
             else
-                bot.logger.error(`execute_command (async): error: ${err}\n${err.stack}`);
+                Logger.error(`execute_command (async): error: ${err}\n${err.stack}`);
         });
     }
 }

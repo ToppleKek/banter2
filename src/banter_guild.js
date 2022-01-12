@@ -12,8 +12,8 @@ class BanterGuild {
             this.db.get(`SELECT ${field} FROM servers WHERE id = ?`, this.id, (err, row) => {
                 if (err)
                     reject(err);
-                else if (!row || !row[field])
-                    reject('null row or null field');
+                else if (!row || row[field] === undefined)
+                    reject('null row or undefined field');
                 else
                     resolve(row[field]);
             });
@@ -22,7 +22,7 @@ class BanterGuild {
 
     db_set(field, value) {
         return new Promise((resolve, reject) => {
-            this.db.run('UPDATE servers SET ? = ? WHERE id = ?', field, value, this.id, (err) => {
+            this.db.run(`UPDATE servers SET ${field} = ? WHERE id = ?`, value, this.id, (err) => {
                 if (err)
                     reject(err);
                 else
@@ -63,9 +63,11 @@ class BanterGuild {
         const i = autoroles.indexOf(role);
 
         if (i > -1) {
-            autoroles.splice(autoroles.indexOf(role), 1);
+            autoroles.splice(i, 1);
             return this.db_set('autoroles', autoroles.join(','));
-        }
+        } else
+            return false;
+
     }
 
     async add_auto_role(role) {
@@ -75,7 +77,8 @@ class BanterGuild {
         if (i < 0) {
             autoroles.push(role);
             return this.db_set('autoroles', autoroles.join(','));
-        }
+        } else
+            return false;
     }
 }
 

@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const Logger = {
+const L = {
     file: `./logs/${Date.now()}_LOG.txt`,
 
     info(msg) {
@@ -46,6 +46,13 @@ const Logger = {
                 console.log(`[debug] failed to write to log file! ${err}`);
         });
     }
+}
+
+const Logger = {
+    info: L.info.bind(L),
+    warn: L.warn.bind(L),
+    error: L.error.bind(L),
+    debug: L.debug.bind(L),
 }
 
 module.exports = Logger;

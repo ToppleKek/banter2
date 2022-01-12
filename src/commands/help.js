@@ -55,7 +55,7 @@ module.exports.main = async (bot, args, msg) => {
         const embed = {
             title: `**${bot.prefix}${cmd_name}**`,
             description: `${cmd.help}\n**Usage**\n${cmd.usage.replace('#PREFIX', bot.prefix)}
-            **Permission required**\n${cmd.permission === '' ? 'none' : cmd.permission}`,
+            **Permission required**\n${cmd.required_permissions.join(', ') || 'none'}`,
             fields: cmd_args,
             color: Math.floor(Math.random() * 0xFFFFFF)
         };

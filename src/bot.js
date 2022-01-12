@@ -30,9 +30,10 @@ class Bot {
     }
 
     start() {
-        Discord.Message.prototype.respond_info = function(msg) {
+        Discord.Message.prototype.respond_info = function(msg, header) {
             this.channel.send({embed: {
                 color: 0x259EF5,
+                title: header,
                 description: msg,
             }});
         };

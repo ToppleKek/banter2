@@ -27,7 +27,7 @@ async function handle_slash_command(bot, data) {
     const payload = JSON.stringify(cmd_payload);
     const response = await interaction_respond(payload, data.id, data.token)
         .catch((err) => {
-            bot.logger.error(`Failed to respond to interaction: ${err}`);
+            Logger.error(`Failed to respond to interaction: ${err}`);
         });
     
     const cmd = data.data.name;

@@ -3,6 +3,7 @@ const Bot = require("../bot");
 const util = require('util');
 const CommandError = require("../command_error");
 const CommandUtils = require("../utils/command_utils");
+const Logger = require("../logger");
 
 const subscribed_macros = [];
 const macro_errors = new Map();
@@ -14,7 +15,7 @@ function main(msg) {
         if (err instanceof CommandError)
             msg.respond_command_error(err.type, err.msg);
         else
-            this.logger.error(`command_handler: error: ${err}\n${err.stack}`);
+            Logger.error(`command_handler: error: ${err}\n${err.stack}`);
     }
 }
 
@@ -50,8 +51,6 @@ function subscribe(guild, macro) {
 async function _execute_macro(bot, macro) {
     const payload = macro.payload;
 
-    bot.logger.info(`execute_macros (event=message): executing macro: ${payload.name} on guild: ${macro.guild}`);
-
     let last_logic_op;
     let last_result = true;
     let evaluated_conditionals = [];
@@ -73,7 +72,6 @@ async function _execute_macro(bot, macro) {
         switch (conditional.operator) {
             case 'equals':
                 result = lhs === conditional.rhs && !not;
-                bot.logger.info(`equals operator lhs=${lhs} rhs=${conditional.rhs} result=${result}`);
                 break;
             case 'contains':
                 if (typeof lhs !== 'string' || typeof conditional.rhs !== 'string') {

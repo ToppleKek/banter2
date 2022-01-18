@@ -1,0 +1,103 @@
+{
+  "type": "object",
+  "properties": {
+    "blShowInfractions": { "type": "boolean" },
+    "blIgnoreAdmins": { "type": "boolean" },
+    "logMassDelHaste": { "type": "boolean" },
+    "logNoP": { "type": "boolean" },
+    "logNoD": { "type": "boolean" },
+    "statShowN": { "type": "boolean" },
+    "blLevel": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 2
+    },
+    "starR": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 50
+    },
+    "bmLen": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "wmLen": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "punish": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 3
+    },
+    "wLim": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 50
+    },
+    "asMInRow": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "asCool": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1000
+    },
+    "prefix": {
+      "type": "string",
+      "minLen": 0,
+      "maxLen": 50
+    },
+    "aBotMInRow": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10000 
+    },
+    "aBotCool": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10000 
+    },
+    "aBotTCool": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10000 
+    },
+    "asPing": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10000
+    },
+    "asPCool": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10000
+    }
+  },
+  "required": [
+    "blShowInfractions",
+    "blIgnoreAdmins",
+    "logMassDelHaste",
+    "blLevel",
+    "logNoP",
+    "logNoD",
+    "statShowN",
+    "starR",
+    "bmLen",
+    "wmLen",
+    "punish",
+    "wLim",
+    "asMInRow",
+    "asCool",
+    "prefix",
+    "aBotMInRow",
+    "aBotCool",
+    "aBotTCool",
+    "asPing",
+    "asPCool"
+  ]
+}

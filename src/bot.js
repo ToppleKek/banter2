@@ -84,9 +84,12 @@ class Bot {
 
             Logger.info('setting up servers');
 
-            this.client.guilds.cache.each((guild) => {
+            this.client.guilds.cache.each(async (guild) => {
                 Logger.info(`setting up: ${guild.name} - ${guild.id}`);
-                this.guilds.set(guild.id, new BanterGuild(this, guild.id));
+                const b_guild = new BanterGuild(this, guild.id);
+
+                await b_guild._reload_config();
+                this.guilds.set(guild.id, b_guild);
             });
 
             Logger.info('done setting up servers');

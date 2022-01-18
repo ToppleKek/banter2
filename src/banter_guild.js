@@ -1,10 +1,15 @@
 const Logger = require('./logger');
+const SCHEMA = require('../config_schema.json');
+const Ajv = require('ajv');
+const Validate = new Ajv({ allErrors: true }).compile(SCHEMA);
+const CONFIG = require('../config.json');
 
 class BanterGuild {
     constructor(bot, id) {
         this.id = id;
         this.db = bot.db;
         this._temp_storage = new Map();
+        this._config = {};
     }
 
     db_get(field) {
@@ -49,8 +54,47 @@ class BanterGuild {
         });
     }
 
+    async _reload_config() {
+        const b64_config = await this.db_get('config').catch((err) => {}); // TODO: this can be changed back to a log once we insert new db rows for all servers
+        const load_default_config = function() {
+            const json = Buffer.from(CONFIG.default_config, 'base64').toString('binary');
+            return JSON.parse(json);
+        }
+
+        if (!b64_config)
+            this._config = load_default_config();
+        else {
+            const json = Buffer.from(b64_config, 'base64').toString('binary');
+            const config = JSON.parse(json);
+
+            if (!Validate(config)) {
+                Logger.warn(`reload_config: config for server ${this.id} is invalid- defaults loaded`);
+                this._config = load_default_config();
+            } else
+                this._config = config;
+        }
+    }
+
+    async _load_new_config(b64_config) {
+        const json = Buffer.from(b64_config, 'base64').toString('binary');
+        const config = JSON.parse(json);
+
+        if (!Validate(config))
+            throw new Error('Invalid config');
+
+        this._config = config;
+        return this.db_set('config', b64_config);
+    }
+
     temp_storage() {
         return this._temp_storage;
+    }
+
+    config_get(key) {
+        if (this._config[key] === undefined)
+            throw new Error(`Invalid key: ${key}`);
+
+        return this._config[key];
     }
 
     async get_auto_roles() {

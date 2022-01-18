@@ -21,7 +21,6 @@ module.exports.args_list = {
  * @param {Message} msg Message Object
  */
 module.exports.main = async (bot, args, msg) => {
-    console.dir(args);
     const user = args.get('user') || msg.author;
     const embed = {
         title: `${user.username}#${user.discriminator}'s avatar`,

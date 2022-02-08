@@ -47,6 +47,12 @@ module.exports = {
             throw new CommandError('ArgumentError', `Optional argument \`${key}\` is required in this context.`);
     },
 
+    /**
+     * Get the guilds that the bot shares with the given user
+     * @param {Bot} bot The bot
+     * @param {import('discord.js').User} user The user
+     * @return {Array<String>} An array of the names of the guilds shared with this user
+     */
     guilds_shared_with(bot, user) {
         const shared_guilds = [];
 

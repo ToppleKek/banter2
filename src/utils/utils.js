@@ -5,8 +5,8 @@ const CommandError = require('../command_error');
 module.exports = {
     /**
      * Check if the given member has the given permissions
-     * @param {GuildMember} member 
-     * @param {Array<import('discord.js').PermissionResolvable>} permissions 
+     * @param {GuildMember} member
+     * @param {Array<import('discord.js').PermissionResolvable>} permissions
      * @return bool True if the member has permission
      */
     check_permissions(member, permissions) {
@@ -45,6 +45,16 @@ module.exports = {
     require_optional(key, args) {
         if (!args.has(key))
             throw new CommandError('ArgumentError', `Optional argument \`${key}\` is required in this context.`);
-    }
+    },
 
+    guilds_shared_with(bot, user) {
+        const shared_guilds = [];
+
+        bot.client.guilds.cache.each((guild) => {
+            if (guild.members.cache.get(user))
+                shared_guilds.push(guild.name);
+        });
+
+        return shared_guilds;
+    }
 };

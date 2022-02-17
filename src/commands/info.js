@@ -1,5 +1,7 @@
 const { Message } = require("discord.js");
+const util = require("util");
 const Bot = require("../bot");
+const Logger = require("../logger");
 const Utils = require("../utils/utils");
 
 module.exports.help = 'Get info about a user';
@@ -22,8 +24,14 @@ module.exports.args_list =  {
  */
 module.exports.main = async (bot, args, msg) => {
     const user = args.get('user') || msg.author;
-    const member = msg.guild.members.cache.get(user);
-    const client_status = member.presence.clientStatus;
+    const member = msg.guild.members.cache.get(user.id);
+    Logger.debug("what the shit: " + util.inspect(member));
+    const default_client_status = {
+        desktop: 'unknown',
+        web: 'unknown',
+        mobile: 'unknown',
+    };
+    const client_status = member?.presence?.clientStatus ?? default_client_status;
 
     const embed = {
         author:  {
@@ -33,7 +41,7 @@ module.exports.main = async (bot, args, msg) => {
         description: member.nickname ? `AKA: ${member.nickname} (${user.id})` : `(${user.id})`,
         fields: [{
             name: 'Status',
-            value: `Desktop: ${client_status.desktop | 'offline'}\nWeb: ${client_status.web | 'offline'}\nMobile: ${client_status.mobile | 'offline'}`
+            value: `Desktop: ${client_status.desktop || 'offline'}\nWeb: ${client_status.web || 'offline'}\nMobile: ${client_status.mobile || 'offline'}`
         }, {
             name: 'Account Created At',
             value: user.createdAt.toLocaleString('en-gb'),
@@ -42,7 +50,7 @@ module.exports.main = async (bot, args, msg) => {
             value: member.joinedAt.toLocaleString('en-gb'),
         }, {
             name: 'Seen On',
-            value: Utils.guilds_shared_with(bot, user).join('\n'),
+            value: Utils.guilds_shared_with(bot, user).join('\n') || 'Nowhere',
         }],
         color: member.roles.color,
     };

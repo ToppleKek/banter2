@@ -4,7 +4,7 @@
   "description": "final banter rewrite",
   "main": "run.js",
   "dependencies": {
-    "discord.js": "12.5.1",
+    "discord.js": "13.6.0",
     "forever": "^3.0.4",
     "sqlite3": "^5.0.2",
     "ajv": "^8.6.0",

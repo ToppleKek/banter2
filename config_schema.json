@@ -48,24 +48,22 @@
       "maximum": 1000
     },
     "prefix": {
-      "type": "string",
-      "minLen": 0,
-      "maxLen": 50
+      "type": "string"
     },
     "aBotMInRow": {
       "type": "number",
       "minimum": 0,
-      "maximum": 10000 
+      "maximum": 10000
     },
     "aBotCool": {
       "type": "number",
       "minimum": 0,
-      "maximum": 10000 
+      "maximum": 10000
     },
     "aBotTCool": {
       "type": "number",
       "minimum": 0,
-      "maximum": 10000 
+      "maximum": 10000
     },
     "asPing": {
       "type": "number",

@@ -8,10 +8,10 @@ const Logger = require('../logger');
 module.exports = {
     join_token_string(i, tokens) {
         let buf = '';
-        
+
         for (; i < tokens.length; ++i)
             buf += String(tokens[i].value) + ' ';
-    
+
         return buf.trimEnd();
     },
 
@@ -71,11 +71,11 @@ module.exports = {
     },
 
     /**
-     * 
-     * @param {Bot} bot 
-     * @param {Message} msg 
-     * @param {Object} command 
-     * @param {Array} tokens 
+     *
+     * @param {Bot} bot
+     * @param {Message} msg
+     * @param {Object} command
+     * @param {Array} tokens
      */
     execute_command(bot, msg, command, tokens) {
         if (!Utils.check_permissions(msg.member, command.required_permissions)) {
@@ -116,7 +116,7 @@ module.exports = {
                         break;
                     }
                 }
-                
+
                 for (let j = 0; j < command.args_list.optional_args.length; ++j) {
                     if (tokens[i].type === 'string' && command.args_list.optional_args[j].type === 'string') {
                         args.set(command.args_list.optional_args[i].name, module.exports.join_token_string(i, tokens));
@@ -133,7 +133,7 @@ module.exports = {
             for (i = 0, j = 0; j < command.args_list.args.length; ++j) {
                 if (tokens.length <= i)
                     break;
-                
+
                 Logger.debug(`command_utils: ${command.args_list.args.length === 1 && command.args_list.optional_args.length === 0}`);
                 // If there is only one argument required and it is a string, then just turn the whole message into a string.
                 if (command.args_list.args.length === 1 && command.args_list.optional_args.length === 0 && command.args_list.args[j].type === 'string')
@@ -146,17 +146,17 @@ module.exports = {
                     const new_token = module.exports._try_cast(bot, msg, command.args_list.args[j].type, tokens[i].value);
 
                     if (new_token.type === 'failed_cast') {
-                        throw new CommandError('SyntaxError', `Expected type: \`${command.args_list.args[j].type}\` ` + 
+                        throw new CommandError('SyntaxError', `Expected type: \`${command.args_list.args[j].type}\` ` +
                         `for argument: ${command.args_list.args[j].name} ` +
                         `but got: "${tokens[i].value}" (\`${tokens[i].type}\`) instead` +
                         `\nNOTE: Attempted implicit cast from: \`string\` ->` +
                             `\`${command.args_list.args[j].type}\` failed (not found)`);
                     }
-                    
+
                     tokens[i] = new_token;
                     args.set(command.args_list.args[j].name, tokens[i++].value);
                 } else {
-                    throw new CommandError('SyntaxError', `Expected type: \`${command.args_list.args[j].type}\` ` + 
+                    throw new CommandError('SyntaxError', `Expected type: \`${command.args_list.args[j].type}\` ` +
                         `for argument: ${command.args_list.args[j].name} `  +
                         `but got: "${tokens[i].value}" (\`${tokens[i].type}\`) instead`);
                 }
@@ -172,17 +172,17 @@ module.exports = {
                     optional_args.set(command.args_list.optional_args[j].name, tokens[i++].value);
                 else if (tokens[i].type === 'string') {
                     const new_token = module.exports._try_cast(bot, msg, command.args_list.optional_args[j].type, tokens[i].value);
-                
+
                     if (new_token.type === 'failed_cast') {
-                        msg.channel.send({embed: {
+                        msg.channel.send({embeds: [{
                             description: `Warning: Attempted implicit cast for argument \`${command.args_list.optional_args[j].name}\` ` +
                                          `from "${new_token.value}" (\`string\`) -> \`${command.args_list.optional_args[j].type}\` failed.`
-                        }});
+                        }]});
                     } else {
                         tokens[i] = new_token;
                         optional_args.set(command.args_list.optional_args[j].name, tokens[i++].value);
                     }
-                }    
+                }
             }
         }
 

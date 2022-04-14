@@ -62,5 +62,41 @@ module.exports = {
         });
 
         return shared_guilds;
+    },
+
+    parse_time(str) {
+        let times = {
+            'd': 0,
+            'h': 0,
+            'm': 0,
+            's': 0
+        };
+        let number_buf = '';
+
+        for (let i = 0; i < str.length; ++i) {
+            if (this._is_digit(str[i]))
+                number_buf += str[i];
+            else if (times.hasOwnProperty(str[i])) {
+                times[str[i]] = Number.parseInt(number_buf);
+                number_buf = '';
+            } else
+                return null;
+        }
+
+        if (number_buf !== '')
+            return Number.parseInt(number_buf);
+
+        return times.d * 86400 + times.h * 3600 + times.m * 60 + times.s;
+    },
+
+    _is_digit(c) {
+        return c >= '0' && c <= '9';
     }
+
+    // mute(bot, member, time, reason = 'No reason provided') {
+    //     if (time <= 0)
+    //         time = 9999999; // TODO: highest possible timeout?
+
+    //     return member.timeout
+    // }
 };

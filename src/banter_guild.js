@@ -6,10 +6,31 @@ const CONFIG = require('../config.json');
 
 class BanterGuild {
     constructor(bot, id) {
+        this.dguild = bot.client.guilds.cache.get(id);
         this.id = id;
+        this.bot = bot;
         this.db = bot.db;
         this._temp_storage = new Map();
         this._config = {};
+        this._invites = new Map();
+
+        this.dguild.invites.fetch().then((guild_invites) => {
+            guild_invites.each(async (invite) => {
+                invite = await bot.client.fetchInvite(invite).catch((err) =>  {
+                    Logger.error(`Stupid djs error from invite=${invite} err=${err}`);
+                });
+
+                if (invite) {
+                    this._invites.set(invite.code, {
+                        code: invite.code,
+                        inviter: invite.inviter,
+                        uses: invite.memberCount,
+                    });
+                }
+            });
+        }).catch((err) => {
+            Logger.warn(`Failed to fetch invites for guild: ${this.id}: ${err}`);
+        });
     }
 
     db_get(field) {
@@ -86,15 +107,64 @@ class BanterGuild {
         return this.db_set('config', b64_config);
     }
 
-    temp_storage() {
-        return this._temp_storage;
-    }
-
     config_get(key) {
         if (this._config[key] === undefined)
             throw new Error(`Invalid key: ${key}`);
 
         return this._config[key];
+    }
+
+    temp_storage() {
+        return this._temp_storage;
+    }
+
+    invites() {
+        return this._invites;
+    }
+
+    async log(embed_options) {
+        const log_id = await this.db_get('log');
+        const log_channel = await this.bot.client.channels.fetch(log_id).catch(Logger.warn); // TODO: messages system (when implemented) should report this error to the server mods
+
+        if (!log_channel)
+            return;
+
+        const embed = { // TODO: what else is generic in logs?
+            timestamp: Date.now(),
+        };
+
+        Object.assign(embed, embed_options);
+        await log_channel.send({embed});
+    }
+
+    async mod_log(action, mod, target, reason) {
+        const mod_log_id = await this.db_get('log');
+        const mod_log_channel = await this.bot.client.channels.fetch(mod_log_id).catch(Logger.warn); // TODO: messages system (when implemented) should report this error to the server mods
+
+        if (!mod_log_channel)
+            return;
+
+        const embed = {
+            author: {
+                name: 'Moderator action taken',
+                iconURL: mod.avatarURL({ size: 2048, dynamic: true, format: 'png' }),
+            },
+            description: reason || 'N/A',
+            fields: [{
+                name: 'Action',
+                value: action,
+            }, {
+                name: 'Responsable Moderator',
+                value: mod.tag,
+            }, {
+                name: 'Target',
+                value: (typeof target) === 'string' ? target : target.tag,
+            }],
+            timstamp: Date.now(),
+            color: 0x0084ff,
+        };
+
+        await mod_log_channel.send({embed});
     }
 
     async get_auto_roles() {

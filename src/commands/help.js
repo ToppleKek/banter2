@@ -60,7 +60,7 @@ module.exports.main = async (bot, args, msg) => {
             color: Math.floor(Math.random() * 0xFFFFFF)
         };
 
-        msg.channel.send({embed});
+        msg.channel.send({embeds: [embed]});
         return;
     }
 
@@ -78,7 +78,7 @@ module.exports.main = async (bot, args, msg) => {
     const page = args.get('page') || 0;
     if (page >= pages.length)
         return msg.respond_command_error('Argument Error', 'Page not found');
-    msg.channel.send({embed: {
+    msg.channel.send({embeds: [{
         author: {
             name: msg.author.username,
             iconURL: msg.author.displayAvatarURL()
@@ -87,5 +87,5 @@ module.exports.main = async (bot, args, msg) => {
         title: 'Banter3',
         description: `For details, use ${bot.prefix}help <cmd> change pages with ${bot.prefix}help <#>`,
         fields: pages[args.get('page') || 0]
-    }});
+    }]});
 }

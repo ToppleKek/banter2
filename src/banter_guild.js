@@ -138,7 +138,7 @@ class BanterGuild {
     }
 
     async mod_log(action, mod, target, reason) {
-        const mod_log_id = await this.db_get('log');
+        const mod_log_id = await this.db_get('modlog');
         const mod_log_channel = await this.bot.client.channels.fetch(mod_log_id).catch(Logger.warn); // TODO: messages system (when implemented) should report this error to the server mods
 
         if (!mod_log_channel)

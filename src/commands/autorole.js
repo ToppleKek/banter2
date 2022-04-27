@@ -31,7 +31,7 @@ module.exports.main = async (bot, args, msg) => {
             Utils.require_optional('target_role', args);
             const target_role = args.get('target_role');
             const b_guild = bot.guilds.get(msg.guild.id);
-            
+
             const added = await b_guild.add_auto_role(target_role.id).catch((err) => {
                 throw new CommandError('SQLError', err);
             });
@@ -45,7 +45,7 @@ module.exports.main = async (bot, args, msg) => {
             Utils.require_optional('target_role', args);
             const target_role = args.get('target_role');
             const b_guild = bot.guilds.get(msg.guild.id);
-            
+
             const removed = await b_guild.remove_auto_role(target_role.id).catch((err) => {
                 throw new CommandError('SQLError', err);
             });
@@ -62,7 +62,7 @@ module.exports.main = async (bot, args, msg) => {
 
             for (const role of auto_roles)
                 message += `${(await msg.guild.roles.cache.get(role)).name} - \`${role}\`\n`;
-            
+
 
             msg.respond_info(message || 'None.', 'This server\'s auto roles');
         } break;
@@ -70,4 +70,3 @@ module.exports.main = async (bot, args, msg) => {
             msg.respond_error('Invalid command');
     }
 }
-

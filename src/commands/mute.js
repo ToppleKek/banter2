@@ -30,11 +30,11 @@ module.exports.main = async (bot, args, msg) => {
     const member = msg.guild.members.resolve(args.get('target'));
 
     if (!member)
-        throw new CommandError('ArugmentError', 'User not in guild');
+        throw new CommandError('ArgumentError', 'User not in guild');
 
     if (member.isCommunicationDisabled()) {
         member.timeout(0, `Unmute issued by: ${msg.author.tag}`);
-        msg.respond_info(`Unmuted ${member.tag}`);
+        msg.respond_info(`Unmuted ${member.user.tag}`);
     } else if (args.get('time')) {
         const time = Utils.parse_time(args.get('time'));
 
@@ -46,7 +46,7 @@ module.exports.main = async (bot, args, msg) => {
         }
     } else {
         // Indefinite mute
-        member.timeout(99999999, `Indefinite mute issued by: ${msg.author.tag}`); // TODO: Get largest timeout possible
+        member.timeout(2399999999, `Indefinite mute issued by: ${msg.author.tag}`); // TODO: Get largest timeout possible
         msg.respond_info(`Muted ${member.user.tag} indefinitely`);
     }
 }

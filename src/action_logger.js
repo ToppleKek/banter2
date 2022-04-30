@@ -1,5 +1,5 @@
 const ActionLogger = {
-    banter_guildMemberAdd(member) {
+    banter_guildMemberAdd(bot, member) {
         const bguild = bot.guilds.get(member.guild.id);
 
         bguild.log({
@@ -7,13 +7,13 @@ const ActionLogger = {
             description: `${member.user.tag} (${member.user.id})`,
             color: 0xFFFFFF,
             fields: [{
-                title: 'Invite Used',
-                description: member.invite_code,
+                name: 'Invite Used',
+                value: member.invite_code || 'Unknown',
             }],
         });
     },
 
-    guildMemberRemove(member) {
+    guildMemberRemove(bot, member) {
         const bguild = bot.guilds.get(member.guild.id);
 
         bguild.log({

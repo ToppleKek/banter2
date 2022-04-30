@@ -128,20 +128,19 @@ class Bot {
             const bguild = this.guilds.get(member.guild.id);
             const guild_invites = await member.guild.invites.fetch();
 
-            for (const invite of guild_invites) {
+            for (const [code, invite] of guild_invites.entries()) {
                 // Check if the number of uses for this invite changed.
                 // If it did that probably means that this was the invite that was used.
-                console.dir(invite);
-                let binv = bguild.invites().get(invite.code);
-                Logger.debug(`binv=${binv} invite_code=${invite.code} bguild=${bguild}`);
+                let binv = bguild.invites().get(code);
                 let current_uses = binv.uses;
-                binv.uses = invite.memberCount;
+                binv.uses = invite.uses;
 
-                if (current_uses !== invite.memberCount) {
+                Logger.debug(`current_uses=${current_uses} binv.uses=${binv.uses} invite.uses=${invite.uses} code=${code}`);
+                if (current_uses !== invite.uses) {
                     // Update the invite store
-                    bguild.invites().set(invite.code, Object.assign(binv, {uses: invite.memberCount}));
-                    Logger.debug(`Invite store: invite now: ${bguild.invites().get(invite.code)}`);
-                    member.invite_code = invite.code;
+                    bguild.invites().set(code, Object.assign(binv, {uses: invite.uses}));
+                    Logger.debug(`Invite store: invite now: ${bguild.invites().get(code)}`);
+                    member.invite_code = code;
                     member.inviter = binv.inviter;
                     break;
                 }
@@ -153,7 +152,7 @@ class Bot {
         Logger.info('ActionLogger init...');
 
         for (const event in ActionLogger)
-            this.client.on(event, ActionLogger[event].bind(this));
+            this.client.on(event, (...args) => ActionLogger[event](this, ...args));
 
         this.client.login(this.token);
     }

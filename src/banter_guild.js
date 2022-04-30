@@ -15,19 +15,15 @@ class BanterGuild {
         this._invites = new Map();
 
         this.dguild.invites.fetch().then((guild_invites) => {
-            guild_invites.each(async (invite) => {
-                invite = await bot.client.fetchInvite(invite).catch((err) =>  {
-                    Logger.error(`Stupid djs error from invite=${invite} err=${err}`);
-                });
-
+            for (const [code, invite] of guild_invites.entries()) {
                 if (invite) {
                     this._invites.set(invite.code, {
                         code: invite.code,
                         inviter: invite.inviter,
-                        uses: invite.memberCount,
+                        uses: invite.uses,
                     });
                 }
-            });
+            }
         }).catch((err) => {
             Logger.warn(`Failed to fetch invites for guild: ${this.id}: ${err}`);
         });
@@ -134,7 +130,7 @@ class BanterGuild {
         };
 
         Object.assign(embed, embed_options);
-        await log_channel.send({embed});
+        await log_channel.send({embeds: [embed]});
     }
 
     async mod_log(action, mod, target, reason) {
@@ -164,7 +160,7 @@ class BanterGuild {
             color: 0x0084ff,
         };
 
-        await mod_log_channel.send({embed});
+        await mod_log_channel.send({embeds: [embed]});
     }
 
     async get_auto_roles() {

@@ -2,6 +2,8 @@ const { Message } = require('discord.js');
 const Bot = require('../bot');
 const Utils = require('../utils/utils');
 const CommandError = require('../command_error');
+const Logger = require('../logger');
+const util = require('util');
 
 module.exports.help = 'Manage channel settings';
 module.exports.usage = '#PREFIXchannel <channel_type> <?command> <?target_channel>';
@@ -10,12 +12,12 @@ module.exports.args_list = {
     position_independent: false,
     args: [{
         name: 'channel_type',
-        type: 'string',
+        type: 'word',
         description: 'One of `log/modlog`'
     }],
     optional_args: [{
         name: 'command',
-        type: 'string',
+        type: 'word',
         description: 'One of set/disable'
     }, {
         name: 'target_channel',

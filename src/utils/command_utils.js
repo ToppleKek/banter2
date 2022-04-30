@@ -105,6 +105,7 @@ module.exports = {
         const optional_args = new Map();
         const cast_errors = [];
 
+        // TODO: Position independent is kinda stupid, gonna remove probably
         if (command.args_list.position_independent) {
             for (let i = 0; i < tokens.length; ++i) {
                 for (let j = 0; j < command.args_list.args.length; ++j) {
@@ -142,7 +143,20 @@ module.exports = {
                     args.set(command.args_list.args[j].name, String(tokens[i++].value));
                 else if (command.args_list.args[j].type === tokens[i].type)
                     args.set(command.args_list.args[j].name, tokens[i++].value);
-                else if (tokens[i].type === 'string') {
+                else if (command.args_list.args[j].type === 'word' && tokens[i].type === 'string') {
+                    const words = tokens[i].value.split(' ');
+
+                    args.set(command.args_list.args[j].name, words[0]);
+                    words.splice(0, 1);
+
+                    if (words.length === 0) {
+                        // Skip the to be empty token if the string was already just one word
+                        ++i;
+                        continue;
+                    }
+
+                    tokens[i].value = words.join(' ');
+                } else if (tokens[i].type === 'string') {
                     const new_token = module.exports._try_cast(bot, msg, command.args_list.args[j].type, tokens[i].value);
 
                     if (new_token.type === 'failed_cast') {
@@ -170,7 +184,20 @@ module.exports = {
                     optional_args.set(command.args_list.optional_args[j].name, module.exports.join_token_string(i++, tokens));
                 else if (command.args_list.optional_args[j].type === tokens[i].type)
                     optional_args.set(command.args_list.optional_args[j].name, tokens[i++].value);
-                else if (tokens[i].type === 'string') {
+                else if (command.args_list.optional_args[j].type === 'word' && tokens[i].type === 'string') {
+                    const words = tokens[i].value.split(' ');
+
+                    optional_args.set(command.args_list.optional_args[j].name, words[0]);
+                    words.splice(0, 1);
+
+                    if (words.length === 0) {
+                        // Skip the to be empty token if the string was already just one word
+                        ++i;
+                        continue;
+                    }
+
+                    tokens[i].value = words.join(' ');
+                } else if (tokens[i].type === 'string') {
                     const new_token = module.exports._try_cast(bot, msg, command.args_list.optional_args[j].type, tokens[i].value);
 
                     if (new_token.type === 'failed_cast') {

@@ -4,14 +4,15 @@
   "description": "final banter rewrite",
   "main": "run.js",
   "dependencies": {
-    "discord.js": "13.6.0",
-    "forever": "^3.0.4",
-    "sqlite3": "^5.0.2",
     "ajv": "^8.6.0",
     "atob": "^2.1.2",
-    "btoa": "^1.2.1"
+    "btoa": "^1.2.1",
+    "discord.js": "^13.9.2",
+    "forever": "^3.0.4",
+    "sqlite3": "^5.0.2"
   },
   "scripts": {
+    "start": "node run.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "ToppleKek",

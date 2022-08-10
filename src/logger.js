@@ -3,9 +3,20 @@ const fs = require('fs');
 const L = {
     file: `./logs/${Date.now()}_LOG.txt`,
 
+    _line_and_filename() {
+        // const err = new Error();
+        const line = new Error().stack.split('\n')[3].trim();
+        let split = line.split('/');
+
+        if (split.length === 1)
+            split = line.split('\\'); // Windows
+
+        return split[split.length - 1].replace(/\(|\)/g, '');
+    },
+
     info(msg) {
         const d = new Date().toLocaleTimeString("en-ca", {timeStyle:"medium", hour12:false});
-        const txt = `[${d}] INF: ${msg}`;
+        const txt = `[${d}] (${this._line_and_filename()}) INF: ${msg}`;
         console.log(txt);
 
         fs.appendFile(this.file, txt + '\n', (err) => {
@@ -16,7 +27,7 @@ const L = {
 
     warn(msg) {
         const d = new Date().toLocaleTimeString("en-ca", {timeStyle:"medium", hour12:false});
-        const txt = `[${d}] WRN: ${msg}`;
+        const txt = `[${d}] (${this._line_and_filename()}) WRN: ${msg}`;
         console.log(txt);
 
         fs.appendFile(this.file, txt + '\n', (err) => {
@@ -27,7 +38,7 @@ const L = {
 
     error(msg) {
         const d = new Date().toLocaleTimeString("en-ca", {timeStyle:"medium", hour12:false});
-        const txt = `[${d}] ERR: ${msg}`;
+        const txt = `[${d}] (${this._line_and_filename()}) ERR: ${msg}`;
         console.log(txt);
 
         fs.appendFile(this.file, txt + '\n', (err) => {
@@ -38,7 +49,7 @@ const L = {
 
     debug(msg) {
         const d = new Date().toLocaleTimeString("en-ca", {timeStyle:"medium", hour12:false});
-        const txt = `[${d}] DBG: ${msg}`;
+        const txt = `[${d}] (${this._line_and_filename()}) DBG: ${msg}`;
         console.log(txt);
 
         fs.appendFile(this.file, txt + '\n', (err) => {

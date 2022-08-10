@@ -1,5 +1,4 @@
 const { Message } = require("discord.js");
-const util = require("util");
 const Bot = require("../bot");
 const Logger = require("../logger");
 const Utils = require("../utils/utils");
@@ -25,7 +24,6 @@ module.exports.args_list =  {
 module.exports.main = async (bot, args, msg) => {
     const user = args.get('user') || msg.author;
     const member = msg.guild.members.cache.get(user.id);
-    Logger.debug("what the shit: " + util.inspect(member));
     const default_client_status = {
         desktop: 'unknown',
         web: 'unknown',
@@ -55,5 +53,5 @@ module.exports.main = async (bot, args, msg) => {
         color: member.roles.color,
     };
 
-    msg.channel.send({embed});
+    msg.channel.send({embeds: [embed]});
 }

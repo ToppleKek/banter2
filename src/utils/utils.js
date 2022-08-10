@@ -57,7 +57,7 @@ module.exports = {
         const shared_guilds = [];
 
         bot.client.guilds.cache.each((guild) => {
-            if (guild.members.cache.get(user))
+            if (guild.members.resolve(user))
                 shared_guilds.push(guild.name);
         });
 

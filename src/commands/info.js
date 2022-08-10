@@ -42,10 +42,10 @@ module.exports.main = async (bot, args, msg) => {
             value: `Desktop: ${client_status.desktop || 'offline'}\nWeb: ${client_status.web || 'offline'}\nMobile: ${client_status.mobile || 'offline'}`
         }, {
             name: 'Account Created At',
-            value: user.createdAt.toLocaleString('en-gb'),
+            value: `<t:${Math.floor(user.createdTimestamp / 1000)}>`,
         }, {
             name: 'Joined Server At',
-            value: member.joinedAt.toLocaleString('en-gb'),
+            value: `<t:${Math.floor(member.joinedTimestamp / 1000)}>`,
         }, {
             name: 'Seen On',
             value: Utils.guilds_shared_with(bot, user).join('\n') || 'Nowhere',

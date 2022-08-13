@@ -27,7 +27,7 @@ const L = {
 
     warn(msg) {
         const d = new Date().toLocaleTimeString("en-ca", {timeStyle:"medium", hour12:false});
-        const txt = `[${d}] (${this._line_and_filename()}) WRN: ${msg}`;
+        const txt = `[${d}] (stack trace follows) WRN: ${msg}\n${new Error().stack}`;
         console.log(txt);
 
         fs.appendFile(this.file, txt + '\n', (err) => {
@@ -38,7 +38,7 @@ const L = {
 
     error(msg) {
         const d = new Date().toLocaleTimeString("en-ca", {timeStyle:"medium", hour12:false});
-        const txt = `[${d}] (${this._line_and_filename()}) ERR: ${msg}`;
+        const txt = `[${d}] (stack trace follows) ERR: ${msg}\n${new Error().stack}`;
         console.log(txt);
 
         fs.appendFile(this.file, txt + '\n', (err) => {

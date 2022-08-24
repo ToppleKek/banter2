@@ -1,6 +1,20 @@
 const Logger = require('./logger');
+const Util = require('./utils/utils');
+const Diff = require('diff');
 
 const ActionLogger = {
+    userUpdate(bot, old_user, new_user) {
+        Util.guilds_shared_with(bot, new_user).each((guild) => {
+            const bguild = bot.guilds.get(guild.id);
+            if (old_user.tag !== new_user.tag) {
+                bguild.log({
+                    title: 'User updated',
+                    description: `${old_user.tag} --> ${new_user.tag}`
+                });
+            }
+        });
+    },
+
     banter_guildMemberAdd(bot, member) {
         const bguild = bot.guilds.get(member.guild.id);
 
@@ -176,6 +190,19 @@ const ActionLogger = {
         if (old_msg.content === new_msg.content)
             return;
 
+        let content_diff = '';
+
+        Diff.diffChars(old_msg.content, new_msg.content).forEach((chunk) => {
+            let md = '';
+
+            if (chunk.added)
+                md = '**';
+            else if (chunk.removed)
+                md = '~~';
+
+            content_diff += md + chunk.value + md;
+        });
+
         bguild.log({
             title: '📜✏️ Message edited',
             description: `By: **${new_msg.author.tag}** (${new_msg.author.id}) in **#${new_msg.channel.name}**`,
@@ -186,6 +213,9 @@ const ActionLogger = {
             }, {
                 name: 'New content',
                 value: new_msg.content || '\\*\\*\\*Empty message***'
+            }, {
+                name: 'Diff',
+                value: content_diff || '*No diff generated*'
             }]
         });
 

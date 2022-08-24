@@ -48,7 +48,7 @@ module.exports.main = async (bot, args, msg) => {
             value: `<t:${Math.floor(member.joinedTimestamp / 1000)}>`,
         }, {
             name: 'Seen On',
-            value: Utils.guilds_shared_with(bot, user).join('\n') || 'Nowhere',
+            value: Utils.guilds_shared_with(bot, user).map((guild) => guild.name).join('\n') || 'Nowhere',
         }],
         color: member.roles.color,
     };

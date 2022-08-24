@@ -51,17 +51,10 @@ module.exports = {
      * Get the guilds that the bot shares with the given user
      * @param {Bot} bot The bot
      * @param {import('discord.js').User} user The user
-     * @return {Array<String>} An array of the names of the guilds shared with this user
+     * @return {import('discord.js').Collection} A collection of the guilds shared with the user
      */
     guilds_shared_with(bot, user) {
-        const shared_guilds = [];
-
-        bot.client.guilds.cache.each((guild) => {
-            if (guild.members.resolve(user))
-                shared_guilds.push(guild.name);
-        });
-
-        return shared_guilds;
+        return bot.client.guilds.cache.filter((guild) => !!!guild.members.resolve(user));
     },
 
     parse_time(str) {

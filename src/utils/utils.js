@@ -82,6 +82,10 @@ module.exports = {
         return times.d * 86400 + times.h * 3600 + times.m * 60 + times.s;
     },
 
+    escape_markdown(str) {
+        return str.replace(/\*|\~|_|\||\`/g, (match) => '\\' + match);
+    },
+
     _is_digit(c) {
         return c >= '0' && c <= '9';
     }

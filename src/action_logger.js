@@ -291,7 +291,7 @@ const ActionLogger = {
 
         let content_diff = '';
 
-        Diff.diffChars(old_msg.content, new_msg.content).forEach((chunk) => {
+        Diff.diffChars(Util.escape_markdown(old_msg.content), Util.escape_markdown(new_msg.content)).forEach((chunk) => {
             let md = '';
 
             if (chunk.added)

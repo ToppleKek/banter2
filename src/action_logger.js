@@ -48,19 +48,26 @@ const ActionLogger = {
 
         bguild.log({
             title: '⛔ Member banned',
-            description: `${ban.user.tag} (${ban.user.id})\n\n**Reason:** ${ban.reason || 'No reason provided'}`,
+            description: `${ban.user.tag} (${ban.user.id})`,
+            fields: [{
+                name: 'Reason',
+                value: ban.reason || 'No reason provided'
+            }],
             color: 0xBA211C
         });
     },
 
     async guildBanRemove(bot, ban) {
         const bguild = bot.guilds.get(ban.guild.id);
-        ban = await ban.fetch();
 
         bguild.log({
             title: '✅ Member unbanned',
-            description: `${ban.user.tag} (${ban.user.id})\n\n**Original ban reason:** ${ban.reason || 'No reason provided'}`,
-            color: 0xBA211C
+            description: `${ban.user.tag} (${ban.user.id})`,
+            fields: [{
+                name: 'Original Ban Reason',
+                value: ban.reason || 'No reason provided'
+            }],
+            color: 0xFFFFFF
         });
     },
 
@@ -132,14 +139,14 @@ const ActionLogger = {
         if (old_channel.name !== new_channel.name) {
             bguild.log({
                 title: 'Channel updated',
-                description: 'Name changed',
+                description: `${new_channel.name} (${new_channel.id})`,
                 color: 0xFFFFFF,
                 fields: [{
-                    name: 'Change',
-                    value: `${old_channel.name} --> ${new_channel.name}`
-                }, {
                     name: 'Type',
                     value: new_channel.type
+                }, {
+                    name: 'Name',
+                    value: `${old_channel.name} --> ${new_channel.name}`
                 }]
             });
         }
@@ -147,14 +154,14 @@ const ActionLogger = {
         if (old_channel.position !== new_channel.position) {
             bguild.log({
                 title: 'Channel updated',
-                description: 'Position changed',
+                description: `${new_channel.name} (${new_channel.id})`,
                 color: 0xFFFFFF,
                 fields: [{
-                    name: 'Change',
-                    value: `${old_channel.rawPosition} --> ${new_channel.rawPosition}`
-                }, {
                     name: 'Type',
                     value: new_channel.type
+                }, {
+                    name: 'Position',
+                    value: `${old_channel.rawPosition} --> ${new_channel.rawPosition}`
                 }]
             });
         }

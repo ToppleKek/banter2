@@ -23,6 +23,9 @@ const ActionLogger = {
             description: `${member.user.tag} (${member.user.id})`,
             color: 0xFFFFFF,
             fields: [{
+                name: 'Account Creation Date',
+                value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}>`
+            }, {
                 name: 'Invite Used',
                 value: member.invite_code || 'Unknown',
             }],
@@ -84,6 +87,9 @@ const ActionLogger = {
     },
 
     channelCreate(bot, channel) {
+        if (!channel.guild) // Ignore DM's
+            return;
+
         const bguild = bot.guilds.get(channel.guild.id);
 
         bguild.log({
@@ -100,6 +106,9 @@ const ActionLogger = {
     },
 
     channelDelete(bot, channel) {
+        if (!channel.guild) // Ignore DM's
+            return;
+
         const bguild = bot.guilds.get(channel.guild.id);
 
         bguild.log({
@@ -113,6 +122,42 @@ const ActionLogger = {
                 value: channel.type
             }]
         });
+    },
+
+    channelUpdate(bot, old_channel, new_channel) {
+        if (!new_channel.guild) // Ignore DM's
+            return;
+
+        const bguild = bot.guilds.get(new_channel.guild.id);
+        if (old_channel.name !== new_channel.name) {
+            bguild.log({
+                title: 'Channel updated',
+                description: 'Name changed',
+                color: 0xFFFFFF,
+                fields: [{
+                    name: 'Change',
+                    value: `${old_channel.name} --> ${new_channel.name}`
+                }, {
+                    name: 'Type',
+                    value: new_channel.type
+                }]
+            });
+        }
+
+        if (old_channel.position !== new_channel.position) {
+            bguild.log({
+                title: 'Channel updated',
+                description: 'Position changed',
+                color: 0xFFFFFF,
+                fields: [{
+                    name: 'Change',
+                    value: `${old_channel.rawPosition} --> ${new_channel.rawPosition}`
+                }, {
+                    name: 'Type',
+                    value: new_channel.type
+                }]
+            });
+        }
     },
 
     roleCreate(bot, role) {
@@ -159,6 +204,57 @@ const ActionLogger = {
         });
     },
 
+    roleUpdate(bot, old_role, new_role) {
+        const old_permissions = old_role.permissions.toArray();
+        const new_permissions = new_role.permissions.toArray();
+        const fields = [];
+
+        const permissions_removed = old_permissions.filter((permission) => !new_permissions.includes(permission));
+        const permissions_granted = new_permissions.filter((permission) => !old_permissions.includes(permission));
+
+        if (permissions_removed.length > 0 || permissions_granted.length > 0) {
+            fields.push({
+                name: 'Permissions removed',
+                value: permissions_removed.join(', ') || 'None'
+            }, {
+                name: 'Permissions granted',
+                value: permissions_granted.join(', ') || 'None'
+            });
+        }
+
+        if (old_role.name !== new_role.name) {
+            fields.push({
+                name: 'Name',
+                value: `${old_role.name} --> ${new_role.name}`
+            });
+        }
+
+        if (old_role.hexColor !== new_role.hexColor) {
+            fields.push({
+                name: 'Colour',
+                value: `#${old_role.hexColor} --> #${new_role.hexColor}`
+            });
+        }
+
+        if (old_role.position !== new_role.position) {
+            fields.push({
+                name: 'Position',
+                value: `#${old_role.rawPosition} --> #${new_role.rawPosition}`
+            });
+        }
+
+        const bguild = bot.guilds.get(new_role.guild.id);
+
+        if (fields.length > 0) {
+            bguild.log({
+                title: '🎭 Role updated',
+                description: `${new_role.name} (${new_role.id})`,
+                color: new_role.color,
+                fields
+            });
+        }
+    },
+
     // TODO: This event only fires when the message has been cached.
     //       We should hook into 'raw' and fire it anyway so we can
     //       give some kind of message.
@@ -175,6 +271,9 @@ const ActionLogger = {
             }]
         });
     },
+
+    // TODO: bulk delete logs
+    // messageDeleteBulk(bot, msgs) {}
 
     async messageUpdate(bot, old_msg, new_msg) {
         const bguild = bot.guilds.get(new_msg.guild.id);

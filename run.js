@@ -1,3 +1,6 @@
-const forever = require('forever');
+const Bot = require('./src/bot');
+const CONFIG = require('./config.json');
 
-forever.start('./src/banter.js', { stream: true });
+const banter = new Bot(CONFIG);
+
+banter.start();

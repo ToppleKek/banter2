@@ -54,7 +54,7 @@ module.exports = {
      * @return {Array} An array of the guilds shared with the user
      */
     guilds_shared_with(bot, user) {
-        return bot.client.guilds.cache.filter((guild) => !!!guild.members.resolve(user));
+        return bot.client.guilds.cache.filter((guild) => !!guild.members.resolve(user));
     },
 
     parse_time(str) {

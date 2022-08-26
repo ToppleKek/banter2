@@ -1,6 +1,5 @@
 const { Message } = require('discord.js');
 const Bot = require('../bot');
-const util = require('util');
 const CommandError = require('../command_error');
 
 module.exports.help = 'Ban a member from the guild';
@@ -32,20 +31,34 @@ module.exports.args_list = {
 module.exports.main = async (bot, args, msg) => {
     console.dir(args);
     const member = msg.guild.members.resolve(args.get('target'));
+    const opts = {
+        days: args.get('days') ?? 7,
+        reason: `Ban issued by: ${msg.author.tag} - ` + args.get('reason') || `(no reason provided)`
+    };
 
-    if (!member)
-        throw new CommandError('ArgumentError', 'User not in guild');
+    if (!member) {
+        const ban_embed = {
+            color: 1571692,
+            title: `${args.get('target').tag} JUST GOT HACKNAENAED`,
+            description: 'GET FRICKED KIDDO',
+            thumbnail: {
+                url: 'https://topplekek.xyz/lmao.gif',
+            },
+            timestamp: new Date(),
+        };
+
+        msg.guild.bans.create(args.get('target'), opts)
+            .then(() => msg.channel.send({embeds:[ban_embed]}))
+            .catch((err) => msg.respond_error(`API Error: \`\`\`${err}\`\`\``));
+
+        return;
+    }
 
     if (!member.bannable)
         throw new CommandError('BotPermissionError', 'This user is not bannable by the bot');
 
     if (member.roles.highest.rawPosition >= msg.guild.members.resolve(msg.author).roles.highest.rawPosition)
         throw new CommandError('PermissionError', `${member.user.tag} has a higher or equal role`);
-
-    const opts = {
-        days: args.get('days') || 7,
-        reason: `Ban issued by: ${msg.author.tag} - ` + args.get('reason') || `(no reason provided)`
-    };
 
     const ban_embed = {
         color: 1571692,

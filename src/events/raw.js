@@ -29,7 +29,7 @@ async function handle_slash_command(bot, data) {
         .catch((err) => {
             Logger.error(`Failed to respond to interaction: ${err}`);
         });
-    
+
     const cmd = data.data.name;
     const tokens = [];
 
@@ -39,10 +39,10 @@ async function handle_slash_command(bot, data) {
     const msgs = (await channel.messages.fetch({limit: 20})).filter(msg => msg.content.startsWith(`</${data.data.name}:${data.data.id}>`) && msg.author.id === data.member.user.id);
     msgs.sort((msg1, msg2) => msg2.createdTimestamp - msg1.createdTimestamp);
     console.dir(msgs);
-    
+
     if (data.data.options) {
         for (let option of data.data.options)
-            tokens.push(CommandUtils.get_token(bot, msgs[0], option.value));
+            tokens.push(await CommandUtils.get_token(bot, msgs[0], option.value));
     }
 
     try {

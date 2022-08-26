@@ -15,25 +15,25 @@ module.exports = {
         return buf.trimEnd();
     },
 
-    get_token(bot, msg, buf) {
+    async get_token(bot, msg, buf) {
         if (new RegExp(/^[0-9]{17,19}$/g).test(buf)) { // ID
             let ret;
-            if (ret = bot.client.users.cache.get(buf))
+            if (ret = await bot.client.users.fetch(buf).catch(Logger.debug))
                 return { type: 'user', value: ret };
-            else if (ret = bot.client.channels.cache.get(buf))
+            else if (ret = await bot.client.channels.fetch(buf).catch(Logger.debug))
                 return { type: 'channel', value: ret };
-            else if (ret = msg.channel.messages.cache.get(buf))
+            else if (ret = await msg.channel.messages.fetch(buf).catch(Logger.debug))
                 return { type: 'message', value: ret };
-            else if (ret = msg.guild.roles.cache.get(buf))
+            else if (ret = await msg.guild.roles.fetch(buf).catch(Logger.debug))
                 return { type: 'role', value: ret };
             else
                 return { type: 'unknown_id', value: buf }; // idk generic id could be a guild
         } else if (new RegExp(/^<@!?[0-9]{17,19}>$/g).test(buf)) // USER MENTION
-            return { type: 'user', value: bot.client.users.cache.get(buf.replace(/<|@|!|>/g, '')) };
+            return { type: 'user', value: await bot.client.users.fetch(buf.replace(/<|@|!|>/g, '')).catch(Logger.debug) };
         else if (new RegExp(/^<#[0-9]{17,19}>$/g).test(buf)) // CHANNEL MENTION
-            return { type: 'channel', value: bot.client.channels.cache.get(buf.replace(/<|#|>/g, '')) };
+            return { type: 'channel', value: bot.client.channels.fetch(buf.replace(/<|#|>/g, '')).catch(Logger.debug) };
         else if (new RegExp(/^<@&[0-9]{17,19}>$/g).test(buf)) // ROLE MENTION
-            return { type: 'role', value: msg.guild.roles.cache.get(buf.replace(/<|@|&|>/g, '')) };
+            return { type: 'role', value: msg.guild.roles.fetch(buf.replace(/<|@|&|>/g, '')).catch(Logger.debug) };
         else if ((num = Number.parseFloat(buf)) == buf)
             return { type: 'number', value: num };
         else

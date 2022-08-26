@@ -68,7 +68,7 @@ async function _execute_macro(bot, macro) {
 
         if (not)
             conditional.operator = conditional.operator.substring(1);
-        
+
         switch (conditional.operator) {
             case 'equals':
                 result = lhs === conditional.rhs && !not;
@@ -123,10 +123,10 @@ async function _execute_macro(bot, macro) {
 
         if (evaluated_conditionals[0].is_literal)
             lhs = evaluated_conditionals[0].value;
-        
+
         if (!evaluated_conditionals[1].is_literal)
             operator = evaluated_conditionals[1].value;
-        
+
         if (evaluated_conditionals[2].is_literal)
             rhs = evaluated_conditionals[2].value;
 
@@ -136,7 +136,7 @@ async function _execute_macro(bot, macro) {
             case 'and':
                 evaluated_conditionals[0] = {is_literal: true, value: lhs && rhs};
                 break;
-        
+
             case 'or':
                 evaluated_conditionals[0] = {is_literal: true, value: lhs || rhs};
                 break;
@@ -209,35 +209,35 @@ function execute_macros(bot, msg) {
     //         if (conditional.logic_op !== '')
     //             evaluated_conditionals.push({is_literal: false, value: conditional.logic_op});
     //     }
-        
+
     //     while (evaluated_conditionals.length > 1) {
     //         console.dir(evaluated_conditionals);
     //         let lhs;
     //         let operator;
     //         let rhs;
-        
+
     //         if (evaluated_conditionals[0].is_literal)
     //             lhs = evaluated_conditionals[0].value;
-            
+
     //         if (!evaluated_conditionals[1].is_literal)
     //             operator = evaluated_conditionals[1].value;
-            
+
     //         if (evaluated_conditionals[2].is_literal)
     //             rhs = evaluated_conditionals[2].value;
-        
+
     //         evaluated_conditionals = evaluated_conditionals.slice(2);
-        
+
     //         switch (operator) {
     //             case 'and':
     //                 evaluated_conditionals[0] = {is_literal: true, value: lhs && rhs};
     //                 break;
-            
+
     //             case 'or':
     //                 evaluated_conditionals[0] = {is_literal: true, value: lhs || rhs};
     //                 break;
     //         }
     //     }
-        
+
     // }
 }
 
@@ -246,7 +246,7 @@ function execute_macros(bot, msg) {
  * @param {Bot} bot the bot
  * @param {Message} msg the message to check
  */
-function check_command(bot, msg) {
+async function check_command(bot, msg) {
     if (!msg.guild || msg.author.id === bot.client.user.id || msg.author.bot || !msg.content.startsWith(bot.prefix))
         return;
 
@@ -283,7 +283,7 @@ function check_command(bot, msg) {
             while (content.charAt(i) !== ' ' && i < content.length)
                 buf += content.charAt(i++);
 
-            const t = CommandUtils.get_token(bot, msg, buf) || null;
+            const t = (await CommandUtils.get_token(bot, msg, buf)) || null;
 
             // TODO: I don't really know if I want to pass null users around. Is it better than passing around an invalid ID and
             // making the command do all the checking every time? idk

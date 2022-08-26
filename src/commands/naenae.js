@@ -29,7 +29,6 @@ module.exports.args_list = {
  * @param {Message} msg Message Object
  */
 module.exports.main = async (bot, args, msg) => {
-    console.dir(args);
     const member = msg.guild.members.resolve(args.get('target'));
     const opts = {
         days: args.get('days') ?? 7,

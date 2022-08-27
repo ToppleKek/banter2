@@ -76,7 +76,8 @@ module.exports.main = async (bot, args, msg) => {
         timestamp: new Date(),
     };
 
-    await member.createDM().then((dm_channel) => dm_channel.send({embeds:[dm_embed]}));
+    await member.createDM().then((dm_channel) => dm_channel.send({embeds:[dm_embed]}))
+        .catch((err) => msg.respond_error(`Warn: failed to DM user: ${err}`));
 
     member.ban(opts)
         .then(() => msg.channel.send({embeds: [ban_embed]}))

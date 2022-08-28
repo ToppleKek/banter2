@@ -285,29 +285,56 @@ const ActionLogger = {
     async messageUpdate(bot, old_msg, new_msg) {
         const bguild = bot.guilds.get(new_msg.guild.id);
 
-        // TODO: discord.js does not support forums yet
-        // let parent_text = '';
-
-        // if (new_msg.channel.parentId) {
-        //     const parent_channel = await new_msg.guild.channels.fetch(new_msg.channel.parentId).catch(Logger.error);
-        //     parent_text = ` (a thread from #${parent_channel.name})`;
-        // }
-
         if (old_msg.content === new_msg.content)
             return;
 
-        let content_diff = '';
+        const is_code_block = (s) => s.startsWith('```') && s.endsWith('```');
+        const splitter = /(`{3}.*?`{3})/gs;
+        const old_content_chunks = old_msg.content.split(splitter);
+        const new_content_chunks = new_msg.content.split(splitter);
+        const diff_chunks = [];
 
-        Diff.diffChars(Util.escape_markdown(old_msg.content), Util.escape_markdown(new_msg.content)).forEach((chunk) => {
-            let md = '';
+        Util.match_array_length(old_content_chunks, new_content_chunks, '');
 
-            if (chunk.added)
-                md = '**';
-            else if (chunk.removed)
-                md = '~~';
+        for (let i = 0; i < old_content_chunks.length; ++i) {
+            if (is_code_block(old_content_chunks[i].trim()) && is_code_block(new_content_chunks[i].trim())) {
+                let old_code = old_content_chunks[i].trim().slice(3, old_content_chunks[i].length);
+                let new_code = new_content_chunks[i].trim().slice(3, new_content_chunks[i].length);
+                old_code = old_code.slice(0, old_code.length - 3).trim();
+                new_code = new_code.slice(0, new_code.length - 3).trim();
 
-            content_diff += md + chunk.value + md;
-        });
+                let diff = '```diff\n';
+
+                Diff.diffLines(old_code, new_code).forEach((chunk) => {
+                    if (!chunk.value.endsWith('\n'))
+                        chunk.value += '\n';
+
+                    if (chunk.added)
+                        diff += chunk.value.split('\n').map((c) => `+${c}`).join('\n').slice(0, -1);
+                    else if (chunk.removed)
+                        diff += chunk.value.split('\n').map((c) => `-${c}`).join('\n').slice(0, -1);
+                    else
+                        diff += chunk.value.split('\n').map((c) => ` ${c}`).join('\n').slice(0, -1);
+                });
+
+                diff_chunks.push(diff + '```');
+            } else {
+                let diff = '';
+
+                Diff.diffWords(Util.escape_markdown(old_content_chunks[i]), Util.escape_markdown(new_content_chunks[i])).forEach((chunk) => {
+                    let md = '';
+
+                    if (chunk.added)
+                        md = '**';
+                    else if (chunk.removed)
+                        md = '~~';
+
+                    diff += md + chunk.value + md;
+                });
+
+                diff_chunks.push(diff);
+            }
+        }
 
         bguild.log({
             title: '📜✏️ Message edited',
@@ -315,13 +342,15 @@ const ActionLogger = {
             color: 0xFFFFFF,
             fields: [{
                 name: 'Old content',
-                value: old_msg.content || '\\*\\*\\*Empty message***'
+                value: old_msg.content || '\\*\\*\\*Empty message***',
+                inline: true
             }, {
                 name: 'New content',
-                value: new_msg.content || '\\*\\*\\*Empty message***'
+                value: new_msg.content || '\\*\\*\\*Empty message***',
+                inline: true
             }, {
                 name: 'Diff',
-                value: content_diff || '*No diff generated*'
+                value: diff_chunks.filter((chunk) => chunk !== '').join('') || '*No diff generated*',
             }]
         });
 

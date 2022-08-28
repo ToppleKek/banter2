@@ -86,6 +86,18 @@ module.exports = {
         return str.replace(/\*|\~|_|\||\`/g, (match) => '\\' + match);
     },
 
+    match_array_length(arr1, arr2, pad) {
+        if (arr1.length > arr2.length) {
+            const n = arr1.length - arr2.length;
+            for (let i = 0; i < n; ++i)
+                arr2.push(pad);
+        } else if (arr1.length < arr2.length) {
+            const n = arr2.length - arr1.length;
+            for (let i = 0; i < n; ++i)
+                arr1.push(pad);
+        }
+    },
+
     _is_digit(c) {
         return c >= '0' && c <= '9';
     }

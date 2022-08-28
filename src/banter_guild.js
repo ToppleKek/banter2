@@ -3,6 +3,7 @@ const SCHEMA = require('../config_schema.json');
 const Ajv = require('ajv');
 const Validate = new Ajv({ allErrors: true }).compile(SCHEMA);
 const CONFIG = require('../config.json');
+const { pledge } = require('./utils/utils');
 
 class BanterGuild {
     constructor(bot, id) {
@@ -33,9 +34,9 @@ class BanterGuild {
         return new Promise((resolve, reject) => {
             this.db.get(`SELECT ${field} FROM servers WHERE id = ?`, this.id, (err, row) => {
                 if (err)
-                    reject(err);
+                    reject(new Error(err));
                 else if (!row || row[field] === undefined)
-                    reject('null row or undefined field');
+                    reject(new Error('null row or undefined field'));
                 else
                     resolve(row[field]);
             });
@@ -46,9 +47,9 @@ class BanterGuild {
         return new Promise((resolve, reject) => {
             this.db.run(`UPDATE servers SET ${field} = ? WHERE id = ?`, value, this.id, (err) => {
                 if (err)
-                    reject(err);
+                    reject(new Error(err));
                 else
-                    resolve(true);
+                    resolve();
             });
         });
     }
@@ -58,21 +59,28 @@ class BanterGuild {
             this.db.serialize(() => {
                 this.db.run('DELETE FROM servers WHERE id = ?', this.id, (err) => {
                     if (err)
-                        reject(err);
+                        reject(new Error(err));
                 });
 
                 this.db.run('INSERT INTO servers (id) VALUES (?)', this.id, (err) => {
                     if (err)
-                        reject(err);
+                        reject(new Error(err));
 
-                    resolve(true);
+                    resolve();
                 });
             });
         });
     }
 
     async _reload_config() {
-        const b64_config = await this.db_get('config').catch((err) => {}); // TODO: this can be changed back to a log once we insert new db rows for all servers
+        const [err, b64_config] = await pledge(this.db_get('config'));
+
+        if (err) {
+            // TODO: this can be changed back to a log once we insert new db rows for all servers
+            // Logger.error(err);
+            return;
+        }
+
         const load_default_config = function() {
             const json = Buffer.from(CONFIG.default_config, 'base64').toString('binary');
             return JSON.parse(json);
@@ -119,7 +127,13 @@ class BanterGuild {
     }
 
     async log(embed_options) {
-        const log_id = await this.db_get('log').catch((err) => {}); // TODO: this can be changed back to a log once we insert new db rows for all servers
+        const [err, log_id] = await pledge(this.db_get('log'));
+
+        if (err) {
+            // TODO: this can be changed back to a log once we insert new db rows for all servers
+            return;
+        }
+
         const log_channel = await this.bot.client.channels.fetch(log_id).catch(Logger.warn); // TODO: messages system (when implemented) should report this error to the server mods
 
         if (!log_channel)
@@ -134,7 +148,13 @@ class BanterGuild {
     }
 
     async mod_log(action, mod, target, reason) {
-        const mod_log_id = await this.db_get('modlog').catch((err) => {}); // TODO: this can be changed back to a log once we insert new db rows for all servers
+        const [err, mod_log_id] = await pledge(this.db_get('modlog'));
+
+        if (err) {
+            // TODO: this can be changed back to a log once we insert new db rows for all servers
+            return;
+        }
+
         const mod_log_channel = await this.bot.client.channels.fetch(mod_log_id).catch(Logger.warn); // TODO: messages system (when implemented) should report this error to the server mods
 
         if (!mod_log_channel)
@@ -164,8 +184,8 @@ class BanterGuild {
     }
 
     async get_auto_roles() {
-        const db_response = await this.db_get('autoroles').catch(Logger.error);
-        return db_response ? db_response.split(',') : [];
+        const [err, db_response] = await pledge(this.db_get('autoroles'));
+        return err ? [] : db_response.split(',');
     }
 
     async remove_auto_role(role) {
@@ -174,10 +194,10 @@ class BanterGuild {
 
         if (i > -1) {
             autoroles.splice(i, 1);
-            return this.db_set('autoroles', autoroles.join(','));
+            await this.db_set('autoroles', autoroles.join(','));
+            return true;
         } else
             return false;
-
     }
 
     async add_auto_role(role) {

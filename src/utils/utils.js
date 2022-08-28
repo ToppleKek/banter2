@@ -4,6 +4,15 @@ const CommandError = require('../command_error');
 
 module.exports = {
     /**
+     * Go style error handling
+     * @param {Promise} p
+     * @return {Promise} Error and result with no throws
+     */
+    pledge(p) {
+        return p.then((r) => [null, r]).catch((e) => [e]);
+    },
+
+    /**
      * Check if the given member has the given permissions
      * @param {GuildMember} member
      * @param {Array<import('discord.js').PermissionResolvable>} permissions

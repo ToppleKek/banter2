@@ -2,6 +2,7 @@ const { Message } = require("discord.js");
 const Bot = require("../bot");
 const Utils = require("../utils/utils");
 const CommandError = require("../command_error");
+const { pledge } = require("../utils/utils");
 
 module.exports.help = 'Manage roles that are given to users when they join';
 module.exports.usage = '#PREFIXautorole <command> <?target_role>';
@@ -32,9 +33,10 @@ module.exports.main = async (bot, args, msg) => {
             const target_role = args.get('target_role');
             const b_guild = bot.guilds.get(msg.guild.id);
 
-            const added = await b_guild.add_auto_role(target_role.id).catch((err) => {
+            const [err, added] = await pledge(b_guild.add_auto_role(target_role.id));
+
+            if (err)
                 throw new CommandError('SQLError', err);
-            });
 
             if (added)
                 msg.respond_info(`Added auto role: \`${target_role.name}\``);
@@ -46,9 +48,10 @@ module.exports.main = async (bot, args, msg) => {
             const target_role = args.get('target_role');
             const b_guild = bot.guilds.get(msg.guild.id);
 
-            const removed = await b_guild.remove_auto_role(target_role.id).catch((err) => {
+            const [err, removed] = await pledge(b_guild.remove_auto_role(target_role.id));
+
+            if (err)
                 throw new CommandError('SQLError', err);
-            });
 
             if (removed)
                 msg.respond_info(`Removed auto role: \`${target_role.name}\``);

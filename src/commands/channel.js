@@ -65,7 +65,7 @@ module.exports.main = async (bot, args, msg) => {
             const [err] = await pledge(b_guild.db_set(channel_type, target_channel.id));
 
             if (err)
-                throw new CommandError('SQLError', err);
+                throw new CommandError('SQLError', err.toString());
 
             msg.respond_info(`This server's ${channel_type} channel is now ${target_channel}.`);
         } break;
@@ -73,7 +73,7 @@ module.exports.main = async (bot, args, msg) => {
             const [err] = await pledge(b_guild.db_set(channel_type, null));
 
             if (err)
-                throw new CommandError('SQLError', err);
+                throw new CommandError('SQLError', err.toString());
 
             msg.respond_info(`The ${channel_type} channel has been disabled.`);
         } break;

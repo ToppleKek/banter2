@@ -36,7 +36,7 @@ module.exports.main = async (bot, args, msg) => {
             const [err, added] = await pledge(b_guild.add_auto_role(target_role.id));
 
             if (err)
-                throw new CommandError('SQLError', err);
+                throw new CommandError('SQLError', err.toString());
 
             if (added)
                 msg.respond_info(`Added auto role: \`${target_role.name}\``);
@@ -51,7 +51,7 @@ module.exports.main = async (bot, args, msg) => {
             const [err, removed] = await pledge(b_guild.remove_auto_role(target_role.id));
 
             if (err)
-                throw new CommandError('SQLError', err);
+                throw new CommandError('SQLError', err.toString());
 
             if (removed)
                 msg.respond_info(`Removed auto role: \`${target_role.name}\``);

@@ -1,7 +1,7 @@
 const { Message } = require('discord.js');
 const Bot = require('../bot');
 const CommandError = require('../command_error');
-const { require_optional, pledge } = require('../utils/utils');
+const { pledge } = require('../utils/utils');
 
 module.exports.help = 'Get a tag';
 module.exports.usage = '#PREFIXt <key>';
@@ -34,5 +34,5 @@ module.exports.main = async (bot, args, msg) => {
     if (!tag)
         throw new CommandError('ArgumentError', 'Tag not found.');
 
-    msg.respond_info(tag.content, tag.key);
+    msg.channel.send(tag.content);
 }

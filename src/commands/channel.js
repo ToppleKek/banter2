@@ -41,7 +41,7 @@ module.exports.main = async (bot, args, msg) => {
         throw new CommandError('ArgumentError', 'channel_type must be one of `log/modlog`');
 
     if (!command) {
-        const [err, channel_id] = await b_guild.db_get(channel_type);
+        const [err, channel_id] = await pledge(b_guild.db_get(channel_type));
 
         if (err)
             Logger.error(err);

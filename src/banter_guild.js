@@ -206,9 +206,42 @@ class BanterGuild {
 
         if (i < 0) {
             autoroles.push(role);
-            return this.db_set('autoroles', autoroles.join(','));
+            await this.db_set('autoroles', autoroles.join(','));
+            return true;
         } else
             return false;
+    }
+
+    async get_tags() {
+        let [err, tags] = await pledge(this.db_get('tags'));
+
+        if (!tags)
+            tags = '[]';
+
+        return err ? [] : JSON.parse(tags);
+    }
+
+    async add_tag(key, content) {
+        const tags = await this.get_tags();
+
+        if (tags.find((tag) => tag.key === key))
+            return false;
+
+        tags.push({key, content});
+        await this.db_set('tags', JSON.stringify(tags));
+        return true;
+    }
+
+    async remove_tag(key) {
+        const tags = await this.get_tags();
+        const i = tags.findIndex((tag) => tag.key === key);
+
+        if (i < 0)
+            return false;
+
+        tags.splice(i, 1);
+        await this.db_set('tags', JSON.stringify(tags));
+        return true;
     }
 }
 

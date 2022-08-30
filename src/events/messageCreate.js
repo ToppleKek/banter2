@@ -8,9 +8,9 @@ const Logger = require("../logger");
 const subscribed_macros = [];
 const macro_errors = new Map();
 
-function main(msg) {
+async function main(msg) {
     try {
-        check_command(this, msg);
+        await check_command(this, msg);
     } catch (err) {
         if (err instanceof CommandError)
             msg.respond_command_error(err.type, err.msg);

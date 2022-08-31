@@ -212,6 +212,50 @@ class BanterGuild {
             return false;
     }
 
+    async get_pub_roles() {
+        let [err, pubroles] = await pledge(this.db_get('pubroles'));
+
+        if (!pubroles)
+            pubroles = '[]';
+
+        return err ? [] : JSON.parse(pubroles);
+    }
+
+    async toggle_pub_role(role) {
+        const pubroles = await this.get_pub_roles();
+        const i = pubroles.findIndex((r) => r === role);
+
+        if (i < 0)
+            pubroles.push(role);
+        else
+            pubroles.splice(i, 1);
+
+        await this.db_set('pubroles', JSON.stringify(pubroles));
+        return i < 0;
+    }
+
+    async add_pub_role(role) {
+        const pubroles = await this.get_pub_roles();
+
+        if (pubroles.find((pubrole) => pubrole === role))
+            return false;
+
+        pubroles.push(role);
+        await this.db_set('pubroles', JSON.stringify(pubroles));
+        return true;
+    }
+
+    async remove_pub_role(role) {
+        const pubroles = await this.get_pub_roles();
+        const i = pubroles.findIndex((r) => r === role);
+
+        if (i < 0)
+            return false;
+
+        pubroles.splice(i, 1);
+        await this.db_set('pubroles', JSON.stringify(pubroles));
+    }
+
     async get_tags() {
         let [err, tags] = await pledge(this.db_get('tags'));
 

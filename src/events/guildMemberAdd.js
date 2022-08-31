@@ -9,8 +9,10 @@ async function apply_auto_roles(bot, member) {
     const b_guild = bot.guilds.get(member.guild.id);
     const [err, auto_roles] = await pledge(b_guild.get_auto_roles());
 
-    if (err)
+    if (err) {
         Logger.error(err);
+        return;
+    }
 
     for (const role of auto_roles) {
         member.roles.add(role).catch((err) => {

@@ -12,12 +12,12 @@ module.exports.args_list = {
         name: 'command',
         type: 'word',
         description: 'One of `set/remove`'
-    }],
-    optional_args: [{
+    }, {
         name: 'key',
         type: 'word',
         description: 'One word key'
-    }, {
+    }],
+    optional_args: [{
         name: 'value',
         type: 'string',
         description: 'The key value'
@@ -33,7 +33,6 @@ module.exports.main = async (bot, args, msg) => {
     const bguild = bot.guilds.get(msg.guild.id);
 
     if (args.get('command') === 'set') {
-        require_optional('key', args);
         require_optional('value', args);
 
         const [err, added] = await pledge(bguild.add_tag(args.get('key'), args.get('value')));
@@ -45,8 +44,6 @@ module.exports.main = async (bot, args, msg) => {
 
         msg.respond_info(`Added tag: ${args.get('key')}`);
     } else if (args.get('command') === 'remove') {
-        require_optional('key', args);
-
         const [err, removed] = await pledge(bguild.remove_tag(args.get('key')));
 
         if (err)

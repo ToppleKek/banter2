@@ -5,8 +5,6 @@
   "main": "run.js",
   "dependencies": {
     "ajv": "^8.6.0",
-    "atob": "^2.1.2",
-    "btoa": "^1.2.1",
     "diff": "^5.1.0",
     "discord.js": "^13.9.2",
     "sqlite3": "^5.0.2"

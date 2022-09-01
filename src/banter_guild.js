@@ -183,6 +183,38 @@ class BanterGuild {
         await mod_log_channel.send({embeds: [embed]});
     }
 
+    async _get_array_backed_db_storage(key) {
+        const [err, db_response] = await pledge(this.db_get(key));
+
+        if (!db_response)
+            db_response = '[]';
+
+        return err ? [] : JSON.parse(db_response);
+    }
+
+    async _add_array_backed_db_storage(key, value, finder) {
+        const values = await this._get_array_backed_db_storage(key);
+
+        if (values.find(finder ?? ((v) => v === value)))
+            return false;
+
+        values.push(value);
+        await this.db_set(key, JSON.stringify(values));
+        return true;
+    }
+
+    async _remove_array_backed_db_storage(key, value, finder) {
+        const values = await this._get_array_backed_db_storage(key);
+        const i = values.findIndex(finder ?? ((v) => v === value));
+
+        if (i < 0)
+            return false;
+
+        values.splice(i, 1);
+        await this.db_set(key, JSON.stringify(values));
+        return true;
+    }
+
     async get_auto_roles() {
         const [err, db_response] = await pledge(this.db_get('autoroles'));
         return err ? [] : db_response.split(',');
@@ -213,12 +245,7 @@ class BanterGuild {
     }
 
     async get_pub_roles() {
-        let [err, pubroles] = await pledge(this.db_get('pubroles'));
-
-        if (!pubroles)
-            pubroles = '[]';
-
-        return err ? [] : JSON.parse(pubroles);
+        return this._get_array_backed_db_storage('pubroles');
     }
 
     async toggle_pub_role(role) {
@@ -234,58 +261,16 @@ class BanterGuild {
         return i < 0;
     }
 
-    async add_pub_role(role) {
-        const pubroles = await this.get_pub_roles();
-
-        if (pubroles.find((pubrole) => pubrole === role))
-            return false;
-
-        pubroles.push(role);
-        await this.db_set('pubroles', JSON.stringify(pubroles));
-        return true;
-    }
-
-    async remove_pub_role(role) {
-        const pubroles = await this.get_pub_roles();
-        const i = pubroles.findIndex((r) => r === role);
-
-        if (i < 0)
-            return false;
-
-        pubroles.splice(i, 1);
-        await this.db_set('pubroles', JSON.stringify(pubroles));
-    }
-
     async get_tags() {
-        let [err, tags] = await pledge(this.db_get('tags'));
-
-        if (!tags)
-            tags = '[]';
-
-        return err ? [] : JSON.parse(tags);
+        return this._get_array_backed_db_storage('tags');
     }
 
     async add_tag(key, content) {
-        const tags = await this.get_tags();
-
-        if (tags.find((tag) => tag.key === key))
-            return false;
-
-        tags.push({key, content});
-        await this.db_set('tags', JSON.stringify(tags));
-        return true;
+        return this._add_array_backed_db_storage('tags', {key, content}, (tag) => tag.key === key);
     }
 
     async remove_tag(key) {
-        const tags = await this.get_tags();
-        const i = tags.findIndex((tag) => tag.key === key);
-
-        if (i < 0)
-            return false;
-
-        tags.splice(i, 1);
-        await this.db_set('tags', JSON.stringify(tags));
-        return true;
+        return this._remove_array_backed_db_storage('tags', key, (tag) => tag.key === key);
     }
 }
 

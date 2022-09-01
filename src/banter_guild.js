@@ -216,32 +216,15 @@ class BanterGuild {
     }
 
     async get_auto_roles() {
-        const [err, db_response] = await pledge(this.db_get('autoroles'));
-        return err ? [] : db_response.split(',');
+        return this._get_array_backed_db_storage('autoroles');
     }
 
     async remove_auto_role(role) {
-        const autoroles = await this.get_auto_roles();
-        const i = autoroles.indexOf(role);
-
-        if (i > -1) {
-            autoroles.splice(i, 1);
-            await this.db_set('autoroles', autoroles.join(','));
-            return true;
-        } else
-            return false;
+        return this._remove_array_backed_db_storage('autoroles', role);
     }
 
     async add_auto_role(role) {
-        const autoroles = await this.get_auto_roles();
-        const i = autoroles.indexOf(role);
-
-        if (i < 0) {
-            autoroles.push(role);
-            await this.db_set('autoroles', autoroles.join(','));
-            return true;
-        } else
-            return false;
+        return this._add_array_backed_db_storage('autoroles', role);
     }
 
     async get_pub_roles() {

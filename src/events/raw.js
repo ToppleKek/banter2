@@ -6,8 +6,8 @@ const CommandError = require("../command_error");
 const Logger = require('../logger');
 
 function main(event) {
-    if (event.t === 'INTERACTION_CREATE')
-        handle_slash_command(this, event.d);
+    // if (event.t === 'INTERACTION_CREATE')
+        // handle_slash_command(this, event.d);
 
 }
 

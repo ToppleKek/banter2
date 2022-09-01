@@ -184,7 +184,7 @@ class BanterGuild {
     }
 
     async _get_array_backed_db_storage(key) {
-        const [err, db_response] = await pledge(this.db_get(key));
+        let [err, db_response] = await pledge(this.db_get(key));
 
         if (!db_response)
             db_response = '[]';

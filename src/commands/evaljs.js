@@ -1,5 +1,6 @@
 const { Message } = require("discord.js");
 const Bot = require("../bot");
+const Util = require('../utils/utils');
 const util = require('util');
 
 module.exports.help = 'Evaluate JS';

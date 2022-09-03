@@ -3,6 +3,7 @@ const fs = require('fs');
 const TOKEN = require('./config.json').token;
 const APPID = require('./config.json').appid;
 const TYPES = {
+    "word": 3,
     "string": 3,
     "number": 4,
     "boolean": 5,
@@ -10,6 +11,10 @@ const TYPES = {
     "channel": 7,
     "role": 8
 };
+
+function sleep(t) {
+    return new Promise((resolve) => setTimeout(resolve, t));
+}
 
 function register_command(cmd) {
     const cmd_payload = {
@@ -21,7 +26,7 @@ function register_command(cmd) {
     for (const arg of cmd.data.args_list.args) {
         cmd_payload.options.push({
             name: arg.name,
-            type: TYPES[arg.types[0]],
+            type: TYPES[arg.type],
             description: arg.description,
             required: true
         });
@@ -30,15 +35,13 @@ function register_command(cmd) {
     for (const arg of cmd.data.args_list.optional_args) {
         cmd_payload.options.push({
             name: arg.name,
-            type: TYPES[arg.types[0]],
+            type: TYPES[arg.type],
             description: arg.description,
             required: false
         });
     }
 
     const payload = JSON.stringify(cmd_payload);
-
-    console.log(payload);
 
     const options = {
         method: "POST",
@@ -53,18 +56,22 @@ function register_command(cmd) {
 
     return new Promise((resolve, reject) => {
         let response_data = "";
-        const request = Https.request(`https://discord.com/api/v8/applications/${APPID}/guilds/585205338081460224/commands`, options, (response) => {
+        const request = Https.request(`https://discord.com/api/v10/applications/${APPID}/guilds/585205338081460224/commands`, options, async (response) => {
+            console.log(`X-RateLimit-Remaining: ${response.headers['x-ratelimit-remaining']} X-RateLimit-Reset-After: ${response.headers['x-ratelimit-reset-after']}`);
+            if (response.headers['x-ratelimit-remaining'] === '0')
+                await sleep(Number.parseFloat(response.headers['x-ratelimit-reset-after']) * 1000);
+
             response.on('data', (chunk) => {
                 response_data += chunk;
             });
-    
+
             response.on('end', () => {
                 console.log(`Request end: ${response_data}`);
                 const json_data = JSON.parse(response_data);
                 resolve(json_data.id);
             });
         });
-    
+
         request.write(payload);
         request.end();
     });
@@ -76,7 +83,7 @@ async function register_commands() {
 
     for (let file of command_files) {
         if (file.endsWith('.js')) {
-            const command =  {
+            const command = {
                 name: file.slice(0, -3),
                 data: require(`./src/commands/${file}`)
             };
@@ -86,7 +93,7 @@ async function register_commands() {
         }
     }
 
-    fs.appendFileSync('./slash_command_map.json', JSON.stringify(command_map));
+    fs.writeFileSync('./slash_command_map.json', JSON.stringify(command_map));
 }
 
 register_commands();

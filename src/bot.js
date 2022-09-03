@@ -4,6 +4,7 @@ const Logger = require('./logger');
 const fs = require('fs');
 const BanterGuild = require('./banter_guild');
 const ActionLogger = require('./action_logger');
+const MessageUtils = require('./utils/message_utils');
 
 /**
  * @type {Bot}
@@ -31,51 +32,9 @@ class Bot {
     }
 
     start() {
-        Discord.Message.prototype.respond_info = function(msg, header) {
-            this.channel.send({embeds: [{
-                color: 0x259EF5,
-                title: header,
-                description: msg,
-            }]});
-        };
-
-        Discord.Message.prototype.respond_command_error = function(type, msg) {
-            const fields = [{
-                name: 'Type',
-                value: type,
-                inline: false
-            }, {
-                name: 'Details',
-                value: msg,
-                inline: false
-            }];
-
-            if (msg.command) {
-                fields.push({
-                    name: 'Usage',
-                    value: this.command.usage,
-                    inline: false
-                });
-            }
-
-            this.channel.send({embeds: [{
-                author: {
-                    name: `Command executed by ${this.author.username}#${this.author.discriminator}`,
-                    iconURL: this.author.displayAvatarURL()
-                },
-                title: 'Command Error',
-                fields,
-                color: 0xFF6640,
-                timestamp: Date.now()
-            }]});
-        };
-
-        Discord.Message.prototype.respond_error = function(msg) {
-            this.channel.send({embeds: [{
-                color: 0xFF6640,
-                description: msg,
-            }]});
-        };
+        Discord.Message.prototype.respond_info = MessageUtils.respond_info;
+        Discord.Message.prototype.respond_command_error = MessageUtils.respond_command_error;
+        Discord.Message.prototype.respond_error = MessageUtils.respond_error;
 
         /** @type {Discord.Client} */
         this.client = new Discord.Client({ autoReconnect: true, disableEveryone: true, intents: 0b11111111111111111 });

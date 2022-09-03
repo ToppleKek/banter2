@@ -66,20 +66,31 @@ module.exports = {
         return bot.client.guilds.cache.filter((guild) => !!guild.members.resolve(user));
     },
 
-    parse_time(str) {
+    parse_time(timestr) {
+        const is_digit = (c) => {
+            return c >= '0' && c <= '9';
+        };
+
         let times = {
             'd': 0,
             'h': 0,
             'm': 0,
             's': 0
         };
+
         let number_buf = '';
+        const str = timestr.replace(/\s/g, '');
 
         for (let i = 0; i < str.length; ++i) {
-            if (this._is_digit(str[i]))
+            if (is_digit(str[i]))
                 number_buf += str[i];
             else if (times.hasOwnProperty(str[i])) {
-                times[str[i]] = Number.parseInt(number_buf);
+                const num = Number.parseInt(number_buf);
+
+                if (Number.isNaN(num))
+                    return null;
+
+                times[str[i]] = num;
                 number_buf = '';
             } else
                 return null;
@@ -106,10 +117,6 @@ module.exports = {
                 arr1.push(pad);
         }
     },
-
-    _is_digit(c) {
-        return c >= '0' && c <= '9';
-    }
 
     // mute(bot, member, time, reason = 'No reason provided') {
     //     if (time <= 0)

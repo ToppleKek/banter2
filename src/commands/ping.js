@@ -17,5 +17,5 @@ module.exports.args_list = {
  * @param {Message} msg Message Object
  */
 module.exports.main = async (bot, args, msg) => {
-    msg.respond_info(`Pong: \`${Date.now() - msg.createdAt.getTime()}ms\`\nClient: \`${Math.floor(bot.client.ws.ping)}ms\``);
+    msg.respond_info(`Pong: \`${Math.floor(bot.client.ws.ping)}ms\``);
 }

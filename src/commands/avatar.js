@@ -29,5 +29,5 @@ module.exports.main = async (bot, args, msg) => {
         }
     };
 
-    await msg.channel.send({embed});
+    await msg.channel.send({embeds: [embed]});
 }

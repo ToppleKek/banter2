@@ -66,7 +66,7 @@ module.exports.main = async (bot, args, msg) => {
 
         if (show_unique_authors) {
             [err, unique_author_channel] = await pledge(parent_channel.children.create({
-                name: `Unique Authors: 0 (0)`,
+                name: `Communicators: 0 (0)`,
                 type: GUILD_VOICE,
                 permissionOverwrites
             }));

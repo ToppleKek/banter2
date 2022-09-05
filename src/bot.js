@@ -20,6 +20,7 @@ class Bot {
         this.commands      = {};
         this.events        = {};
         this.guilds        = new Map();
+        this.stat_timer    = null;
 
         this.db = new SQLite3.Database(config.db_file, (err) => {
             if (err) {
@@ -132,6 +133,11 @@ class Bot {
             // Emit our custom event
             this.client.emit('banter_guildMemberAdd', member);
         });
+
+        this.stat_timer = setInterval(() => {
+            this.client.emit('statisticUpdate');
+        }, 5 * 60 * 1000);
+
         Logger.info('ActionLogger init...');
 
         for (const event in ActionLogger)

@@ -17,6 +17,8 @@ async function main(msg) {
         else
             Logger.error(`command_handler: error: ${err}\n${err.stack}`);
     }
+
+    update_unique_authors(this, msg);
 }
 
 function _get_value(value, bot, msg) {
@@ -239,6 +241,11 @@ function execute_macros(bot, msg) {
     //     }
 
     // }
+}
+
+async function update_unique_authors(bot, msg) {
+    const bguild = bot.guilds.get(msg.guild.id);
+    bguild.add_unique_author(msg.author.id);
 }
 
 /**

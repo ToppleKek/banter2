@@ -5,10 +5,19 @@ const CommandError = require('../command_error');
 module.exports = {
     /**
      * Go style error handling
-     * @param {Promise} p
+     * @param {Promise|Array[Promise]} p
      * @return {Promise} Error and result with no throws
      */
     pledge(p) {
+        if (Array.isArray(p)) {
+            return Promise.allSettled(p).then((results) => {
+                const errs = results.filter((result) => result.status === 'rejected').map((result) => result.reason);
+                const values = results.filter((result) => result.status === 'fulfilled').map((result) => result.value);
+
+                return [errs, values];
+            });
+        }
+
         return p.then((r) => [null, r]).catch((e) => [e]);
     },
 

@@ -84,6 +84,11 @@ module.exports.main = async (bot, args, msg) => {
         if (err)
             throw new CommandError('SQLError', err.toString());
 
+        const [errs] = await pledge([bguild.db_set('last_unique_author_count', 0), bguild.db_set('last_member_count', msg.guild.memberCount)]);
+
+        if (errs.length > 0)
+            throw new CommandError('SQLError', errs.map((e) => e.toString()).join('\n'));
+
         msg.respond_info('Enabled server statistics.');
     } else {
         // We need to ensure that stat channels can be disabled even if there is an error deleting the old channels.

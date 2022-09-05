@@ -30,6 +30,10 @@ class BanterGuild {
         });
     }
 
+    async fetch_dguild() {
+        this.dguild = await this.bot.client.guilds.fetch(this.id);
+    }
+
     db_get(field) {
         return new Promise((resolve, reject) => {
             this.db.get(`SELECT ${field} FROM servers WHERE id = ?`, this.id, (err, row) => {
@@ -257,27 +261,17 @@ class BanterGuild {
     }
 
     async get_stat_channels() {
-        const [err, stat_channels] = await pledge(this.db_get('stat_channels'));
+        const stat_channels = await this.db_get('stat_channels');
 
-        if (err) {
-            Logger.error(err);
-            return null;
+        const json = JSON.parse(stat_channels) ?? {};
+
+        if (!['parent_channel', 'total_users_channel', 'unique_author_channel'].every((c) => Object.keys(json).includes(c))) {
+            json.parent_channel = null;
+            json.total_users_channel = null;
+            json.unique_author_channel = null;
         }
 
-        try {
-            const json = JSON.parse(stat_channels) ?? {};
-
-            if (!['parent_channel', 'total_users_channel', 'unique_author_channel'].every((c) => Object.keys(json).includes(c))) {
-                json.parent_channel = null;
-                json.total_users_channel = null;
-                json.unique_author_channel = null;
-            }
-
-            return json;
-        } catch (e) {
-            Logger.error(e);
-            return null;
-        }
+        return json;
     }
 
     async set_stat_channels(stat_channels) {
@@ -285,6 +279,18 @@ class BanterGuild {
             throw new Error('stat_channels is missing required keys');
 
         await this.db_set('stat_channels', JSON.stringify(stat_channels));
+    }
+
+    async get_unique_authors() {
+        return this._get_array_backed_db_storage('unique_authors');
+    }
+
+    async add_unique_author(user) {
+        return this._add_array_backed_db_storage('unique_authors', user);
+    }
+
+    async remove_unique_author(user) {
+        return this._remove_array_backed_db_storage('unique_authors', user);
     }
 }
 

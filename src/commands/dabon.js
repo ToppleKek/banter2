@@ -44,14 +44,14 @@ module.exports.main = async (bot, args, msg) => {
         thumbnail: {
             url: 'https://topplekek.xyz/breaddab.gif',
         },
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
     };
 
     const dm_embed = {
         color: 1571692,
         title: `Get heckin dabbed on from ${msg.guild.name}`,
         description: `They kicked you for \`${args.get('reason')}\``,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
     };
 
     await member.createDM().then((dm_channel) => dm_channel.send({embeds:[dm_embed]}))

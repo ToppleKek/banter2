@@ -34,7 +34,7 @@ module.exports.main = async (bot, args, msg) => {
         thumbnail: {
             url: 'https://topplekek.xyz/lmao.gif',
         },
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
     };
 
     const [err] = await pledge(msg.guild.bans.remove(target, args.get('reason') ?? 'No reason provided'));

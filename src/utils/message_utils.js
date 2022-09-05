@@ -34,7 +34,7 @@ module.exports = {
             title: 'Command Error',
             fields,
             color: 0xFF6640,
-            timestamp: Date.now()
+            timestamp: new Date().toISOString()
         }]});
     },
 

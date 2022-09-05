@@ -31,7 +31,7 @@ module.exports.args_list = {
 module.exports.main = async (bot, args, msg) => {
     const member = msg.guild.members.resolve(args.get('target'));
     const opts = {
-        days: args.get('days') ?? 7,
+        deleteMessageDays: args.get('days') ?? 7,
         reason: `Ban issued by: ${msg.author.tag} - ` + args.get('reason') || `(no reason provided)`
     };
 
@@ -43,7 +43,7 @@ module.exports.main = async (bot, args, msg) => {
             thumbnail: {
                 url: 'https://topplekek.xyz/lmao.gif',
             },
-            timestamp: new Date(),
+            timestamp: new Date().toISOString(),
         };
 
         msg.guild.bans.create(args.get('target'), opts)
@@ -66,14 +66,14 @@ module.exports.main = async (bot, args, msg) => {
         thumbnail: {
             url: 'https://topplekek.xyz/lmao.gif',
         },
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
     };
 
     const dm_embed = {
         color: 1571692,
         title: `Get heckin naenaed from ${msg.guild.name}`,
         description: `They banned you for \`${args.get('reason')}\``,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
     };
 
     await member.createDM().then((dm_channel) => dm_channel.send({embeds:[dm_embed]}))

@@ -89,7 +89,7 @@ module.exports.main = async (bot, args, msg) => {
             if (!member.bannable)
                 return;
 
-            const [err] = await pledge(member.ban({days: 7, reason}));
+            const [err] = await pledge(member.ban({deleteMessageDays: 7, reason}));
 
             if (err)
                 Logger.error(err);

@@ -140,7 +140,7 @@ class BanterGuild {
             return;
 
         const embed = { // TODO: what else is generic in logs?
-            timestamp: Date.now(),
+            timestamp: new Date().toISOString(),
         };
 
         Object.assign(embed, embed_options);

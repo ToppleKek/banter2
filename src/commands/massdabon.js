@@ -4,7 +4,7 @@ const CommandError = require('../command_error');
 const Logger = require('../logger');
 const { pledge, parse_time } = require('../utils/utils');
 
-module.exports.help = 'Mass kick users that joined in the specified time period';
+module.exports.help = 'Mass kick members that joined in the specified time period';
 module.exports.usage = '#PREFIXmassdabon <timestr> <?reason>';
 module.exports.required_permissions = ['KICK_MEMBERS'];
 module.exports.args_list = {

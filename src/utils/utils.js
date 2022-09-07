@@ -21,6 +21,13 @@ module.exports = {
         return p.then((r) => [null, r]).catch((e) => [e]);
     },
 
+    command_error_if(err, type) {
+        if (Array.isArray(err) && err.length > 0)
+            throw new CommandError(type, err.map((e) => e.toString()).join('\n'));
+        else if (err)
+            throw new CommandError(type, err.toString());
+    },
+
     /**
      * Check if the given member has the given permissions
      * @param {GuildMember} member

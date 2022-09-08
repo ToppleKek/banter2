@@ -73,7 +73,7 @@ module.exports.main = async (bot, args, msg) => {
     }
 
     while (cmds.length)
-        pages.push(cmds.splice(0, 10));
+        pages.push(cmds.splice(0, 8));
 
     const page = args.get('page') ?? 1;
 
@@ -81,13 +81,9 @@ module.exports.main = async (bot, args, msg) => {
         return msg.respond_command_error('Argument Error', 'Page not found');
 
     msg.channel.send({embeds: [{
-        author: {
-            name: msg.author.username,
-            iconURL: msg.author.displayAvatarURL()
-        },
         color: Math.floor(Math.random() * 0xFFFFFF),
-        title: 'Banter3',
-        description: `For details, use ${bot.prefix}help <cmd> change pages with ${bot.prefix}help <#>`,
+        title: 'Banter2',
+        description: `https://github.com/ToppleKek/banter2\nFor details, use ${bot.prefix}help <cmd> change pages with ${bot.prefix}help <#>`,
         fields: pages[page - 1],
         footer: {
             text: `Page ${page}/${pages.length}`

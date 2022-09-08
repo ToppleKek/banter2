@@ -1,11 +1,12 @@
 const { GuildMember } = require('discord.js');
 const CONFIG = require('../../config.json');
 const CommandError = require('../command_error');
+const Constants = require('../constants');
 
 module.exports = {
     /**
      * Go style error handling
-     * @param {Promise|Array[Promise]} p
+     * @param {Promise|Array<Promise>} p
      * @return {Promise} Error and result with no throws
      */
     pledge(p) {
@@ -29,10 +30,21 @@ module.exports = {
     },
 
     /**
-     * Check if the given member has the given permissions
+     * Convert permission strings to a bitfield
+     * Fix for discord.js v14 because these people keep
+     * changing their fucking API and it pisses me off.
+     * @param {Array<String>} permissions
+     * @return {BigInt} Bitfield of permissions
+     */
+    permission_strings_to_bitfield(permissions) {
+        return permissions.map((permission) => 1n << BigInt(Constants.permissions.indexOf(permission))).reduce((prev, current) => prev | current);
+    },
+
+    /**
+     * Check if the given member has any of the given permissions
      * @param {GuildMember} member
-     * @param {Array<import('discord.js').PermissionResolvable>} permissions
-     * @return bool True if the member has permission
+     * @param {Array<String>} permissions
+     * @return {boolean} True if the member has permission
      */
     check_permissions(member, permissions) {
         if (permissions.length <= 0)
@@ -40,7 +52,8 @@ module.exports = {
         else if (permissions[0] === 'BOT_OWNER')
             return member.user.id === CONFIG.owner_id;
 
-        return member.permissions.any(permissions, true);
+        const bitfield = module.exports.permission_strings_to_bitfield(permissions);
+        return member.permissions.any(bitfield, true);
     },
 
     /**

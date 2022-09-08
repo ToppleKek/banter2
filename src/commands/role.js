@@ -4,7 +4,7 @@ const { pledge, command_error_if } = require('../utils/utils');
 
 module.exports.help = 'Toggle member roles';
 module.exports.usage = '#PREFIXrole <target> <role>';
-module.exports.required_permissions = ['MANAGE_MEMBERS'];
+module.exports.required_permissions = ['MANAGE_ROLES'];
 module.exports.args_list = {
     position_independent: false,
     args: [{
@@ -35,15 +35,11 @@ module.exports.main = async (bot, args, msg) => {
     if (target.roles.resolve(role.id) !== null) {
         [err] = await pledge(target.roles.remove(role));
         command_error_if(err, 'APIError');
-        console.log('2');
-
 
         msg.respond_info(`Removed **${role.name}** from **${target.user.tag}**`);
     } else {
         [err] = await pledge(target.roles.add(role));
         command_error_if(err, 'APIError');
-        console.log('3');
-
 
         msg.respond_info(`Added **${role.name}** to **${target.user.tag}**`);
     }

@@ -24,7 +24,7 @@ module.exports = {
     command_error_if(err, type) {
         if (Array.isArray(err) && err.length > 0)
             throw new CommandError(type, err.map((e) => e.toString()).join('\n'));
-        else if (err)
+        else if (!Array.isArray(err) && err)
             throw new CommandError(type, err.toString());
     },
 

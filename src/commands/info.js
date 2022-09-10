@@ -1,7 +1,7 @@
 const { Message } = require("discord.js");
 const Bot = require("../bot");
 const Logger = require("../logger");
-const Utils = require("../utils/utils");
+const { pledge, guilds_shared_with } = require("../utils/utils");
 
 module.exports.help = 'Get info about a user';
 module.exports.usage = '#PREFIXinfo <user>';
@@ -23,7 +23,11 @@ module.exports.args_list =  {
  */
 module.exports.main = async (bot, args, msg) => {
     const user = args.get('user') || msg.author;
-    const member = msg.guild.members.cache.get(user.id);
+    let [err, member] = await pledge(msg.guild.members.fetch(user.id));
+
+    if (err)
+        member = {};
+
     const default_client_status = {
         desktop: 'unknown',
         web: 'unknown',
@@ -45,12 +49,12 @@ module.exports.main = async (bot, args, msg) => {
             value: `<t:${Math.floor(user.createdTimestamp / 1000)}>`,
         }, {
             name: 'Joined Server At',
-            value: `<t:${Math.floor(member.joinedTimestamp / 1000)}>`,
+            value: `${member.joinedTimestamp ? `<t:${Math.floor(member.joinedTimestamp / 1000)}>` : 'N/A'}`,
         }, {
             name: 'Seen On',
-            value: Utils.guilds_shared_with(bot, user).map((guild) => guild.name).join('\n') || 'Nowhere',
+            value: guilds_shared_with(bot, user).map((guild) => guild.name).join('\n') || 'Nowhere',
         }],
-        color: member.roles.color,
+        color: member?.roles?.color,
     };
 
     msg.channel.send({embeds: [embed]});

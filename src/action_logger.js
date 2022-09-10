@@ -1,6 +1,8 @@
 const Logger = require('./logger');
+const CONFIG = require('../config.json');
 const Util = require('./utils/utils');
 const Diff = require('diff');
+const { pledge, generate_message_dump } = require('./utils/utils');
 
 const ActionLogger = {
     userUpdate(bot, old_user, new_user) {
@@ -279,8 +281,22 @@ const ActionLogger = {
         });
     },
 
-    // TODO: bulk delete logs
-    // messageDeleteBulk(bot, msgs) {}
+    async messageDeleteBulk(bot, msgs, channel) {
+        const bguild = bot.guilds.get(channel.guild.id);
+
+        const [err, file_path] = await pledge(generate_message_dump(msgs, channel));
+
+        if (err) {
+            Logger.error(err);
+            return;
+        }
+
+        bguild.log({
+            title: '📜❌ Messages deleted',
+            description: `In **#${channel.name}**\nView the log [here](${CONFIG.msg_log_base_url}/${file_path.replace('./', '')})`,
+            color: 0xFFFFFF
+        });
+    },
 
     async messageUpdate(bot, old_msg, new_msg) {
         const bguild = bot.guilds.get(new_msg.guild.id);

@@ -2,6 +2,8 @@ const { GuildMember } = require('discord.js');
 const CONFIG = require('../../config.json');
 const CommandError = require('../command_error');
 const Constants = require('../constants');
+const UUID = require('uuid');
+const fs = require('fs');
 
 module.exports = {
     /**
@@ -93,6 +95,34 @@ module.exports = {
      */
     guilds_shared_with(bot, user) {
         return bot.client.guilds.cache.filter((guild) => !!guild.members.resolve(user));
+    },
+
+    generate_message_dump(msgs, channel) {
+        const log_content = msgs.map((msg) => {
+            const embed_desc = msg?.embeds.map((embed) => JSON.stringify(embed));
+            return `[${msg.createdAt.toUTCString()}] ${msg.author.tag} - ${msg.content}${embed_desc?.length ? `<br>EMBEDS:<br>${embed_desc}` : ''}`;
+        });
+
+        log_content.push(`***Message log generated at ${new Date().toUTCString()} on guild ${channel.guild.name} in channel #${channel.name}.***`);
+        log_content.reverse();
+
+        const file_content = `<html><head><meta name="robots" content="noindex"></head><body style="font-family:monospace;font-size:14px;">${log_content.join('<br>')}</body></html>`;
+        const file_name = UUID.v4() + '.html';
+        const file_path = `${CONFIG.msg_log_dir}/${channel.guild.id}/${file_name}`;
+
+        return new Promise((resolve, reject) => {
+            fs.mkdir(`${CONFIG.msg_log_dir}/${channel.guild.id}`, { recursive: true }, (mkdir_err) => {
+                if (mkdir_err)
+                    reject(mkdir_err);
+
+                fs.writeFile(file_path, file_content, (write_err) => {
+                    if (write_err)
+                        reject(write_err);
+
+                    resolve(file_path);
+                });
+            })
+        });
     },
 
     parse_time(timestr) {

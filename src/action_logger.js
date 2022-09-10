@@ -336,9 +336,11 @@ const ActionLogger = {
             }
         }
 
+        const context_link = `https://discord.com/channels/${new_msg.guild.id}/${new_msg.channel.id}/${new_msg.id}`;
+
         bguild.log({
             title: '📜✏️ Message edited',
-            description: `By: **${new_msg.author.tag}** (${new_msg.author.id}) in **#${new_msg.channel.name}**`,
+            description: `By: **${new_msg.author.tag}** (${new_msg.author.id}) in **#${new_msg.channel.name}**\n[Jump to Context](${context_link})`,
             color: 0xFFFFFF,
             fields: [{
                 name: 'Old content',

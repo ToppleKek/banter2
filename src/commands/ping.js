@@ -4,7 +4,7 @@ const util = require('util');
 
 module.exports.help = 'Pong';
 module.exports.usage = '#PREFIXping';
-module.exports.required_permissions = [''];
+module.exports.required_permissions = [];
 module.exports.args_list = {
     position_independent: false,
     args: [],

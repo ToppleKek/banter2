@@ -5,7 +5,7 @@ const { pledge, guilds_shared_with } = require("../utils/utils");
 
 module.exports.help = 'Get info about a user';
 module.exports.usage = '#PREFIXinfo <user>';
-module.exports.required_permissions = [''];
+module.exports.required_permissions = [];
 module.exports.args_list =  {
     position_independent: false,
     args: [{

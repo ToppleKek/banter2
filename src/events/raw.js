@@ -4,7 +4,7 @@ const Https = require('https');
 const CommandUtils = require('../utils/command_utils');
 const CommandError = require("../command_error");
 const Logger = require('../logger');
-const { pledge } = require("../utils/utils");
+const { pledge, check_permissions } = require("../utils/utils");
 const MessageUtils = require("../utils/message_utils");
 
 const INTERACTION_MAP = require('../../interaction_map.json');
@@ -105,14 +105,54 @@ async function handle_slash_command(bot, data) {
 
 async function handle_message_command(bot, data) {
     data.respond = function (payload) { return interaction_respond(JSON.stringify(payload), this.id, this.token) };
-    const cmd = INTERACTION_MAP[data.data.id];
+    const cmd = bot.interactions[INTERACTION_MAP[data.data.id]];
 
-    if (!bot.interactions[cmd]) {
+    if (!cmd) {
         Logger.error(`Got interaction that is not loaded: id=${data.data.id} cmd=${cmd}`);
         return;
     }
 
-    const [err] = await pledge(bot.interactions[cmd].main(bot, data));
+    let err, guild, executor;
+    [err, guild] = await pledge(bot.client.guilds.fetch(data.guild_id));
+
+    if (err) {
+        Logger.error(err);
+        return;
+    }
+
+    [err, executor] = await pledge(guild.members.fetch(data.member.user.id));
+
+    if (err) {
+        Logger.error(err);
+        return;
+    }
+
+    if (!check_permissions(executor, cmd.required_permissions)) {
+        data.respond({
+            type: 4,
+            data: {
+                embeds: [{
+                    title: `Command Error`,
+                    fields: [{
+                        name: 'Type',
+                        value: 'Permission Error',
+                        inline: false
+                    }, {
+                        name: 'Details',
+                        value: `You must have ${cmd.required_permissions.join(' or ')} to execute this command`,
+                        inline: false
+                    }],
+                    color: 0xFF6640,
+                    timestamp: new Date().toISOString()
+                }],
+                flags: 1 << 6
+            }
+        });
+
+        return;
+    }
+
+    [err] = await pledge(cmd.main(bot, guild, executor, data));
 
     if (err instanceof CommandError) {
         data.respond({

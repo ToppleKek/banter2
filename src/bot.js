@@ -19,6 +19,7 @@ class Bot {
         this.error_channel = config.error_channel;
         this.commands      = {};
         this.events        = {};
+        this.interactions  = {};
         this.guilds        = new Map();
         this.stat_timer    = null;
 
@@ -84,7 +85,7 @@ class Bot {
         Logger.debug(__dirname);
         const command_files = fs.readdirSync(`${__dirname}/commands`);
 
-        for (let file of command_files) {
+        for (const file of command_files) {
             if (file.endsWith('.js')) {
                 this.commands[file.slice(0, -3)] = require(`${__dirname}/commands/${file}`);
                 Logger.info(`Loaded command file: ${file}`);
@@ -95,7 +96,7 @@ class Bot {
         Logger.info('Loading events...');
         const event_files = fs.readdirSync(`${__dirname}/events`);
 
-        for (let file of event_files) {
+        for (const file of event_files) {
             if (file.endsWith('.js')) {
                 const event = file.slice(0, -3);
                 this.events[event] = require(`${__dirname}/events/${file}`);
@@ -105,6 +106,16 @@ class Bot {
         }
 
         Logger.info('All events loaded');
+        Logger.info('Loading interactions...');
+        const interaction_files = fs.readdirSync(`${__dirname}/interactions`);
+
+        for (const file of interaction_files) {
+            if (file.endsWith('.js')) {
+                const interaction = file.slice(0, -3);
+                this.interactions[interaction] = require(`${__dirname}/interactions/${file}`);
+                Logger.info(`Loaded interaction file: ${file}`);
+            }
+        }
 
         // Setup custom guildMemberAdd for invite counting
         // This event will add a property to get what invite the user joined with

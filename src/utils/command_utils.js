@@ -224,5 +224,5 @@ module.exports = {
             else
                 Logger.error(`execute_command (async): error: ${err}\n${err.stack}`);
         });
-    }
+    },
 }

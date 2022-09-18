@@ -7,9 +7,14 @@ const Logger = require('../logger');
 const { pledge } = require("../utils/utils");
 const MessageUtils = require("../utils/message_utils");
 
+const INTERACTION_MAP = require('../../interaction_map.json');
+
 function main(event) {
-    if (event.t === 'INTERACTION_CREATE' && event.d.type === 2)
+    if (event.t === 'INTERACTION_CREATE' && event.d?.data?.type === 1)
         handle_slash_command(this, event.d);
+    else if (event.t === 'INTERACTION_CREATE' && event.d?.data?.type === 3)
+        handle_message_command(this, event.d);
+
 }
 
 function subscribe(guild, macro) {
@@ -98,8 +103,45 @@ async function handle_slash_command(bot, data) {
 
 }
 
+async function handle_message_command(bot, data) {
+    data.respond = function (payload) { return interaction_respond(JSON.stringify(payload), this.id, this.token) };
+    const cmd = INTERACTION_MAP[data.data.id];
+
+    if (!bot.interactions[cmd]) {
+        Logger.error(`Got interaction that is not loaded: id=${data.data.id} cmd=${cmd}`);
+        return;
+    }
+
+    const [err] = await pledge(bot.interactions[cmd].main(bot, data));
+
+    if (err instanceof CommandError) {
+        data.respond({
+            type: 4,
+            data: {
+                embeds: [{
+                    title: `Command Error`,
+                    fields: [{
+                        name: 'Type',
+                        value: err.type,
+                        inline: false
+                    }, {
+                        name: 'Details',
+                        value: err.msg,
+                        inline: false
+                    }],
+                    color: 0xFF6640,
+                    timestamp: new Date().toISOString()
+                }],
+                flags: 1 << 6
+            }
+        });
+    } else if (err)
+        Logger.error(err);
+}
+
 function interaction_respond(payload, id, token) {
     return new Promise((resolve, reject) => {
+        Logger.info(`Responding to interaction id=${id}`);
         const options = {
             method: "POST",
             headers: {

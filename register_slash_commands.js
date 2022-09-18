@@ -3,25 +3,69 @@ const fs = require('fs');
 const TOKEN = require('./config.json').token;
 const APPID = require('./config.json').appid;
 const TYPES = {
-    "word": 3,
-    "string": 3,
-    "number": 4,
-    "boolean": 5,
-    "user": 6,
-    "channel": 7,
-    "role": 8
+    'word': 3,
+    'string': 3,
+    'number': 4,
+    'boolean': 5,
+    'user': 6,
+    'channel': 7,
+    'role': 8
 };
 
 function sleep(t) {
     return new Promise((resolve) => setTimeout(resolve, t));
 }
 
+function post_registration(payload, options) {
+    return new Promise((resolve, reject) => {
+        let response_data = '';
+        const request = Https.request(`https://discord.com/api/v10/applications/${APPID}/guilds/585205338081460224/commands`, options, async (response) => {
+            console.log(`X-RateLimit-Remaining: ${response.headers['x-ratelimit-remaining']} X-RateLimit-Reset-After: ${response.headers['x-ratelimit-reset-after']}`);
+            if (response.headers['x-ratelimit-remaining'] === '0')
+                await sleep(Number.parseFloat(response.headers['x-ratelimit-reset-after']) * 1000);
+
+            response.on('data', (chunk) => {
+                response_data += chunk;
+            });
+
+            response.on('end', () => {
+                console.log(`Request end: ${response_data}`);
+                const json_data = JSON.parse(response_data);
+                resolve(json_data.id);
+            });
+        });
+
+        request.write(payload);
+        request.end();
+    });
+}
+
+function register_message_interaction(interaction) {
+    const payload = JSON.stringify({
+        type: 3,
+        name: interaction.name
+    });
+
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': payload.length,
+            'User-Agent': 'DiscordBot (https://github.com/ToppleKek/banter2)',
+            Authorization: `Bot ${TOKEN}`
+        }
+    };
+
+    return post_registration(payload, options);
+}
+
 function register_command(cmd) {
     const cmd_payload = {
+        type: 1,
         name: cmd.name,
         options: [],
         description: cmd.data.help,
-    }
+    };
 
     for (const arg of cmd.data.args_list.args) {
         cmd_payload.options.push({
@@ -44,44 +88,41 @@ function register_command(cmd) {
     const payload = JSON.stringify(cmd_payload);
 
     const options = {
-        method: "POST",
+        method: 'POST',
         headers: {
-            "Content-Type": "application/json",
-            "Content-Length": payload.length,
-            "User-Agent": "DiscordBot (https://github.com/ToppleKek/banter2)",
+            'Content-Type': 'application/json',
+            'Content-Length': payload.length,
+            'User-Agent': 'DiscordBot (https://github.com/ToppleKek/banter2)',
             Authorization: `Bot ${TOKEN}`
         }
     };
 
+    return post_registration(payload, options);
+}
 
-    return new Promise((resolve, reject) => {
-        let response_data = "";
-        const request = Https.request(`https://discord.com/api/v10/applications/${APPID}/guilds/585205338081460224/commands`, options, async (response) => {
-            console.log(`X-RateLimit-Remaining: ${response.headers['x-ratelimit-remaining']} X-RateLimit-Reset-After: ${response.headers['x-ratelimit-reset-after']}`);
-            if (response.headers['x-ratelimit-remaining'] === '0')
-                await sleep(Number.parseFloat(response.headers['x-ratelimit-reset-after']) * 1000);
+async function register_integrations() {
+    const interaction_map = {};
+    const interaction_files = fs.readdirSync('./src/interactions');
 
-            response.on('data', (chunk) => {
-                response_data += chunk;
-            });
+    for (const file of interaction_files) {
+        const interaction = require(`./src/interactions/${file}`);
 
-            response.on('end', () => {
-                console.log(`Request end: ${response_data}`);
-                const json_data = JSON.parse(response_data);
-                resolve(json_data.id);
-            });
-        });
+        if (interaction.type === 2) // User command
+            console.log('Interaction type not implemented'); // TODO: implement
+        else if (interaction.type === 3)
+            interaction_map[await register_message_interaction(interaction)] = file.slice(0, -3);
 
-        request.write(payload);
-        request.end();
-    });
+        console.log(`Registered interaction: ${file}`);
+    }
+
+    fs.writeFileSync('./interaction_map.json', JSON.stringify(interaction_map));
 }
 
 async function register_commands() {
     const command_map = {};
-    const command_files = fs.readdirSync(`./src/commands`);
+    const command_files = fs.readdirSync('./src/commands');
 
-    for (let file of command_files) {
+    for (const file of command_files) {
         if (file.endsWith('.js')) {
             const command = {
                 name: file.slice(0, -3),
@@ -96,4 +137,9 @@ async function register_commands() {
     fs.writeFileSync('./slash_command_map.json', JSON.stringify(command_map));
 }
 
-register_commands();
+async function main() {
+    await register_integrations();
+    await register_commands();
+}
+
+main();

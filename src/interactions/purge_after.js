@@ -11,9 +11,6 @@ module.exports.required_permissions = ['MANAGE_MESSAGES'];
  * @param {Object} interaction The interaction
  */
 module.exports.main = async (bot, guild, executor, interaction) => {
-    Logger.debug('Purge after this interaction:');
-    console.dir(interaction);
-
     let err, channel, msgs;
 
     [err, channel] = await pledge(guild.channels.fetch(interaction.channel_id));

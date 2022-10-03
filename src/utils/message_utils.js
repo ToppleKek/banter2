@@ -1,3 +1,5 @@
+const Logger = require("../logger");
+
 module.exports = {
     respond_info: function (msg, header) {
         this.channel.send({embeds: [{
@@ -8,6 +10,11 @@ module.exports = {
     },
 
     respond_command_error: function (type, msg) {
+        if (!type || !msg) {
+            Logger.error(`respond_command_error called with null parameters! type=${type} msg=${msg}`);
+            return;
+        }
+
         const fields = [{
             name: 'Type',
             value: type,

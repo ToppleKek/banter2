@@ -31,6 +31,39 @@ class Bot {
                 Logger.info('Connected to database');
             }
         });
+
+        SQLite3.Database.prototype.getp = function(sql, ...params) {
+            return new Promise((resolve, reject) => {
+                this.get(sql, ...params, (err, row) => {
+                    if (err)
+                        reject(err);
+
+                    resolve(row);
+                });
+            });
+        };
+
+        SQLite3.Database.prototype.allp = function(sql, ...params) {
+            return new Promise((resolve, reject) => {
+                this.all(sql, ...params, (err, rows) => {
+                    if (err)
+                        reject(err);
+
+                    resolve(rows);
+                });
+            });
+        };
+
+        SQLite3.Database.prototype.runp = function(sql, ...params) {
+            return new Promise((resolve, reject) => {
+                this.run(sql, ...params, (err) => {
+                    if (err)
+                        reject(err);
+
+                    resolve();
+                });
+            });
+        };
     }
 
     db_get_global(field) {

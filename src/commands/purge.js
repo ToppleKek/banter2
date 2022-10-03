@@ -25,4 +25,4 @@ module.exports.main = async (bot, args, msg) => {
     command_error_if(err, 'APIError');
 
     msg.respond_info(`Purged ${args.get('n')} messages.`);
-}
+};

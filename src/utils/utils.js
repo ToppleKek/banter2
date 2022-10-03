@@ -177,6 +177,13 @@ module.exports = {
         }
     },
 
+    elide(str, max_len) {
+        if (str.length > max_len)
+            return str.substr(0, max_len - 3) + '...';
+
+        return str;
+    }
+
     // mute(bot, member, time, reason = 'No reason provided') {
     //     if (time <= 0)
     //         time = 9999999; // TODO: highest possible timeout?

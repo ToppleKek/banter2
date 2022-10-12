@@ -54,7 +54,7 @@ module.exports.main = async (bot, args, msg) => {
             name: 'Seen On',
             value: guilds_shared_with(bot, user).map((guild) => guild.name).join('\n') || 'Nowhere',
         }],
-        color: member?.roles?.color,
+        color: member?.roles?.color?.color,
     };
 
     msg.channel.send({embeds: [embed]});

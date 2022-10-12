@@ -2,11 +2,11 @@ const Logger = require('./logger');
 const CONFIG = require('../config.json');
 const Util = require('./utils/utils');
 const Diff = require('diff');
-const { pledge, generate_message_dump } = require('./utils/utils');
+const { pledge, generate_message_dump, guilds_shared_with } = require('./utils/utils');
 
 const ActionLogger = {
-    userUpdate(bot, old_user, new_user) {
-        Util.guilds_shared_with(bot, new_user).each((guild) => {
+    async userUpdate(bot, old_user, new_user) {
+        (await guilds_shared_with(bot, new_user)).forEach((guild) => {
             const bguild = bot.guilds.get(guild.id);
             if (old_user.tag !== new_user.tag) {
                 bguild.log({

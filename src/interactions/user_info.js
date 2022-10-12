@@ -35,7 +35,7 @@ module.exports.main = async (bot, executor, target_member, interaction) => {
             value: `${target_member.joinedTimestamp ? `<t:${Math.floor(target_member.joinedTimestamp / 1000)}>` : 'N/A'}`,
         }, {
             name: 'Seen On',
-            value: elide(guilds_shared_with(bot, target_member.user).map((guild) => guild.name).join('\n'), 500) || 'Nowhere',
+            value: elide((await guilds_shared_with(bot, target_member.user)).map((guild) => guild.name).join('\n'), 500) || 'Nowhere',
         }],
         color: target_member?.roles?.color?.color,
     };

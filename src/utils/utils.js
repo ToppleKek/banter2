@@ -93,8 +93,13 @@ module.exports = {
      * @param {import('discord.js').User} user The user
      * @return {Array} An array of the guilds shared with the user
      */
-    guilds_shared_with(bot, user) {
-        return bot.client.guilds.cache.filter((guild) => !!guild.members.resolve(user));
+    async guilds_shared_with(bot, user) {
+        return (await Promise.all(bot.client.guilds.cache.map(async (guild) => {
+            const [err] = await module.exports.pledge(guild.members.fetch(user));
+
+            if (!err)
+                return guild;
+        }))).filter((guild) => !!guild);
     },
 
     generate_message_dump(msgs, channel) {

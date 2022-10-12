@@ -1,7 +1,7 @@
 const { Message } = require("discord.js");
 const Bot = require("../bot");
 const Logger = require("../logger");
-const { pledge, guilds_shared_with } = require("../utils/utils");
+const { pledge, guilds_shared_with, elide } = require("../utils/utils");
 
 module.exports.help = 'Get info about a user';
 module.exports.usage = '#PREFIXinfo <user>';
@@ -52,7 +52,7 @@ module.exports.main = async (bot, args, msg) => {
             value: `${member.joinedTimestamp ? `<t:${Math.floor(member.joinedTimestamp / 1000)}>` : 'N/A'}`,
         }, {
             name: 'Seen On',
-            value: guilds_shared_with(bot, user).map((guild) => guild.name).join('\n') || 'Nowhere',
+            value: elide((await guilds_shared_with(bot, user)).map((guild) => guild.name).join('\n'), 500) || 'Nowhere',
         }],
         color: member?.roles?.color?.color,
     };

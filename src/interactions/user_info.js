@@ -38,6 +38,9 @@ module.exports.main = async (bot, executor, target_member, interaction) => {
             value: elide((await guilds_shared_with(bot, target_member.user)).map((guild) => guild.name).join('\n'), 500) || 'Nowhere',
         }],
         color: target_member?.roles?.color?.color,
+        thumbnail: {
+            url: target_member.displayAvatarURL({ size: 4096, dynamic: true, format: 'png' })
+        }
     };
 
     interaction.respond({

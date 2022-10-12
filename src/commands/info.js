@@ -55,6 +55,9 @@ module.exports.main = async (bot, args, msg) => {
             value: elide((await guilds_shared_with(bot, user)).map((guild) => guild.name).join('\n'), 500) || 'Nowhere',
         }],
         color: member?.roles?.color?.color,
+        thumbnail: {
+            url: member.displayAvatarURL({ size: 4096, dynamic: true, format: 'png' })
+        }
     };
 
     msg.channel.send({embeds: [embed]});

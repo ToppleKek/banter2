@@ -8,21 +8,20 @@ module.exports.required_permissions = ['MANAGE_MESSAGES'];
 
 /**
  * @param {Bot} bot Bot object that called
+ * @param {import('discord.js').GuildMember} executor The member who executed this interaction
+ * @param {import('discord.js').Message} target_msg The message this interaction was executed on
  * @param {Object} interaction The interaction
  */
-module.exports.main = async (bot, guild, executor, interaction) => {
-    let err, channel, msgs;
+module.exports.main = async (bot, executor, target_msg, interaction) => {
+    let err, msgs;
 
-    [err, channel] = await pledge(guild.channels.fetch(interaction.channel_id));
-    command_error_if(err, 'APIError');
-
-    [err, msgs] = await pledge(channel.messages.fetch({ after: interaction.data.target_id }));
+    [err, msgs] = await pledge(target_msg.channel.messages.fetch({ after: interaction.data.target_id }));
     command_error_if(err, 'APIError');
 
     if (msgs.size === 0)
         throw new CommandError('ArgumentError', 'There are no messages after this one.');
 
-    [err] = await pledge(channel.bulkDelete(msgs));
+    [err] = await pledge(target_msg.channel.bulkDelete(msgs));
     command_error_if(err, 'APIError');
 
     interaction.respond({

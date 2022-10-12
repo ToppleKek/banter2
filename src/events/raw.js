@@ -12,9 +12,8 @@ const INTERACTION_MAP = require('../../interaction_map.json');
 function main(event) {
     if (event.t === 'INTERACTION_CREATE' && event.d?.data?.type === 1)
         handle_slash_command(this, event.d);
-    else if (event.t === 'INTERACTION_CREATE' && event.d?.data?.type === 3)
-        handle_message_command(this, event.d);
-
+    else if (event.t === 'INTERACTION_CREATE' && (event.d?.data?.type === 2 || event.d?.data?.type === 3))
+        handle_other_command(this, event.d, event.d);
 }
 
 function subscribe(guild, macro) {
@@ -103,7 +102,8 @@ async function handle_slash_command(bot, data) {
 
 }
 
-async function handle_message_command(bot, data) {
+async function handle_other_command(bot, data) {
+    // Allow the interaction's main function to respond to the interaction
     data.respond = function (payload) { return interaction_respond(JSON.stringify(payload), this.id, this.token) };
     const cmd = bot.interactions[INTERACTION_MAP[data.data.id]];
 
@@ -112,7 +112,7 @@ async function handle_message_command(bot, data) {
         return;
     }
 
-    let err, guild, executor;
+    let err, guild, executor, target_member, target_msg;
     [err, guild] = await pledge(bot.client.guilds.fetch(data.guild_id));
 
     if (err) {
@@ -152,7 +152,35 @@ async function handle_message_command(bot, data) {
         return;
     }
 
-    [err] = await pledge(cmd.main(bot, guild, executor, data));
+    // Fetch type-specific data and execute the interactions accordingly
+    if (data.data.type === 2) {
+        [err, target_member] = await pledge(guild.members.fetch(data.data.target_id));
+
+        if (err) {
+            Logger.error(err);
+            return;
+        }
+
+        [err] = await pledge(cmd.main(bot, executor, target_member, data));
+    } else if (data.data.type === 3) {
+        let context_channel;
+        [err, context_channel] = await pledge(guild.channels.fetch(data.channel_id));
+
+        if (err) {
+            Logger.error(err);
+            return;
+        }
+
+        [err, target_msg] = await pledge(context_channel.messages.fetch(data.data.target_id));
+
+        if (err) {
+            Logger.error(err);
+            return;
+        }
+
+        [err] = await pledge(cmd.main(bot, executor, target_msg, data));
+    }
+
 
     if (err instanceof CommandError) {
         data.respond({

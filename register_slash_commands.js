@@ -40,6 +40,25 @@ function post_registration(payload, options) {
     });
 }
 
+function register_other_interaction(interaction) {
+    const payload = JSON.stringify({
+        type: interaction.type,
+        name: interaction.name
+    });
+
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': payload.length,
+            'User-Agent': 'DiscordBot (https://github.com/ToppleKek/banter2)',
+            Authorization: `Bot ${TOKEN}`
+        }
+    };
+
+    return post_registration(payload, options);
+}
+
 function register_message_interaction(interaction) {
     const payload = JSON.stringify({
         type: 3,
@@ -100,17 +119,13 @@ function register_command(cmd) {
     return post_registration(payload, options);
 }
 
-async function register_integrations() {
+async function register_interactions() {
     const interaction_map = {};
     const interaction_files = fs.readdirSync('./src/interactions');
 
     for (const file of interaction_files) {
         const interaction = require(`./src/interactions/${file}`);
-
-        if (interaction.type === 2) // User command
-            console.log('Interaction type not implemented'); // TODO: implement
-        else if (interaction.type === 3)
-            interaction_map[await register_message_interaction(interaction)] = file.slice(0, -3);
+        interaction_map[await register_other_interaction(interaction)] = file.slice(0, -3);
 
         console.log(`Registered interaction: ${file}`);
     }

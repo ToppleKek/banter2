@@ -178,6 +178,9 @@ module.exports = {
     },
 
     elide(str, max_len) {
+        if (!str)
+            return;
+
         if (str.length > max_len)
             return str.substr(0, max_len - 3) + '...';
 

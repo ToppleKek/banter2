@@ -90,7 +90,7 @@ class Bot {
         });
     }
 
-    start() {
+    async start() {
         Discord.Message.prototype.respond_info = MessageUtils.respond_info;
         Discord.Message.prototype.respond_command_error = MessageUtils.respond_command_error;
         Discord.Message.prototype.respond_error = MessageUtils.respond_error;
@@ -186,6 +186,28 @@ class Bot {
 
         for (const event in ActionLogger)
             this.client.on(event, (...args) => ActionLogger[event](this, ...args));
+
+        Logger.info('Temp ban timer init...');
+
+        const temp_bans = await this.db.allp('SELECT * FROM temp_bans');
+        for (const temp_ban of temp_bans) {
+            const bguild = this.guilds.get(temp_ban.guild_id);
+
+            // Remove any stale temp bans at startup
+            if (temp_ban.start_timestamp + temp_ban.duration >= Date.now()) {
+                Logger.info(`Removing stale temp ban on guild ${temp_ban.guild_id} for user ${temp_ban.user_id}`);
+                bguild.remove_temp_ban(temp_ban.user_id);
+            }
+
+            const existing_ban = await bguild.dguild.bans.fetch(temp_ban.user_id).catch(() => {});
+
+            // User was manually unbanned
+            if (!existing_ban) {
+                Logger.info(`Removing obsolete temp ban on guild ${temp_ban.guild_id} for user ${temp_ban.user_id}`);
+                bguild.remove_temp_ban(temp_ban.user_id);
+            }
+
+        }
 
         this.client.login(this.token);
     }

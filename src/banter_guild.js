@@ -187,6 +187,40 @@ class BanterGuild {
         await mod_log_channel.send({embeds: [embed]});
     }
 
+    async temp_ban(member, author, duration, days, reason = 'No reason provided') {
+        if (!(await this.dguild.members.fetch(member).catch(() => {})))
+            throw new Error(`Member ${member.user.tag} is not in the guild ${this.id}`);
+
+        if (!member.bannable)
+            throw new Error(`Member ${member.user.tag} is not bannable`);
+
+        const existing_ban = this.bot.db.getp(
+            'SELECT * FROM temp_bans WHERE guild_id = ? AND user_id = ?',
+            this.id,
+            member.user.id
+        );
+
+        if (existing_ban)
+            throw new Error(`Member ${member.user.tag} is already temp banned`);
+
+        member.ban({ deleteMessageDays: days, reason });
+        this.bot.db.runp(
+            'INSERT INTO temp_bans (guild_id, user_id, author_id, duration, start_timestamp) VALUES (?, ?, ?, ?, ?)',
+            this.id,
+            member.user.id,
+            author.id,
+            duration,
+            Date.now()
+        );
+
+        setTimeout(this.remove_temp_ban(member.user.id), duration);
+    }
+
+    async remove_temp_ban(user_id) {
+        this.dguild.bans.remove(user_id, 'Remove temp ban');
+        this.bot.db.runp('DELETE FROM temp_bans WHERE guild_id = ? AND user_id = ?', this.id, user_id);
+    }
+
     async _get_array_backed_db_storage(key) {
         let [err, db_response] = await pledge(this.db_get(key));
 

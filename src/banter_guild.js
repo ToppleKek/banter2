@@ -187,37 +187,42 @@ class BanterGuild {
         await mod_log_channel.send({embeds: [embed]});
     }
 
-    async temp_ban(member, author, duration, days, reason = 'No reason provided') {
-        if (!(await this.dguild.members.fetch(member).catch(() => {})))
-            throw new Error(`Member ${member.user.tag} is not in the guild ${this.id}`);
+    async temp_ban(user, author, duration, days, reason = 'No reason provided') {
+        let member;
 
-        if (!member.bannable)
+        if ((member = (await this.dguild.members.fetch(user).catch(() => {}))) && !member.bannable)
             throw new Error(`Member ${member.user.tag} is not bannable`);
 
-        const existing_ban = this.bot.db.getp(
+        const existing_ban = await this.bot.db.getp(
             'SELECT * FROM temp_bans WHERE guild_id = ? AND user_id = ?',
             this.id,
-            member.user.id
+            user.id
         );
 
         if (existing_ban)
-            throw new Error(`Member ${member.user.tag} is already temp banned`);
+            throw new Error(`Member ${user.tag} is already temp banned`);
 
-        member.ban({ deleteMessageDays: days, reason });
+        this.dguild.bans.create(user, { deleteMessageDays: days, reason });
+
         this.bot.db.runp(
             'INSERT INTO temp_bans (guild_id, user_id, author_id, duration, start_timestamp) VALUES (?, ?, ?, ?, ?)',
             this.id,
-            member.user.id,
+            user.id,
             author.id,
             duration,
             Date.now()
         );
 
-        setTimeout(this.remove_temp_ban(member.user.id), duration);
+        this.bot.temp_ban_timers.set(`${this.id}:${user.id}`, setTimeout(() => this.remove_temp_ban(user.id), duration));
     }
 
     async remove_temp_ban(user_id) {
-        this.dguild.bans.remove(user_id, 'Remove temp ban');
+        const timer = this.bot.temp_ban_timers.get(`${this.id}:${user_id}`);
+
+        if (timer)
+            clearTimeout(timer);
+
+        await pledge(this.dguild.bans.remove(user_id, 'Remove temp ban'));
         this.bot.db.runp('DELETE FROM temp_bans WHERE guild_id = ? AND user_id = ?', this.id, user_id);
     }
 

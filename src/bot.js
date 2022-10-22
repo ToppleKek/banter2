@@ -12,16 +12,17 @@ const MessageUtils = require('./utils/message_utils');
  */
 class Bot {
     constructor(config) {
-        this.token         = config.token;
-        this.prefix        = config.prefix;
-        this.owner_id      = config.owner_id;
-        this.appid         = config.appid;
-        this.error_channel = config.error_channel;
-        this.commands      = {};
-        this.events        = {};
-        this.interactions  = {};
-        this.guilds        = new Map();
-        this.stat_timer    = null;
+        this.token           = config.token;
+        this.prefix          = config.prefix;
+        this.owner_id        = config.owner_id;
+        this.appid           = config.appid;
+        this.error_channel   = config.error_channel;
+        this.commands        = {};
+        this.events          = {};
+        this.interactions    = {};
+        this.guilds          = new Map();
+        this.stat_timer      = null;
+        this.temp_ban_timers = new Map();
 
         this.db = new SQLite3.Database(config.db_file, (err) => {
             if (err) {
@@ -112,6 +113,31 @@ class Bot {
             });
 
             Logger.info('done setting up servers');
+            Logger.info('Temp ban timer init...');
+
+            const temp_bans = await this.db.allp('SELECT * FROM temp_bans');
+            for (const temp_ban of temp_bans) {
+                const bguild = this.guilds.get(temp_ban.guild_id);
+
+                // Remove any stale temp bans at startup
+                if (temp_ban.start_timestamp + temp_ban.duration <= Date.now()) {
+                    Logger.info(`Removing stale temp ban on guild ${temp_ban.guild_id} for user ${temp_ban.user_id}`);
+                    bguild.remove_temp_ban(temp_ban.user_id);
+                }
+
+                const existing_ban = await bguild.dguild.bans.fetch(temp_ban.user_id).catch(() => {});
+
+                // User was manually unbanned
+                if (!existing_ban) {
+                    Logger.info(`Removing obsolete temp ban on guild ${temp_ban.guild_id} for user ${temp_ban.user_id}`);
+                    bguild.remove_temp_ban(temp_ban.user_id);
+                }
+
+                this.temp_ban_timers.set(
+                    `${temp_ban.guild_id}:${temp_ban.user_id}`,
+                    setTimeout(() => bguild.remove_temp_ban(temp_ban.user_id), temp_ban.duration - (Date.now() - temp_ban.start_timestamp))
+                );
+            }
         });
 
         Logger.info('Loading commands...');
@@ -186,28 +212,6 @@ class Bot {
 
         for (const event in ActionLogger)
             this.client.on(event, (...args) => ActionLogger[event](this, ...args));
-
-        Logger.info('Temp ban timer init...');
-
-        const temp_bans = await this.db.allp('SELECT * FROM temp_bans');
-        for (const temp_ban of temp_bans) {
-            const bguild = this.guilds.get(temp_ban.guild_id);
-
-            // Remove any stale temp bans at startup
-            if (temp_ban.start_timestamp + temp_ban.duration >= Date.now()) {
-                Logger.info(`Removing stale temp ban on guild ${temp_ban.guild_id} for user ${temp_ban.user_id}`);
-                bguild.remove_temp_ban(temp_ban.user_id);
-            }
-
-            const existing_ban = await bguild.dguild.bans.fetch(temp_ban.user_id).catch(() => {});
-
-            // User was manually unbanned
-            if (!existing_ban) {
-                Logger.info(`Removing obsolete temp ban on guild ${temp_ban.guild_id} for user ${temp_ban.user_id}`);
-                bguild.remove_temp_ban(temp_ban.user_id);
-            }
-
-        }
 
         this.client.login(this.token);
     }

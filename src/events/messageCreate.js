@@ -9,6 +9,9 @@ const subscribed_macros = [];
 const macro_errors = new Map();
 
 async function main(msg) {
+    if (msg.author.bot || !msg.guild)
+        return;
+
     try {
         await check_command(this, msg);
     } catch (err) {

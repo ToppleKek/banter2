@@ -5,6 +5,8 @@ const Validate = new Ajv({ allErrors: true }).compile(SCHEMA);
 const CONFIG = require('../config.json');
 const { pledge } = require('./utils/utils');
 
+const DEFAULT_CONFIG = JSON.parse(Buffer.from(CONFIG.default_config, 'base64').toString('binary'));
+
 class BanterGuild {
     constructor(bot, id) {
         this.dguild = bot.client.guilds.cache.get(id);
@@ -85,20 +87,15 @@ class BanterGuild {
             return;
         }
 
-        const load_default_config = function() {
-            const json = Buffer.from(CONFIG.default_config, 'base64').toString('binary');
-            return JSON.parse(json);
-        }
-
         if (!b64_config)
-            this._config = load_default_config();
+            this._config = DEFAULT_CONFIG;
         else {
             const json = Buffer.from(b64_config, 'base64').toString('binary');
             const config = JSON.parse(json);
 
             if (!Validate(config)) {
                 Logger.warn(`reload_config: config for server ${this.id} is invalid- defaults loaded`);
-                this._config = load_default_config();
+                this._config = DEFAULT_CONFIG;
             } else
                 this._config = config;
         }
@@ -116,10 +113,10 @@ class BanterGuild {
     }
 
     config_get(key) {
-        if (this._config[key] === undefined)
+        if (!this._config[key] && !DEFAULT_CONFIG[key])
             throw new Error(`Invalid key: ${key}`);
 
-        return this._config[key];
+        return this._config[key] ?? DEFAULT_CONFIG[key];
     }
 
     temp_storage() {

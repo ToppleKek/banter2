@@ -21,9 +21,16 @@ module.exports.args_list = {
  * @param {Message} msg Message Object
  */
 module.exports.main = async (bot, args, msg) => {
+    const bguild = bot.guilds.get(msg.guild.id);
+
+    if (bguild.config_get('logNoP')) {
+        msg.respond_error('This command is disabled in this channel.');
+        return;
+    }
+
     const [err] = await pledge(msg.channel.bulkDelete(args.get('n') + 1));
     command_error_if(err, 'APIError');
 
     msg.respond_info(`Purged ${args.get('n')} messages.`);
-    bot.guilds.get(msg.guild.id).mod_log(`purge ${args.get('n')} msgs`, msg.author, msg.channel.name);
+    bguild.mod_log(`purge ${args.get('n')} msgs`, msg.author, msg.channel.name);
 };

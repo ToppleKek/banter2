@@ -127,7 +127,7 @@ class BanterGuild {
         return this._invites;
     }
 
-    async log(embed_options) {
+    async log(embed_options, relog_id = null) {
         const [err, log_id] = await pledge(this.db_get('log'));
 
         if (err || !log_id) {
@@ -139,6 +139,26 @@ class BanterGuild {
 
         if (!log_channel)
             return;
+
+        if (relog_id) {
+            const [err, audit] = await pledge(this.dguild.fetchAuditLogs({ type: 72 })); // Type 72 = MessageDelete
+
+            if (err) {
+                Logger.error(err);
+                return;
+            }
+
+            const entry = audit.entries.find((a) => a.target.id === relog_id);
+
+            await log_channel.send({embeds: [{
+                title: `${entry?.executor?.tag ?? 'Someone'} tried to delete a log entry!`,
+                description: `Attempting to resend entry in next message`,
+                color: 0xFFAA00
+            }]});
+
+            await log_channel.send({embeds: [embed_options]});
+            return;
+        }
 
         const embed = { // TODO: what else is generic in logs?
             timestamp: new Date().toISOString(),

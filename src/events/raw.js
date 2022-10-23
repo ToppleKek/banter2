@@ -16,13 +16,6 @@ function main(event) {
         handle_other_command(this, event.d, event.d);
 }
 
-function subscribe(guild, macro) {
-    // subscribed_macros.push({
-    //     guild,
-    //     payload: macro
-    // });
-}
-
 async function handle_slash_command(bot, data) {
     const cmd_payload = {
         type: 4,

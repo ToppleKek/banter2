@@ -30,4 +30,5 @@ module.exports.main = async (bot, args, msg) => {
         throw new CommandError('SQLError', err.toString());
 
     msg.respond_info(`\`${role.name}\` is ${added ? 'now' : 'no longer'} a public role.`);
+    bguild.mod_log(`${added ? 'add' : 'remove'} pubrole`, msg.author, role.name, args.get('reason'));
 }

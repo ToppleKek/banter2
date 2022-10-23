@@ -84,6 +84,8 @@ module.exports.main = async (bot, args, msg) => {
     const do_mass_ban = async (progress_message) => {
         bguild.temp_storage().set('massnaenae_lock', true);
 
+        bot.guilds.get(msg.guild.id).mod_log('massnaenae (ban)', msg.author, `${members.size} members`, args.get('reason'));
+
         let i = 0;
         await Promise.all(members.map(async (member) => { // It is critical that this never throws, otherwise the lock will never be unlocked
             if (!member.bannable)

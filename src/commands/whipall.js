@@ -57,6 +57,8 @@ module.exports.main = async (bot, args, msg) => {
     const do_unban_all = async (progress_message) => {
         bguild.temp_storage().set('whipall_lock', true);
 
+        bot.guilds.get(msg.guild.id).mod_log('whipall (unban)', msg.author, `${bans.size} users`);
+
         let i = 0;
         await Promise.all(bans.map(async (ban) => { // It is critical that this never throws, otherwise the lock will never be unlocked
             const [err] = await pledge(msg.guild.bans.remove(ban.user));

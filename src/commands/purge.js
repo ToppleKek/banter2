@@ -25,4 +25,5 @@ module.exports.main = async (bot, args, msg) => {
     command_error_if(err, 'APIError');
 
     msg.respond_info(`Purged ${args.get('n')} messages.`);
+    bot.guilds.get(msg.guild.id).mod_log(`purge ${args.get('n')} msgs`, msg.author, msg.channel.name);
 };

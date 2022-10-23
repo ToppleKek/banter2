@@ -133,7 +133,7 @@ class BanterGuild {
     async log(embed_options) {
         const [err, log_id] = await pledge(this.db_get('log'));
 
-        if (err) {
+        if (err || !log_id) {
             // TODO: this can be changed back to a log once we insert new db rows for all servers
             return;
         }
@@ -154,7 +154,7 @@ class BanterGuild {
     async mod_log(action, mod, target, reason) {
         const [err, mod_log_id] = await pledge(this.db_get('modlog'));
 
-        if (err) {
+        if (err || !mod_log_id) {
             // TODO: this can be changed back to a log once we insert new db rows for all servers
             return;
         }
@@ -173,14 +173,17 @@ class BanterGuild {
             fields: [{
                 name: 'Action',
                 value: action,
+                inline: true
             }, {
                 name: 'Responsable Moderator',
                 value: mod.tag,
+                inline: true
             }, {
                 name: 'Target',
                 value: (typeof target) === 'string' ? target : target.tag,
+                inline: true
             }],
-            timstamp: Date.now(),
+            timestamp: new Date().toISOString(),
             color: 0x0084ff,
         };
 

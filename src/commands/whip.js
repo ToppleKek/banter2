@@ -41,6 +41,8 @@ module.exports.main = async (bot, args, msg) => {
 
     if (err)
         throw new CommandError('APIError', err.toString());
-    else
+    else {
         msg.channel.send({embeds:[e]});
+        bot.guilds.get(msg.guild.id).mod_log('whip (unban)', msg.author, target);
+    }
 };

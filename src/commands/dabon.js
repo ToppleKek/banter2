@@ -60,4 +60,6 @@ module.exports.main = async (bot, args, msg) => {
     member.kick(reason)
         .then(() => msg.channel.send({embeds: [kick_embed]}))
         .catch((err) => msg.respond_error(`API Error: \`\`\`${err}\`\`\``));
+
+    bot.guilds.get(msg.guild.id).mod_log('dabon (kick)', msg.author, member.user, args.get('reason'));
 };

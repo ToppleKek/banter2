@@ -166,6 +166,14 @@ module.exports = {
         return times.d * 86400 + times.h * 3600 + times.m * 60 + times.s;
     },
 
+    ms_to_hhmmss(ms) {
+        const h = Math.floor(ms / 1000 / 3600).toString();
+        const m = Math.floor(ms / 1000 % 3600 / 60).toString();
+        const s = Math.floor(ms / 1000 % 3600 % 60).toString();
+
+        return `${h.padStart(2, '0')}:${m.padStart(2, '0')}:${s.padStart(2, '0')}`;
+    },
+
     escape_markdown(str) {
         return str.replace(/\*|\~|_|\||\`/g, (match) => '\\' + match);
     },

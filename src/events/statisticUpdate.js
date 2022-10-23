@@ -26,7 +26,8 @@ async function main() {
         [err, stat_channels] = await pledge(bguild.get_stat_channels());
 
         if (err) {
-            Logger.error(err);
+            // Ignore this error, the channel is just not enabled
+            // Logger.error(err);
             continue;
         }
 

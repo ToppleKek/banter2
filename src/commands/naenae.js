@@ -82,4 +82,6 @@ module.exports.main = async (bot, args, msg) => {
     member.ban(opts)
         .then(() => msg.channel.send({embeds: [ban_embed]}))
         .catch((err) => msg.respond_error(`API Error: \`\`\`${err}\`\`\``));
+
+    bot.guilds.get(msg.guild.id).mod_log('naenae (ban)', msg.author, member.user, args.get('reason'));
 };

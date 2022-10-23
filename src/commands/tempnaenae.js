@@ -5,7 +5,7 @@ const { pledge, parse_time, command_error_if } = require('../utils/utils');
 
 module.exports.help = 'Temporarily ban a member from the guild';
 module.exports.usage = '#PREFIXtempnaenae <target> <length> <?days> <?reason>';
-module.exports.required_permissions = [];
+module.exports.required_permissions = ['BAN_MEMBERS'];
 module.exports.args_list = {
     position_independent: false,
     args: [{

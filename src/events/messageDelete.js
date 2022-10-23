@@ -6,6 +6,10 @@ function main(msg) {
 
 async function relog(bot, msg) {
     const bguild = bot.guilds.get(msg.guild.id);
+
+    if (!bguild.config_get('logNoD'))
+        return;
+
     const [err, log_id] = await pledge(bguild.db_get('log'));
 
     if (err || !log_id)

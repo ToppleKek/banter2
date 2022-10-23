@@ -216,13 +216,15 @@ class BanterGuild {
         this.bot.temp_ban_timers.set(`${this.id}:${user.id}`, setTimeout(() => this.remove_temp_ban(user.id), duration));
     }
 
-    async remove_temp_ban(user_id) {
+    async remove_temp_ban(user_id, api = true) {
         const timer = this.bot.temp_ban_timers.get(`${this.id}:${user_id}`);
 
         if (timer)
             clearTimeout(timer);
 
-        await pledge(this.dguild.bans.remove(user_id, 'Remove temp ban'));
+        if (api)
+            await pledge(this.dguild.bans.remove(user_id, 'Remove temp ban'));
+
         this.bot.db.runp('DELETE FROM temp_bans WHERE guild_id = ? AND user_id = ?', this.id, user_id);
     }
 

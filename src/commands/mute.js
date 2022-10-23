@@ -7,7 +7,7 @@ const { ms_to_hhmmss, pledge, command_error_if } = require("../utils/utils");
 
 module.exports.help = 'Mute a user';
 module.exports.usage = '#PREFIXmute <target> ?<time> ?<reason>';
-module.exports.required_permissions = ['MANAGE_ROLES'];
+module.exports.required_permissions = ['MODERATE_MEMBERS'];
 module.exports.args_list =  {
     position_independent: false,
     args: [{

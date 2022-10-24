@@ -4,6 +4,7 @@ const util = require('util');
 const CommandError = require("../command_error");
 const CommandUtils = require("../utils/command_utils");
 const Logger = require("../logger");
+const { pledge } = require("../utils/utils");
 
 async function main(msg) {
     if (msg.author.bot || !msg.guild)
@@ -19,11 +20,86 @@ async function main(msg) {
     }
 
     update_unique_authors(this, msg);
+    check_spam(this, msg);
 }
 
 async function update_unique_authors(bot, msg) {
     const bguild = bot.guilds.get(msg.guild.id);
     bguild.add_unique_author(msg.author.id);
+}
+
+async function check_spam(bot, msg) {
+    const bguild = bot.guilds.get(msg.guild.id);
+    const in_row = bguild.config_get('asMInRow');
+
+    if (in_row === 0)
+        return;
+
+    const cooldown_period = bguild.config_get('asCool');
+    const spam_data = bguild.temp_storage().get('spam_data');
+
+    if (!spam_data[msg.author.id]) {
+        spam_data[msg.author.id] = {
+            last_message_ts: Date.now(),
+            last_message_content: msg.content,
+            msg_count: 0
+        };
+    }
+
+    if (Date.now() - spam_data[msg.author.id].last_message_ts > cooldown_period * 1000) {
+        spam_data[msg.author.id] = {
+            last_message_ts: Date.now(),
+            last_message_content: msg.content,
+            msg_count: 0
+        };
+
+        return;
+    }
+
+    spam_data[msg.author.id].last_message_ts = Date.now();
+
+    // The user has posted the same message as last time we checked on them
+    if (spam_data[msg.author.id].last_message_content === msg.content)
+        ++spam_data[msg.author.id].msg_count;
+    else {
+        // Reset if this is a new message
+        spam_data[msg.author.id].last_message_content = msg.content;
+        spam_data[msg.author.id].msg_count = 0;
+    }
+
+    const reset = () => {
+        spam_data[msg.author.id] = {
+            last_message_ts: Date.now(),
+            last_message_content: msg.content,
+            msg_count: 0
+        };
+    };
+
+    // Punish
+    if (spam_data[msg.author.id].msg_count >= in_row) {
+        let err, member;
+        [err, member] = await pledge(msg.guild.members.fetch(msg.author.id));
+
+        if (err) {
+            Logger.error(err);
+            reset();
+            return;
+        }
+
+        reset();
+
+        const embed = {
+            title: 'Anti-spam Message',
+            description: `Possible spam detected for user: \`${msg.author.tag}\`. *Please contact a moderator to be unmuted.*`
+        };
+
+        [err] = await pledge(member.timeout(2399999999, 'Possible spam detected, user has been muted'));
+
+        if (err)
+            return;
+
+        await pledge(msg.channel.send({embeds: [embed]}));
+    }
 }
 
 /**

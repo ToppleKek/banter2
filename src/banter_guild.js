@@ -113,7 +113,7 @@ class BanterGuild {
     }
 
     config_get(key) {
-        if (!this._config[key] && !DEFAULT_CONFIG[key])
+        if (this._config[key] === undefined && DEFAULT_CONFIG[key] === undefined)
             throw new Error(`Invalid key: ${key}`);
 
         return this._config[key] ?? DEFAULT_CONFIG[key];

@@ -109,6 +109,7 @@ class Bot {
                 const b_guild = new BanterGuild(this, guild.id);
 
                 await b_guild._reload_config();
+                b_guild.temp_storage().set('spam_data', {});
                 this.guilds.set(guild.id, b_guild);
             });
 

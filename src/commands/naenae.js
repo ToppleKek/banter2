@@ -32,7 +32,7 @@ module.exports.main = async (bot, args, msg) => {
     const member = msg.guild.members.resolve(args.get('target'));
     const opts = {
         deleteMessageDays: args.get('days') ?? 7,
-        reason: `Ban issued by: ${msg.author.tag} - ` + args.get('reason') || `(no reason provided)`
+        reason: `Ban issued by: ${msg.author.tag} - ${args.get('reason') ?? '(no reason provided)'}`
     };
 
     if (!member) {

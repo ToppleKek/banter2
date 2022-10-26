@@ -1,6 +1,7 @@
-const { Message, MessageActionRow, MessageButton } = require('discord.js');
+const { Message, ButtonBuilder, ActionRowBuilder } = require('discord.js');
 const Bot = require('../bot');
 const CommandError = require('../command_error');
+const { BUTTON_DANGER, BUTTON_PRIMARY } = require('../constants');
 const Logger = require('../logger');
 const { pledge } = require('../utils/utils');
 
@@ -36,11 +37,9 @@ module.exports.main = async (bot, args, msg) => {
         return;
     }
 
-    const action_row = new MessageActionRow();
-    const yes_button = new MessageButton({label: 'Yes', style: 'DANGER', customId: 'yes_button'});
-    const no_button = new MessageButton({label: 'No', style: 'PRIMARY', customId: 'no_button'});
-
-    action_row.addComponents(yes_button, no_button);
+    const yes_button = ButtonBuilder.from({label: 'Yes', style: BUTTON_DANGER, customId: 'yes_button'});
+    const no_button = ButtonBuilder.from({label: 'No', style: BUTTON_PRIMARY, customId: 'no_button'});
+    const action_row = ActionRowBuilder.from({components: [yes_button, no_button]});
 
     const opts = {
         embeds: [{

@@ -41,3 +41,8 @@ module.exports.permissions = [
     'USE_EMBEDDED_ACTIVITIES',
     'MODERATE_MEMBERS'
 ];
+
+module.exports.BUTTON_DANGER = 4;
+module.exports.BUTTON_PRIMARY = 1;
+module.exports.BUTTON_SECONDARY = 2;
+module.exports.BUTTON_SUCCESS = 3;

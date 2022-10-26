@@ -153,7 +153,7 @@ async function register_commands() {
 }
 
 async function main() {
-    await register_integrations();
+    await register_interactions();
     await register_commands();
 }
 

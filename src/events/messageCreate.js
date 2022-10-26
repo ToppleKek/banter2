@@ -30,8 +30,8 @@ async function update_unique_authors(bot, msg) {
 
 async function check_spam(bot, msg) {
     const bguild = bot.guilds.get(msg.guild.id);
-    const in_row = bguild.config_get('asMInRow');
-    const pings_in_row = bguild.config_get('asPing');
+    let in_row = bguild.config_get('asMInRow');
+    let pings_in_row = bguild.config_get('asPing');
 
     if (in_row === 0 && pings_in_row == 0)
         return;
@@ -50,10 +50,8 @@ async function check_spam(bot, msg) {
     }
 
     if (Date.now() - spam_data[msg.author.id].last_message_ts > cooldown_period * 1000) {
-        spam_data[msg.author.id] = {
-            last_message_content: msg.content,
-            msg_count: 0
-        };
+        spam_data[msg.author.id].last_message_content = msg.content;
+        spam_data[msg.author.id].msg_count = 0;
 
         in_row = 0; // Disable anti-spam for the remainder of this function
     }
@@ -76,7 +74,8 @@ async function check_spam(bot, msg) {
     }
 
     // Add any member pings that were in the message to the total count
-    spam_data[msg.author.id].ping_msg_count += msg.mentions.members.size;
+    const num_pings = [...msg?.content.matchAll(/<@[0-9]{17,19}>/g)].length;
+    spam_data[msg.author.id].ping_msg_count += num_pings ?? 0;
 
     const reset = () => {
         spam_data[msg.author.id] = {

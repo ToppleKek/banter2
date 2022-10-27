@@ -28,5 +28,8 @@ module.exports.main = async (bot, args, msg) => {
     [err, file_path] = await pledge(generate_message_dump(msgs, msg.channel));
     command_error_if(err, 'InternalError');
 
-    msg.respond_info(`Archived ${msgs.size} messages. View the archive [here](${CONFIG.msg_log_base_url}/${file_path.replace('./', '')})`);
+    let file_name = file_path.split('/');
+    file_name = file_name[file_name.length - 1];
+
+    msg.respond_info(`Archived ${msgs.size} messages. View the archive [here](${CONFIG.msg_log_base_url}/${msg.guild.id}/${file_name})`);
 };

@@ -291,9 +291,12 @@ const ActionLogger = {
             return;
         }
 
+        let file_name = file_path.split('/');
+        file_name = file_name[file_name.length - 1];
+
         bguild.log({
             title: '📜❌ Messages deleted',
-            description: `In **#${channel.name}**\nView the log [here](${CONFIG.msg_log_base_url}/${file_path.replace('./', '')})`,
+            description: `In **#${channel.name}**\nView the log [here](${CONFIG.msg_log_base_url}/${channel.guild.id}/${file_name})`,
             color: 0xFFFFFF
         });
     },

@@ -13,7 +13,12 @@ module.exports.required_permissions = ['MANAGE_MESSAGES'];
  * @param {Object} interaction The interaction
  */
 module.exports.main = async (bot, executor, target_msg, interaction) => {
-    let err, msgs;
+    const bguild = bot.guilds.get(target_msg.guild.id);
+    let err, msgs, log_id;
+    [err, log_id] = await pledge(bguild.db_get('log'));
+
+    if (bguild.config_get('logNoP') && !err && log_id === target_msg.channel.id)
+        throw new CommandError('PermissionError', 'This command is disabled in this channel.');
 
     [err, msgs] = await pledge(target_msg.channel.messages.fetch({ after: interaction.data.target_id }));
     command_error_if(err, 'APIError');

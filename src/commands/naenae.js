@@ -15,7 +15,7 @@ module.exports.args_list = {
     optional_args: [{
         name: 'days',
         type: 'number',
-        description: 'The number of days worth of messages to delete (default=7)'
+        description: 'The number of days worth of messages to delete (default=0)'
     }, {
         name: 'reason',
         type: 'string',
@@ -31,7 +31,7 @@ module.exports.args_list = {
 module.exports.main = async (bot, args, msg) => {
     const member = msg.guild.members.resolve(args.get('target'));
     const opts = {
-        deleteMessageDays: args.get('days') ?? 7,
+        deleteMessageDays: args.get('days') ?? 0,
         reason: `Ban issued by: ${msg.author.tag} - ${args.get('reason') ?? '(no reason provided)'}`
     };
 

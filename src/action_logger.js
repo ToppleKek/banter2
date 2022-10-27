@@ -3,6 +3,7 @@ const CONFIG = require('../config.json');
 const Util = require('./utils/utils');
 const Diff = require('diff');
 const { pledge, generate_message_dump, guilds_shared_with } = require('./utils/utils');
+const { CHANNEL_STRINGS } = require('./constants');
 
 const ActionLogger = {
     async userUpdate(bot, old_user, new_user) {
@@ -109,7 +110,7 @@ const ActionLogger = {
                 value: channel.name
             }, {
                 name: 'Type',
-                value: channel.type
+                value: CHANNEL_STRINGS[channel.type]
             }]
         });
     },
@@ -128,7 +129,7 @@ const ActionLogger = {
                 value: channel.name
             }, {
                 name: 'Type',
-                value: channel.type
+                value: CHANNEL_STRINGS[channel.type]
             }]
         });
     },
@@ -145,7 +146,7 @@ const ActionLogger = {
                 color: 0xFFFFFF,
                 fields: [{
                     name: 'Type',
-                    value: new_channel.type
+                    value: CHANNEL_STRINGS[new_channel.type]
                 }, {
                     name: 'Name',
                     value: `${old_channel.name} --> ${new_channel.name}`
@@ -153,14 +154,14 @@ const ActionLogger = {
             });
         }
 
-        if (old_channel.position !== new_channel.position) {
+        if (old_channel.rawPosition !== new_channel.rawPosition) {
             bguild.log({
                 title: 'Channel updated',
                 description: `${new_channel.name} (${new_channel.id})`,
                 color: 0xFFFFFF,
                 fields: [{
                     name: 'Type',
-                    value: new_channel.type
+                    value: CHANNEL_STRINGS[new_channel.type]
                 }, {
                     name: 'Position',
                     value: `${old_channel.rawPosition} --> ${new_channel.rawPosition}`

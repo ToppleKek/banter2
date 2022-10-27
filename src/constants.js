@@ -46,3 +46,22 @@ module.exports.BUTTON_DANGER = 4;
 module.exports.BUTTON_PRIMARY = 1;
 module.exports.BUTTON_SECONDARY = 2;
 module.exports.BUTTON_SUCCESS = 3;
+
+module.exports.CHANNEL_STRINGS = [
+    'GUILD_TEXT',
+    'DM',
+    'GUILD_VOICE',
+    'GROUP_DM',
+    'GUILD_CATEGORY',
+    'GUILD_ANNOUNCEMENT',
+    'UNUSED',
+    'UNUSED',
+    'UNUSED',
+    'UNUSED',
+    'ANNOUNCEMENT_THREAD',
+    'PUBLIC_THREAD',
+    'PRIVATE_THREAD',
+    'GUILD_STAGE_VOICE',
+    'GUILD_DIRECTORY',
+    'GUILD_FORUM'
+];

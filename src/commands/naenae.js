@@ -13,13 +13,13 @@ module.exports.args_list = {
         description: 'The user to ban'
     }],
     optional_args: [{
-        name: 'days',
-        type: 'number',
-        description: 'The number of days worth of messages to delete (default=0)'
-    }, {
         name: 'reason',
         type: 'string',
         description: 'A reason for the ban'
+    }, {
+        name: 'days',
+        type: 'number',
+        description: 'The number of days worth of messages to delete (default=0)'
     }]
 };
 
@@ -72,7 +72,7 @@ module.exports.main = async (bot, args, msg) => {
     const dm_embed = {
         color: 1571692,
         title: `Get heckin naenaed from ${msg.guild.name}`,
-        description: `They banned you for \`${args.get('reason')}\``,
+        description: `They banned you for \`${args.get('reason') ?? 'No reason provided'}\``,
         timestamp: new Date().toISOString(),
     };
 

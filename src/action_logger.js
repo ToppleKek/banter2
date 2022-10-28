@@ -11,8 +11,12 @@ const ActionLogger = {
             const bguild = bot.guilds.get(guild.id);
             if (old_user.tag !== new_user.tag) {
                 bguild.log({
-                    title: 'User updated',
-                    description: `${old_user.tag} --> ${new_user.tag}`
+                    title: '👤User tag updated',
+                    description: `${old_user.tag} --> ${new_user.tag}`,
+                    color: 0xFFFFFF,
+                    thumbnail: {
+                        url: new_user.displayAvatarURL({ size: 2048, dynamic: true, format: 'png' })
+                    }
                 });
             }
         });
@@ -30,8 +34,14 @@ const ActionLogger = {
                 value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}>`
             }, {
                 name: 'Invite Used',
-                value: member.invite_code || 'Unknown',
+                value: member.invite_code ?? 'Unknown',
+            }, {
+                name: 'Inviter',
+                value: member?.inviter?.tag ?? '(Server discovery?)'
             }],
+            thumbnail: {
+                url: member.user.displayAvatarURL({ size: 2048, dynamic: true, format: 'png' })
+            }
         });
     },
 
@@ -39,9 +49,12 @@ const ActionLogger = {
         const bguild = bot.guilds.get(member.guild.id);
 
         bguild.log({
-            title: '❌ Member left',
+            title: '👤❌ Member left',
             description: `${member.user.tag} (${member.user.id})`,
             color: 0xFFFFFF,
+            thumbnail: {
+                url: member.user.displayAvatarURL({ size: 2048, dynamic: true, format: 'png' })
+            }
         });
     },
 
@@ -50,12 +63,15 @@ const ActionLogger = {
         ban = await ban.fetch();
 
         bguild.log({
-            title: '⛔ Member banned',
+            title: '👤⛔ Member banned',
             description: `${ban.user.tag} (${ban.user.id})`,
             fields: [{
                 name: 'Reason',
                 value: ban.reason || 'No reason provided'
             }],
+            thumbnail: {
+                url: ban.user.displayAvatarURL({ size: 2048, dynamic: true, format: 'png' })
+            },
             color: 0xBA211C
         });
     },
@@ -64,12 +80,15 @@ const ActionLogger = {
         const bguild = bot.guilds.get(ban.guild.id);
 
         bguild.log({
-            title: '✅ Member unbanned',
+            title: '👤☑️ Member unbanned',
             description: `${ban.user.tag} (${ban.user.id})`,
             fields: [{
                 name: 'Original Ban Reason',
                 value: ban.reason || 'No reason provided'
             }],
+            thumbnail: {
+                url: ban.user.displayAvatarURL({ size: 2048, dynamic: true, format: 'png' })
+            },
             color: 0xFFFFFF
         });
     },
@@ -79,8 +98,9 @@ const ActionLogger = {
 
         if (old_member.nickname !== new_member.nickname) {
             bguild.log({
-                title: 'Member nickname changed',
-                description: `${new_member.user.tag} (${new_member.id})\n\n${old_member.nickname} --> ${new_member.nickname}`
+                title: '👤 Member nickname changed',
+                description: `${new_member.user.tag} (${new_member.id})\n\n${old_member.nickname} --> ${new_member.nickname}`,
+                color: 0xFFFFFF,
             });
         }
 
@@ -90,8 +110,9 @@ const ActionLogger = {
 
         if (role_diff.size > 0) {
             bguild.log({
-                title: 'Member roles changed',
-                description: `${new_member.user.tag} (${new_member.id})\n\nOld: ${old_roles}\nNew:${new_roles}`
+                title: '👤🎭 Member roles changed',
+                description: `${new_member.user.tag} (${new_member.id})\n\nOld: ${old_roles}\nNew:${new_roles}`,
+                color: 0xFFFFFF
             });
         }
     },
@@ -103,7 +124,7 @@ const ActionLogger = {
         const bguild = bot.guilds.get(channel.guild.id);
 
         bguild.log({
-            title: '✅ Channel created',
+            title: '✅📔 Channel created',
             color: 0xFFFFFF,
             fields: [{
                 name: 'Name',
@@ -122,7 +143,7 @@ const ActionLogger = {
         const bguild = bot.guilds.get(channel.guild.id);
 
         bguild.log({
-            title: '❌ Channel deleted',
+            title: '❌📔 Channel deleted',
             color: 0xFFFFFF,
             fields: [{
                 name: 'Name',
@@ -141,7 +162,7 @@ const ActionLogger = {
         const bguild = bot.guilds.get(new_channel.guild.id);
         if (old_channel.name !== new_channel.name) {
             bguild.log({
-                title: 'Channel updated',
+                title: '📔 Channel updated',
                 description: `${new_channel.name} (${new_channel.id})`,
                 color: 0xFFFFFF,
                 fields: [{
@@ -156,7 +177,7 @@ const ActionLogger = {
 
         if (old_channel.rawPosition !== new_channel.rawPosition) {
             bguild.log({
-                title: 'Channel updated',
+                title: '📔 Channel updated',
                 description: `${new_channel.name} (${new_channel.id})`,
                 color: 0xFFFFFF,
                 fields: [{
@@ -297,7 +318,7 @@ const ActionLogger = {
 
         bguild.log({
             title: '📜❌ Messages deleted',
-            description: `In **#${channel.name}**\nView the log [here](${CONFIG.msg_log_base_url}/${channel.guild.id}/${file_name})`,
+            description: `In **#${channel.name}**\n\nView the log [here](${CONFIG.msg_log_base_url}/${channel.guild.id}/${file_name})`,
             color: 0xFFFFFF
         });
     },

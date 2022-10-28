@@ -59,7 +59,7 @@ async function reset_stats(bguild, stat_channels) {
         return;
     }
 
-    await edit_channels(bguild, stat_channels, `Users: ${bguild.dguild.memberCount} (0)`, `Communicators: 0 (-${unique_authors.length})`);
+    await edit_channels(bguild, stat_channels, `Users: ${bguild.dguild.memberCount} (0)`, `Active Today: 0 (-${unique_authors.length})`);
 }
 
 async function update_stats(bguild, stat_channels) {
@@ -83,7 +83,7 @@ async function update_stats(bguild, stat_channels) {
 
     await edit_channels(bguild, stat_channels,
         `Users: ${bguild.dguild.memberCount} (${member_count_change > 0 ? '+' : ''}${member_count_change})`,
-        `Communicators: ${unique_authors.length} (${unique_authors_change > 0 ? '+' : ''}${unique_authors_change})`
+        `Active Today: ${unique_authors.length} (${unique_authors_change > 0 ? '+' : ''}${unique_authors_change})`
     );
 }
 

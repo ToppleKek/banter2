@@ -130,7 +130,7 @@ async function edit_channels(bguild, stat_channels, total_users_text, unique_aut
     }
 }
 
-async function disable_stats(bot, bguild) {
+async function disable_stats(bguild) {
     const [err] = await pledge(bguild.set_stat_channels({ parent_channel: null, total_users_channel: null, unique_author_channel: null }));
 
     if (err)

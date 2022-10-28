@@ -56,7 +56,7 @@ module.exports.main = async (bot, args, msg) => {
         }],
         color: member?.roles?.color?.color,
         thumbnail: {
-            url: member.displayAvatarURL({ size: 4096, dynamic: true, format: 'png' })
+            url: member.user.displayAvatarURL({ size: 4096, dynamic: true, format: 'png' })
         }
     };
 

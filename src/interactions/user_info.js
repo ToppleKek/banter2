@@ -39,7 +39,7 @@ module.exports.main = async (bot, executor, target_member, interaction) => {
         }],
         color: target_member?.roles?.color?.color,
         thumbnail: {
-            url: target_member.displayAvatarURL({ size: 4096, dynamic: true, format: 'png' })
+            url: target_member.user.displayAvatarURL({ size: 4096, dynamic: true, format: 'png' })
         }
     };
 

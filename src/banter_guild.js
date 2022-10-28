@@ -184,7 +184,7 @@ class BanterGuild {
         const embed = {
             author: {
                 name: 'Moderator action taken',
-                iconURL: mod.avatarURL({ size: 2048, dynamic: true, format: 'png' }),
+                iconURL: mod.displayAvatarURL({ size: 2048, dynamic: true, format: 'png' }),
             },
             description: reason || 'N/A',
             fields: [{

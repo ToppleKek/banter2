@@ -103,7 +103,7 @@ module.exports.main = async (bot, args, msg) => {
                 title: `Note #${note_id} for \`${target.tag}\` at <t:${Math.floor(timestamp / 1000)}>`,
                 author: {
                     name: author.tag,
-                    iconURL: author.avatarURL({ size: 2048, dynamic: true, format: 'png' })
+                    iconURL: author.displayAvatarURL({ size: 2048, dynamic: true, format: 'png' })
                 },
                 description: elide(note.content, 1000),
                 timestamp: new Date(timestamp).toISOString()

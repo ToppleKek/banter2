@@ -25,7 +25,7 @@ module.exports.main = async (bot, args, msg) => {
     const embed = {
         title: `${user.username}#${user.discriminator}'s avatar`,
         image: {
-            url: user.avatarURL({ size: 4096, dynamic: true, format: 'png' })
+            url: user.displayAvatarURL({ size: 4096, dynamic: true, format: 'png' })
         }
     };
 

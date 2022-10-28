@@ -155,11 +155,23 @@ const ActionLogger = {
         });
     },
 
-    channelUpdate(bot, old_channel, new_channel) {
+    async channelUpdate(bot, old_channel, new_channel) {
         if (!new_channel.guild) // Ignore DM's
             return;
 
         const bguild = bot.guilds.get(new_channel.guild.id);
+        const [err, stat_channels_obj] = await pledge(bguild.get_stat_channels());
+
+        const stat_channels = [
+            stat_channels_obj.parent_channel,
+            stat_channels_obj.total_users_channel,
+            stat_channels_obj.unique_author_channel
+        ];
+
+        // Ignore the stat channel updates as it spams the log
+        if (!err && (stat_channels.includes(new_channel.id)))
+            return;
+
         if (old_channel.name !== new_channel.name) {
             bguild.log({
                 title: '📔 Channel updated',

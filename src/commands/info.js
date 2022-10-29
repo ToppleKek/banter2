@@ -26,7 +26,7 @@ module.exports.main = async (bot, args, msg) => {
     let [err, member] = await pledge(msg.guild.members.fetch(user.id));
 
     if (err)
-        member = {};
+        member = {user};
 
     const default_client_status = {
         desktop: 'unknown',

@@ -1,11 +1,9 @@
-const { Message } = require("discord.js");
-const util = require('util');
 const Https = require('https');
 const CommandUtils = require('../utils/command_utils');
-const CommandError = require("../command_error");
+const CommandError = require('../command_error');
 const Logger = require('../logger');
-const { pledge, check_permissions } = require("../utils/utils");
-const MessageUtils = require("../utils/message_utils");
+const { pledge, check_permissions } = require('../utils/utils');
+const MessageUtils = require('../utils/message_utils');
 
 const INTERACTION_MAP = require('../../interaction_map.json');
 
@@ -105,7 +103,7 @@ async function handle_other_command(bot, data) {
         return;
     }
 
-    let err, guild, executor, target_member, target_msg;
+    let err, guild, executor, target_member, target_msg, target_user;
     [err, guild] = await pledge(bot.client.guilds.fetch(data.guild_id));
 
     if (err) {
@@ -150,8 +148,8 @@ async function handle_other_command(bot, data) {
         [err, target_member] = await pledge(guild.members.fetch(data.data.target_id));
 
         if (err) {
-            Logger.error(err);
-            return;
+            [err, target_user] = await pledge(bot.client.users.fetch(data.data.target_id));
+            target_member = {user: target_user};
         }
 
         [err] = await pledge(cmd.main(bot, executor, target_member, data));
@@ -202,17 +200,23 @@ async function handle_other_command(bot, data) {
 
 function interaction_respond(payload, id, token) {
     return new Promise((resolve, reject) => {
+        // Escape all unicode characters
+        payload = payload.split('').map((char) =>
+            /[\u0080-\uFFFF]/g.test(char) ? `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}` : char
+        ).join('');
+
         Logger.info(`Responding to interaction id=${id}`);
+
         const options = {
-            method: "POST",
+            method: 'POST',
             headers: {
-                "Content-Type": "application/json",
-                "Content-Length": payload.length,
-                "User-Agent": "DiscordBot (https://github.com/ToppleKek/banter2)"
+                'Content-Type': 'application/json',
+                'Content-Length': payload.length,
+                'User-Agent': 'DiscordBot (https://github.com/ToppleKek/banter2)'
             }
         };
 
-        let response_data = "";
+        let response_data = '';
         const request = Https.request(`https://discord.com/api/v10/interactions/${id}/${token}/callback`, options, (response) => {
             response.on('data', (chunk) => {
                 response_data += chunk;

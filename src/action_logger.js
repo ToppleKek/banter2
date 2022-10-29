@@ -2,7 +2,7 @@ const Logger = require('./logger');
 const CONFIG = require('../config.json');
 const Util = require('./utils/utils');
 const Diff = require('diff');
-const { pledge, generate_message_dump, guilds_shared_with } = require('./utils/utils');
+const { pledge, generate_message_dump, guilds_shared_with, elide } = require('./utils/utils');
 const { CHANNEL_STRINGS } = require('./constants');
 
 const ActionLogger = {
@@ -313,7 +313,7 @@ const ActionLogger = {
             color: 0xFFFFFF,
             fields: [{
                 name: 'Content',
-                value: msg.content || '\\*\\*\\*Empty message***'
+                value: elide(msg.content, 1024) || '\\*\\*\\*Empty message***'
             }]
         });
     },
@@ -400,15 +400,15 @@ const ActionLogger = {
             color: 0xFFFFFF,
             fields: [{
                 name: 'Old content',
-                value: old_msg.content || '\\*\\*\\*Empty message***',
+                value: elide(old_msg.content, 1024) || '\\*\\*\\*Empty message***',
                 inline: true
             }, {
                 name: 'New content',
-                value: new_msg.content || '\\*\\*\\*Empty message***',
+                value: elide(new_msg.content, 1024) || '\\*\\*\\*Empty message***',
                 inline: true
             }, {
                 name: 'Diff',
-                value: diff_chunks.filter((chunk) => chunk !== '').join('') || '*No diff generated*',
+                value: elide(diff_chunks.filter((chunk) => chunk !== '').join(''), 1024) || '*No diff generated*',
             }]
         });
 

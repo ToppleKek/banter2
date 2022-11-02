@@ -1,7 +1,7 @@
 const { Message } = require('discord.js');
 const Bot = require('../bot');
 const CommandError = require('../command_error');
-const { pledge } = require('../utils/utils');
+const { pledge, command_error_if } = require('../utils/utils');
 
 module.exports.help = 'Role yourself';
 module.exports.usage = '#PREFIXpubrole <pubrole>';
@@ -30,7 +30,18 @@ module.exports.main = async (bot, args, msg) => {
         throw new CommandError('UnknownError', err.toString());
 
     if (!pubrole) {
-        const human_roles = (await Promise.all(pubroles.map(async (p) => await msg.guild.roles.fetch(p)))).map((p) => p.name);
+        const [err, fetched_pubroles] = await pledge(Promise.all(pubroles.map(async (p) => ({role: await msg.guild.roles.fetch(p), id: p}))));
+        command_error_if(err, 'APIError');
+
+        const human_roles = fetched_pubroles.map((p) => {
+            if (!p.role) {
+                bguild.toggle_pub_role(p.id);
+                return null;
+            }
+
+            return p.role.name;
+        }).filter((p) => p !== null);
+
         msg.respond_info(`${human_roles.join('\n') || '**None.**'}`, `Public roles for ${msg.guild.name}`);
         return;
     }

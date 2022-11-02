@@ -181,7 +181,7 @@ class Bot {
         // This event will add a property to get what invite the user joined with
         this.client.on('guildMemberAdd', async (member) => {
             const bguild = this.guilds.get(member.guild.id);
-            const guild_invites = await member.guild.invites.fetch();
+            const guild_invites = await member.guild.invites.fetch().catch(Logger.warn);
 
             for (const [code, invite] of guild_invites.entries()) {
                 // Check if the number of uses for this invite changed.

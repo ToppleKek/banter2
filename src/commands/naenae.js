@@ -50,6 +50,7 @@ module.exports.main = async (bot, args, msg) => {
             .then(() => msg.channel.send({embeds:[ban_embed]}))
             .catch((err) => msg.respond_error(`API Error: \`\`\`${err}\`\`\``));
 
+        bot.guilds.get(msg.guild.id).mod_log('hacknaenae (ban)', msg.author, args.get('target'), args.get('reason'));
         return;
     }
 

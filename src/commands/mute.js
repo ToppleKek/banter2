@@ -15,7 +15,7 @@ module.exports.args_list =  {
     }],
     optional_args: [{
         name: 'time',
-        type: 'string',
+        type: 'word',
         description: 'Time to mute'
     }, {
         name: 'reason',

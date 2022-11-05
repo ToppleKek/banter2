@@ -56,7 +56,9 @@ async function check_spam(bot, msg) {
         in_row = 0; // Disable anti-spam for the remainder of this function
     }
 
-    if (Date.now() - spam_data[msg.author.id].last_message_ts > ping_cooldown_period * 1000) {
+    const num_pings = [...msg?.content.matchAll(/<@[0-9]{17,19}>/g)].length;
+
+    if (Date.now() - spam_data[msg.author.id].last_message_ts > ping_cooldown_period * 1000 && num_pings < pings_in_row) {
         spam_data[msg.author.id].ping_msg_count = 0;
 
         pings_in_row = 0; // Disable anti-ping-spam for the remainder of this function
@@ -74,7 +76,6 @@ async function check_spam(bot, msg) {
     }
 
     // Add any member pings that were in the message to the total count
-    const num_pings = [...msg?.content.matchAll(/<@[0-9]{17,19}>/g)].length;
     spam_data[msg.author.id].ping_msg_count += num_pings ?? 0;
 
     const reset = () => {

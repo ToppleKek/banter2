@@ -143,8 +143,8 @@ module.exports = {
                     args.set(command.args_list.args[j].name, String(tokens[i++].value));
                 else if (command.args_list.args[j].type === tokens[i].type)
                     args.set(command.args_list.args[j].name, tokens[i++].value);
-                else if (command.args_list.args[j].type === 'word' && tokens[i].type === 'string') {
-                    const words = tokens[i].value.split(' ');
+                else if (command.args_list.args[j].type === 'word' && tokens[i].type === 'string' || tokens[i].type === 'number') {
+                    const words = tokens[i].value.toString().split(' ');
 
                     args.set(command.args_list.args[j].name, words[0]);
                     words.splice(0, 1);
@@ -184,8 +184,8 @@ module.exports = {
                     optional_args.set(command.args_list.optional_args[j].name, module.exports.join_token_string(i++, tokens));
                 else if (command.args_list.optional_args[j].type === tokens[i].type)
                     optional_args.set(command.args_list.optional_args[j].name, tokens[i++].value);
-                else if (command.args_list.optional_args[j].type === 'word' && tokens[i].type === 'string') {
-                    const words = tokens[i].value.split(' ');
+                else if (command.args_list.optional_args[j].type === 'word' && tokens[i].type === 'string' || tokens[i].type === 'number') {
+                    const words = tokens[i].value.toString().split(' ');
 
                     optional_args.set(command.args_list.optional_args[j].name, words[0]);
                     words.splice(0, 1);

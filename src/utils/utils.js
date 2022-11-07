@@ -161,7 +161,7 @@ module.exports = {
         }
 
         if (number_buf !== '')
-            return Number.parseInt(number_buf);
+            return Number.parseInt(number_buf * 60);
 
         return times.d * 86400 + times.h * 3600 + times.m * 60 + times.s;
     },

@@ -36,6 +36,19 @@ async function check_spam(bot, msg) {
     if (in_row === 0 && pings_in_row == 0)
         return;
 
+    let err, member, whitelisted_roles;
+    [err, member] = await pledge(msg.guild.members.fetch(msg.author));
+
+    if (!err && member) {
+        [err, whitelisted_roles] = await pledge(bguild.get_whitelisted('antiSpam'));
+        if (whitelisted_roles.some((whitelisted_role) => !!member.roles.resolve(whitelisted_role)))
+            in_row = 0;
+
+        [err, whitelisted_roles] = await pledge(bguild.get_whitelisted('antiPing'));
+        if (whitelisted_roles.some((whitelisted_role) => !!member.roles.resolve(whitelisted_role)))
+            pings_in_row = 0;
+    }
+
     const cooldown_period = bguild.config_get('asCool');
     const ping_cooldown_period = bguild.config_get('asPCool');
     const spam_data = bguild.temp_storage().get('spam_data');

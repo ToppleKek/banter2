@@ -353,6 +353,67 @@ class BanterGuild {
     async remove_unique_author(user) {
         return this._remove_array_backed_db_storage('unique_authors', user);
     }
+
+    async get_whitelisted(action) {
+        let [err, db_response] = await pledge(this.db_get('whitelist'));
+
+        if (!db_response)
+            db_response = '{}';
+
+        const whitelist_rules = JSON.parse(db_response);
+        return Object.keys(whitelist_rules).filter((id) => whitelist_rules[id][action]);
+    }
+
+    async get_whitelist_rules(id) {
+        let [err, db_response] = await pledge(this.db_get('whitelist'));
+
+        if (!db_response)
+            db_response = '{}';
+
+        const whitelist_rules = JSON.parse(db_response);
+        return whitelist_rules[id] ?? { logAntiDelete: false, antiPing: false, antiSpam: false };
+    }
+
+    async whitelist_add(id, action) {
+        let [err, db_response] = await pledge(this.db_get('whitelist'));
+
+        if (!db_response)
+            db_response = '{}';
+
+        const whitelist_rules = JSON.parse(db_response);
+
+        if (!whitelist_rules[id])
+            whitelist_rules[id] = { logAntiDelete: false, antiPing: false, antiSpam: false };
+
+        if (whitelist_rules[id][action])
+            return false;
+
+
+        whitelist_rules[id][action] = true;
+
+        await this.db_set('whitelist', JSON.stringify(whitelist_rules));
+        return true;
+    }
+
+    async whitelist_remove(id, action) {
+        let [err, db_response] = await pledge(this.db_get('whitelist'));
+
+        if (!db_response)
+            db_response = '{}';
+
+        const whitelist_rules = JSON.parse(db_response);
+
+        if (!whitelist_rules[id])
+            whitelist_rules[id] = { logAntiDelete: false, antiPing: false, antiSpam: false };
+
+        if (!whitelist_rules[id][action])
+            return false;
+
+        whitelist_rules[id][action] = false;
+
+        await this.db_set('whitelist', JSON.stringify(whitelist_rules));
+        return true;
+    }
 }
 
 module.exports = BanterGuild;

@@ -3,8 +3,8 @@ const Bot = require("../bot");
 const Logger = require("../logger");
 const { pledge, command_error_if } = require("../utils/utils");
 
-module.exports.help = 'Get info about a user';
-module.exports.usage = '#PREFIXinfo <user>';
+module.exports.help = 'Load a config string from the web editor';
+module.exports.usage = '#PREFIXloadcfg <config>';
 module.exports.required_permissions = ['ADMINISTRATOR'];
 module.exports.args_list =  {
     position_independent: false,

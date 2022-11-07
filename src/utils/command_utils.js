@@ -31,9 +31,9 @@ module.exports = {
         } else if (new RegExp(/^<@!?[0-9]{17,19}>$/g).test(buf)) // USER MENTION
             return { type: 'user', value: await bot.client.users.fetch(buf.replace(/<|@|!|>/g, '')).catch(Logger.debug) };
         else if (new RegExp(/^<#[0-9]{17,19}>$/g).test(buf)) // CHANNEL MENTION
-            return { type: 'channel', value: bot.client.channels.fetch(buf.replace(/<|#|>/g, '')).catch(Logger.debug) };
+            return { type: 'channel', value: await bot.client.channels.fetch(buf.replace(/<|#|>/g, '')).catch(Logger.debug) };
         else if (new RegExp(/^<@&[0-9]{17,19}>$/g).test(buf)) // ROLE MENTION
-            return { type: 'role', value: msg.guild.roles.fetch(buf.replace(/<|@|&|>/g, '')).catch(Logger.debug) };
+            return { type: 'role', value: await msg.guild.roles.fetch(buf.replace(/<|@|&|>/g, '')).catch(Logger.debug) };
         else if ((num = Number.parseFloat(buf)) == buf)
             return { type: 'number', value: num };
         else

@@ -57,7 +57,7 @@ module.exports.main = async (bot, args, msg) => {
         // HACK: If the time string is invalid, then they **most likely** want an indefinite mute with reason
         if (!time) {
             reason = args.get('time') + (args.get('reason') != null ? ` ${args.get('reason')}` : '');
-            indefinite_mute();
+            await indefinite_mute();
         } else {
             const [err] = await pledge(member.timeout(time * 1000, `Timed mute issued by: ${msg.author.tag} - ${reason}`));
             command_error_if(err, 'APIError');
@@ -66,5 +66,5 @@ module.exports.main = async (bot, args, msg) => {
             msg.respond_info(`Muted ${member.user.tag} for ${ms_to_hhmmss(time * 1000)} - \`${reason}\``);
         }
     } else
-        indefinite_mute();
+        await indefinite_mute();
 }

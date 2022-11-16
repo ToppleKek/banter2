@@ -5,6 +5,7 @@ const fs = require('fs');
 const BanterGuild = require('./banter_guild');
 const ActionLogger = require('./action_logger');
 const MessageUtils = require('./utils/message_utils');
+const { pledge } = require('./utils/utils');
 
 /**
  * @type {Bot}

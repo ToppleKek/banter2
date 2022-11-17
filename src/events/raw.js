@@ -15,6 +15,22 @@ function main(event) {
 }
 
 async function handle_slash_command(bot, data) {
+    if (!data.member) {
+        const cmd_payload = {
+            type: 4,
+            data: {
+                embeds: [{
+                    description: `Slash commands are not supported in DM channels`,
+                    color: 0xff6640
+                }]
+            }
+        };
+
+        const payload = JSON.stringify(cmd_payload);
+        await pledge(interaction_respond(payload, data.id, data.token));
+        return;
+    }
+
     const cmd_payload = {
         type: 4,
         data: {

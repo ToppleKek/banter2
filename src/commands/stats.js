@@ -47,7 +47,7 @@ module.exports.main = async (bot, args, msg) => {
     if (['parent_channel', 'total_users_channel', 'unique_author_channel'].every((c) => stat_channels[c] === null)) {
         const permissionOverwrites = [{
             id: msg.guild.roles.everyone.id,
-            deny: PermissionsBitField.Flags.CONNECT
+            deny: PermissionsBitField.Flags.Connect
         }];
 
         [err, parent_channel] = await pledge(msg.guild.channels.create({name: 'Server Statistics', type: GUILD_CATEGORY}));

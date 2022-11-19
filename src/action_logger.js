@@ -411,7 +411,39 @@ const ActionLogger = {
                 value: elide(diff_chunks.filter((chunk) => chunk !== '').join(''), 1024) || '*No diff generated*',
             }]
         });
+    },
 
+    async voiceStateUpdate(bot, old_state, new_state) {
+        const bguild = bot.guilds.get(new_state.guild.id);
+        const fields = [];
+
+        if (old_state.channelId !== new_state.channelId) {
+            fields.push({
+                name: 'Channel',
+                value: `${old_state.channel?.name || '(none)'} -> ${new_state.channel?.name || '(none)'}`
+            });
+        }
+
+        const voice_flags = ['selfDeaf', 'selfMute', 'selfVideo', 'serverDeaf', 'serverMute', 'streaming'].map((flag) => {
+            if (old_state[flag] !== new_state[flag] && old_state[flag] !== null)
+                return `${flag}: **${old_state[flag]}** -> **${new_state[flag]}**`;
+
+            return null;
+        }).filter((e) => e !== null);
+
+        if (voice_flags.length > 0) {
+            fields.push({
+                name: 'Voice Flags',
+                value: voice_flags.join('\n')
+            });
+        }
+
+        bguild.log({
+            title: '🗣️ Member voice state updated',
+            description: `**${new_state.member.user.tag}** (${new_state.member.user.id})`,
+            color: 0xFFFFFF,
+            fields
+        });
     }
 };
 

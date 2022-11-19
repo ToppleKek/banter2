@@ -19,13 +19,14 @@ module.exports.args_list = {
         type: 'word',
         description: 'One of add/remove/remove_mine/view/page'
     }, {
+        name: 'n',
+        type: 'number',
+        description: 'A note id or page number, if required',
+        suppress_warnings: true
+    }, {
         name: 'content',
         type: 'string',
         description: 'The note content, if required'
-    }, {
-        name: 'n',
-        type: 'number',
-        description: 'A note id or page number, if required'
     }]
 };
 

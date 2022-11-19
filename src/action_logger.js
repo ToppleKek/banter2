@@ -11,7 +11,7 @@ const ActionLogger = {
             const bguild = bot.guilds.get(guild.id);
             if (old_user.tag !== new_user.tag) {
                 bguild.log({
-                    title: '👤User tag updated',
+                    title: '👤 User tag updated',
                     description: `${old_user.tag} --> ${new_user.tag}`,
                     color: 0xFFFFFF,
                     thumbnail: {

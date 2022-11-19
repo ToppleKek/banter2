@@ -201,6 +201,12 @@ module.exports = {
                     const new_token = module.exports._try_cast(bot, msg, command.args_list.optional_args[j].type, tokens[i].value);
 
                     if (new_token.type === 'failed_cast') {
+                        // HACK: Don't show warnings if the command requests it
+                        // I think the arg parser works well enough, but this is just a problem with trying to parse args with
+                        // optional quotes, no names, etc. just trying to go from context hints. So this should suppress some pointless warnings
+                        if (command.args_list.optional_args[j].suppress_warnings)
+                            continue;
+
                         msg.channel.send({embeds: [{
                             description: `Warning: Attempted implicit cast for argument \`${command.args_list.optional_args[j].name}\` ` +
                                          `from "${new_token.value}" (\`string\`) -> \`${command.args_list.optional_args[j].type}\` failed.`

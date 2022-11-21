@@ -206,7 +206,7 @@ async function run_binds(bot, msg) {
     const attachments = msg.attachments.map((a) => a.url).join('\n');
     const content = `${elide(msg.content, 1999 - attachments.length) ?? ''}\n${attachments}`;
 
-    [err] = await pledge(webhook.send({
+    [err, bot_msg] = await pledge(webhook.send({
         username: msg.author.username,
         avatarURL: msg.author.displayAvatarURL({ size: 2048, dynamic: true, format: 'png' }),
         content
@@ -216,6 +216,8 @@ async function run_binds(bot, msg) {
         Logger.error(err);
         return;
     }
+
+    bguild.channel_bind_messages.set(msg.id, {bot_msg_id: bot_msg.id, webhook_id});
 };
 
 module.exports.main = main;

@@ -14,6 +14,7 @@ class BanterGuild {
         this.bot = bot;
         this.db = bot.db;
         this.channel_bindings = new Map();
+        this.channel_bind_messages = new Map();
         this._temp_storage = new Map();
         this._config = {};
         this._invites = new Map();
@@ -385,7 +386,8 @@ class BanterGuild {
 
     async add_channel_bind(channel_id, webhook_id) {
         await this._remove_dead_channel_binds();
-        const ret = await this._add_array_backed_db_storage('channel_bindings', {from: channel_id, to: webhook_id}, (b) => b.from === channel_id);
+        const bind = {from: channel_id, to: webhook_id};
+        const ret = await this._add_array_backed_db_storage('channel_bindings', bind, (b) => b.from === channel_id);
 
         if (ret)
             this.channel_bindings.set(channel_id, webhook_id);
@@ -402,7 +404,6 @@ class BanterGuild {
             await pledge(webhook.delete());
 
         const ret = await this._remove_array_backed_db_storage('channel_bindings', channel_id, (b) => b.from === channel_id);
-        console.log({ret});
         if (ret)
             this.channel_bindings.delete(channel_id);
 

@@ -1,7 +1,9 @@
+const Logger = require("../logger");
 const { pledge } = require("../utils/utils");
 
 function main(msg) {
     relog(this, msg);
+    run_binds(this, msg);
 }
 
 async function relog(bot, msg) {
@@ -17,6 +19,28 @@ async function relog(bot, msg) {
 
     if (msg.channel.id === log_id && msg.author.id === bot.client.user.id)
         bguild.log(msg.embeds[0], msg.author.id);
+}
+
+async function run_binds(bot, msg) {
+    const bguild = bot.guilds.get(msg.guild.id);
+    const bind_msg = bguild.channel_bind_messages.get(msg.id);
+
+    if (!bind_msg)
+        return;
+
+    const { bot_msg_id, webhook_id } = bind_msg;
+
+    if (!bot_msg_id || !webhook_id)
+        return;
+
+    try {
+        const webhook = await bot.client.fetchWebhook(webhook_id);
+        await webhook.deleteMessage(bot_msg_id);
+    } catch (err) {
+        Logger.error(err);
+    } finally {
+        bguild.channel_bind_messages.delete(msg.id);
+    }
 }
 
 module.exports.main = main;

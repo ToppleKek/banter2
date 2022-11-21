@@ -22,7 +22,8 @@ async function run_binds(bot, msg) {
         await webhook.editMessage(bot_msg_id, {
             username: msg.author.username,
             avatarURL: msg.author.displayAvatarURL({ size: 2048, dynamic: true, format: 'png' }),
-            content
+            content,
+            allowedMentions: {users:[]}
         });
     } catch (err) {
         Logger.error(err);

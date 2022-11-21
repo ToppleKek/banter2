@@ -209,7 +209,8 @@ async function run_binds(bot, msg) {
     [err, bot_msg] = await pledge(webhook.send({
         username: msg.author.username,
         avatarURL: msg.author.displayAvatarURL({ size: 2048, dynamic: true, format: 'png' }),
-        content
+        content,
+        allowedMentions: {users:[]}
     }));
 
     if (err) {

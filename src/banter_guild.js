@@ -13,6 +13,7 @@ class BanterGuild {
         this.id = id;
         this.bot = bot;
         this.db = bot.db;
+        this.channel_bindings = new Map();
         this._temp_storage = new Map();
         this._config = {};
         this._invites = new Map();
@@ -29,6 +30,19 @@ class BanterGuild {
             }
         }).catch((err) => {
             Logger.warn(`Failed to fetch invites for guild: ${this.id}: ${err}`);
+        });
+
+        // Cache channel bindings
+        this.db.get('SELECT channel_bindings FROM servers WHERE id = ?', id, (err, row) => {
+            if (!err && row && row['channel_bindings'] !== undefined) {
+                const bindings = JSON.parse(row['channel_bindings']);
+
+                if (!bindings)
+                    return;
+
+                for (const binding of bindings)
+                    this.channel_bindings.set(binding.from, binding.to);
+            }
         });
     }
 
@@ -352,6 +366,47 @@ class BanterGuild {
 
     async remove_unique_author(user) {
         return this._remove_array_backed_db_storage('unique_authors', user);
+    }
+
+    async _remove_dead_channel_binds() {
+        for (const [channel_id, webhook_id] of this.channel_bindings.entries()) {
+            const [err, channel] = await pledge(this.bot.client.channels.fetch(channel_id));
+
+            if (err) {
+                this.remove_channel_bind(channel_id);
+                Logger.info(`Removing dead channel binding: ${channel_id}`);
+            }
+        }
+    }
+
+    get_channel_bind(channel_id) {
+        return this.channel_bindings.get(channel_id);
+    }
+
+    async add_channel_bind(channel_id, webhook_id) {
+        await this._remove_dead_channel_binds();
+        const ret = await this._add_array_backed_db_storage('channel_bindings', {from: channel_id, to: webhook_id}, (b) => b.from === channel_id);
+
+        if (ret)
+            this.channel_bindings.set(channel_id, webhook_id);
+
+        return ret;
+    }
+
+    async remove_channel_bind(channel_id) {
+        const webhook_id = this.channel_bindings.get(channel_id);
+        const [err, webhook] = await pledge(this.bot.client.fetchWebhook(webhook_id));
+
+        // Delete the webhook for this channel binding if it still exists
+        if (!err)
+            await pledge(webhook.delete());
+
+        const ret = await this._remove_array_backed_db_storage('channel_bindings', channel_id, (b) => b.from === channel_id);
+        console.log({ret});
+        if (ret)
+            this.channel_bindings.delete(channel_id);
+
+        return ret;
     }
 
     async get_whitelisted(action) {

@@ -1,10 +1,9 @@
 const { Message } = require("discord.js");
 const Bot = require("../bot");
-const util = require('util');
 const CommandError = require("../command_error");
 const CommandUtils = require("../utils/command_utils");
 const Logger = require("../logger");
-const { pledge } = require("../utils/utils");
+const { pledge, elide } = require("../utils/utils");
 
 async function main(msg) {
     if (msg.author.bot || !msg.guild)
@@ -21,6 +20,7 @@ async function main(msg) {
 
     update_unique_authors(this, msg);
     check_spam(this, msg);
+    run_binds(this, msg);
 }
 
 async function update_unique_authors(bot, msg) {
@@ -187,5 +187,35 @@ async function check_command(bot, msg) {
 
     CommandUtils.execute_command(bot, msg, command, tokens);
 }
+
+async function run_binds(bot, msg) {
+    const bguild = bot.guilds.get(msg.guild.id);
+    const webhook_id = bguild.get_channel_bind(msg.channel.id);
+
+    if (!webhook_id)
+        return;
+
+    let err, webhook;
+    [err, webhook] = await pledge(bot.client.fetchWebhook(webhook_id));
+
+    if (err) {
+        Logger.error(err);
+        return;
+    }
+
+    const attachments = msg.attachments.map((a) => a.url).join('\n');
+    const content = `${elide(msg.content, 1999 - attachments.length) ?? ''}\n${attachments}`;
+
+    [err] = await pledge(webhook.send({
+        username: msg.author.username,
+        avatarURL: msg.author.displayAvatarURL({ size: 2048, dynamic: true, format: 'png' }),
+        content
+    }));
+
+    if (err) {
+        Logger.error(err);
+        return;
+    }
+};
 
 module.exports.main = main;

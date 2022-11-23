@@ -1,6 +1,6 @@
 const Logger = require('../logger');
 
-function main(ban) {
+async function main(ban) {
     cancel_temp_ban(this, ban);
 }
 

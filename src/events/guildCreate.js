@@ -2,7 +2,14 @@ const BanterGuild = require('../banter_guild');
 const Logger = require("../logger");
 
 async function main(guild) {
-    add_banter_guild(this, guild);
+    const results = await Promise.allSettled([
+        add_banter_guild(this, guild)
+    ]);
+
+    for (const result of results) {
+        if (result.status === 'rejected')
+            Logger.error(`Event guildCreate failed to run a task: ${result.reason}`);
+    }
 }
 
 async function add_banter_guild(bot, guild) {

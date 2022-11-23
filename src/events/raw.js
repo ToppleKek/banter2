@@ -7,11 +7,15 @@ const MessageUtils = require('../utils/message_utils');
 
 const INTERACTION_MAP = require('../../interaction_map.json');
 
-function main(event) {
-    if (event.t === 'INTERACTION_CREATE' && event.d?.data?.type === 1)
-        handle_slash_command(this, event.d);
-    else if (event.t === 'INTERACTION_CREATE' && (event.d?.data?.type === 2 || event.d?.data?.type === 3))
-        handle_other_command(this, event.d, event.d);
+async function main(event) {
+    try {
+        if (event.t === 'INTERACTION_CREATE' && event.d?.data?.type === 1)
+            await handle_slash_command(this, event.d);
+        else if (event.t === 'INTERACTION_CREATE' && (event.d?.data?.type === 2 || event.d?.data?.type === 3))
+            await handle_other_command(this, event.d, event.d);
+    } catch (err) {
+        Logger.error(`Failed to handle interaction: ${err}`);
+    }
 }
 
 async function handle_slash_command(bot, data) {

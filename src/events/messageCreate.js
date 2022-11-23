@@ -18,9 +18,16 @@ async function main(msg) {
             Logger.error(`command_handler: error: ${err}\n${err.stack}`);
     }
 
-    update_unique_authors(this, msg);
-    check_spam(this, msg);
-    run_binds(this, msg);
+    const results = await Promise.allSettled([
+        update_unique_authors(this, msg),
+        check_spam(this, msg),
+        run_binds(this, msg)
+    ]);
+
+    for (const result of results) {
+        if (result.status === 'rejected')
+            Logger.error(`Event messageCreate failed to run a task: ${result.reason}`);
+    }
 }
 
 async function update_unique_authors(bot, msg) {

@@ -1,7 +1,11 @@
 const Logger = require("../logger");
 
-function main(invite) {
-    update_invite_store(this, invite);
+async function main(invite) {
+    try {
+        update_invite_store(this, invite);
+    } catch (err) {
+        Logger.error(`Failed to update invite store: ${err}`);
+    }
 }
 
 /**

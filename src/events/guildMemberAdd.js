@@ -1,8 +1,15 @@
 const Logger = require("../logger");
 const { pledge } = require("../utils/utils");
 
-function main(member) {
-    apply_auto_roles(this, member);
+async function main(member) {
+    const results = await Promise.allSettled([
+        apply_auto_roles(this, member)
+    ]);
+
+    for (const result of results) {
+        if (result.status === 'rejected')
+            Logger.error(`Event guildMemberAdd failed to run a task: ${result.reason}`);
+    }
 }
 
 async function apply_auto_roles(bot, member) {

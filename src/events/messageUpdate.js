@@ -1,8 +1,15 @@
 const Logger = require("../logger");
 const { elide } = require("../utils/utils");
 
-function main(old_msg, new_msg) {
-    run_binds(this, new_msg);
+async function main(old_msg, new_msg) {
+    const results = await Promise.allSettled([
+        run_binds(this, new_msg)
+    ]);
+
+    for (const result of results) {
+        if (result.status === 'rejected')
+            Logger.error(`Event messageUpdate failed to run a task: ${result.reason}`);
+    }
 }
 
 async function run_binds(bot, msg) {

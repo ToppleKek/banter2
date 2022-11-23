@@ -1,9 +1,16 @@
 const Logger = require("../logger");
 const { pledge } = require("../utils/utils");
 
-function main(msg) {
-    relog(this, msg);
-    run_binds(this, msg);
+async function main(msg) {
+    const results = await Promise.allSettled([
+        relog(this, msg),
+        run_binds(this, msg)
+    ]);
+
+    for (const result of results) {
+        if (result.status === 'rejected')
+            Logger.error(`Event messageDelete failed to run a task: ${result.reason}`);
+    }
 }
 
 async function relog(bot, msg) {

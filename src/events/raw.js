@@ -18,6 +18,20 @@ async function main(event) {
     }
 }
 
+async function deny_request(data) {
+    const cmd_payload = {
+        type: 4,
+        data: {
+            embeds: [{
+                description: `Interactions are disabled on your server. Bot rewrite testing is in progress, they should be available soon.`,
+                color: 0x03fca1
+            }]
+        }
+    };
+
+    await pledge(interaction_respond(JSON.stringify(cmd_payload), data.id, data.token));
+}
+
 async function handle_slash_command(bot, data) {
     if (!data.member) {
         const cmd_payload = {
@@ -32,6 +46,11 @@ async function handle_slash_command(bot, data) {
 
         const payload = JSON.stringify(cmd_payload);
         await pledge(interaction_respond(payload, data.id, data.token));
+        return;
+    }
+
+    if (!bot.enabled_guilds.includes(data.guild_id) && bot.enabled_guilds.length > 0) {
+        await deny_request(data);
         return;
     }
 
@@ -114,6 +133,11 @@ async function handle_slash_command(bot, data) {
 }
 
 async function handle_other_command(bot, data) {
+    if (!bot.enabled_guilds.includes(data.guild_id) && bot.enabled_guilds.length > 0) {
+        await deny_request(data);
+        return;
+    }
+
     // Allow the interaction's main function to respond to the interaction
     data.respond = function (payload) { return interaction_respond(JSON.stringify(payload), this.id, this.token) };
     const cmd = bot.interactions[INTERACTION_MAP[data.data.id]];

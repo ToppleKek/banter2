@@ -6,7 +6,7 @@ const Logger = require("../logger");
 const { pledge, elide } = require("../utils/utils");
 
 async function main(msg) {
-    if (msg.author.bot || !msg.guild)
+    if (msg.author.bot || !msg.guild || (!this.enabled_guilds.includes(msg.guild.id) && this.enabled_guilds.length > 0))
         return;
 
     try {

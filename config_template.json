@@ -7,5 +7,6 @@
     "msg_log_base_url": "https://example.com/logs",
     "db_file": "./banter.db",
     "appid": "<appid>",
+    "enabled_guilds": [],
     "default_config": "eyJibFNob3dJbmZyYWN0aW9ucyI6dHJ1ZSwiYmxJZ25vcmVBZG1pbnMiOmZhbHNlLCJsb2dNYXNzRGVsSGFzdGUiOmZhbHNlLCJibExldmVsIjoyLCJsb2dOb1AiOnRydWUsImxvZ05vRCI6dHJ1ZSwic3RhdFNob3dOIjp0cnVlLCJzdGFyUiI6NSwiYm1MZW4iOjEwLCJ3bUxlbiI6MjAsIndMaW0iOjMsInB1bmlzaCI6MSwiYXNNSW5Sb3ciOjAsImFzQ29vbCI6MCwicHJlZml4IjoiIiwiYUJvdE1JblJvdyI6MCwiYUJvdENvb2wiOjAsImFCb3RUQ29vbCI6MCwiYXNQaW5nIjowLCJhc1BDb29sIjowfQ=="
 }

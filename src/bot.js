@@ -18,6 +18,7 @@ class Bot {
         this.owner_id        = config.owner_id;
         this.appid           = config.appid;
         this.error_channel   = config.error_channel;
+        this.enabled_guilds  = config.enabled_guilds;
         this.commands        = {};
         this.events          = {};
         this.interactions    = {};
@@ -193,6 +194,12 @@ class Bot {
                 // Check if the number of uses for this invite changed.
                 // If it did that probably means that this was the invite that was used.
                 let binv = bguild.invites().get(code);
+
+                if (!binv) {
+                    Logger.error(`FIXME: Undefined binv: code=${code} invite=${invite} guild_id=${member.guild.id}`);
+                    return;
+                }
+
                 let current_uses = binv.uses;
                 binv.uses = invite.uses;
 

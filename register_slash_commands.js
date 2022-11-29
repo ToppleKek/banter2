@@ -19,7 +19,7 @@ function sleep(t) {
 function post_registration(payload, options) {
     return new Promise((resolve, reject) => {
         let response_data = '';
-        const request = Https.request(`https://discord.com/api/v10/applications/${APPID}/guilds/585205338081460224/commands`, options, async (response) => {
+        const request = Https.request(`https://discord.com/api/v10/applications/${APPID}/commands`, options, async (response) => {
             console.log(`X-RateLimit-Remaining: ${response.headers['x-ratelimit-remaining']} X-RateLimit-Reset-After: ${response.headers['x-ratelimit-reset-after']}`);
             if (response.headers['x-ratelimit-remaining'] === '0')
                 await sleep(Number.parseFloat(response.headers['x-ratelimit-reset-after']) * 1000);

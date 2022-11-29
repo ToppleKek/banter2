@@ -73,7 +73,6 @@ async function handle_slash_command(bot, data) {
     }
 
     const cmd = data.data.name;
-    const tokens = [];
 
     let guild, channel, author, member;
     [err, guild] = await pledge(bot.client.guilds.fetch(data.guild_id));
@@ -116,13 +115,17 @@ async function handle_slash_command(bot, data) {
     msg.respond_command_error = MessageUtils.respond_command_error.bind(msg);
     msg.respond_error = MessageUtils.respond_error.bind(msg);
 
+    const args = new Map();
+
     if (data.data.options) {
-        for (let option of data.data.options)
-            tokens.push(await CommandUtils.get_token(bot, msg, option.value));
+        for (let option of data.data.options) {
+            const token = await CommandUtils.get_token(bot, msg, option.value);
+            args.set(option.name, token.value);
+        }
     }
 
     try {
-        CommandUtils.execute_command(bot, msg, bot.commands[cmd], tokens);
+        await bot.commands[cmd].main(bot, args, msg);
     } catch (err) {
         if (err instanceof CommandError)
             msg.respond_command_error(err.type, err.msg);

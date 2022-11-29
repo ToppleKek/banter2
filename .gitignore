@@ -2,3 +2,5 @@ config.json
 banter.db
 node_modules
 logs
+slash_command_map.json
+interaction_map.json

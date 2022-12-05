@@ -47,7 +47,7 @@ module.exports.main = async (bot, args, msg) => {
         };
 
         msg.guild.bans.create(args.get('target'), opts)
-            .then(() => msg.channel.send({embeds:[ban_embed]}))
+            .then(() => msg.respond({embeds:[ban_embed]}))
             .catch((err) => msg.respond_error(`API Error: \`\`\`${err}\`\`\``));
 
         bot.guilds.get(msg.guild.id).mod_log('hacknaenae (ban)', msg.author, args.get('target'), args.get('reason'));
@@ -81,7 +81,7 @@ module.exports.main = async (bot, args, msg) => {
         .catch((err) => msg.respond_error(`Warn: failed to DM user: ${err}`));
 
     member.ban(opts)
-        .then(() => msg.channel.send({embeds: [ban_embed]}))
+        .then(() => msg.respond({embeds: [ban_embed]}))
         .catch((err) => msg.respond_error(`API Error: \`\`\`${err}\`\`\``));
 
     bot.guilds.get(msg.guild.id).mod_log('naenae (ban)', msg.author, member.user, args.get('reason'));

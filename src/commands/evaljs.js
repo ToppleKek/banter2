@@ -26,13 +26,13 @@ module.exports.main = async (bot, args, msg) => {
         const output = eval(args.get('code'));
 
         if (typeof output === 'object' && Promise.resolve(output) === output) {
-            output.then((a) => msg.channel.send({
+            output.then((a) => msg.respond({
                 embeds: [{
                     color: 7506394,
                     title: `Promise resolved`,
                     description: `Resolve: \`\`\`${util.inspect(a).slice(0, 1000)}\`\`\``
                 }]
-            }), (err) => msg.channel.send({
+            }), (err) => msg.respond({
                 embeds: [{
                     color: 11736341,
                     title: `Promise rejected`,
@@ -41,7 +41,7 @@ module.exports.main = async (bot, args, msg) => {
             }));
         }
 
-        msg.channel.send({
+        msg.respond({
             embeds: [{
                 color: 7506394,
                 title: `Eval Result`,

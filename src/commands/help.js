@@ -60,7 +60,7 @@ module.exports.main = async (bot, args, msg) => {
             color: Math.floor(Math.random() * 0xFFFFFF)
         };
 
-        msg.channel.send({embeds: [embed]});
+        msg.respond({embeds: [embed]});
         return;
     }
 
@@ -80,7 +80,7 @@ module.exports.main = async (bot, args, msg) => {
     if (page - 1 >= pages.length)
         return msg.respond_command_error('Argument Error', 'Page not found');
 
-    msg.channel.send({embeds: [{
+    msg.respond({embeds: [{
         color: Math.floor(Math.random() * 0xFFFFFF),
         title: 'Banter2',
         description: `https://github.com/ToppleKek/banter2\nFor details, use ${bot.prefix}help <cmd> change pages with ${bot.prefix}help <#>`,

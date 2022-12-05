@@ -76,7 +76,7 @@ module.exports.main = async (bot, args, msg) => {
         components: [action_row]
     };
 
-    const interactable_message = await msg.channel.send(opts);
+    const interactable_message = await msg.respond(opts);
     const col = interactable_message.createMessageComponentCollector({time: 20000});
 
     const do_mass_ban = async (progress_message) => {

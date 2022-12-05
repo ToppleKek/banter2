@@ -63,7 +63,7 @@ module.exports.main = async (bot, args, msg) => {
 
         const [err] = await pledge(bot.guilds.get(msg.guild.id).temp_ban(args.get('target'), msg.author, length, opts.deleteMessageDays, opts.reason));
         command_error_if(err, 'InternalError');
-        msg.channel.send({embeds:[ban_embed]});
+        msg.respond({embeds:[ban_embed]});
         return;
     }
 
@@ -96,5 +96,5 @@ module.exports.main = async (bot, args, msg) => {
     [err] = await pledge(bot.guilds.get(msg.guild.id).temp_ban(args.get('target'), msg.author, length, opts.deleteMessageDays, opts.reason));
     command_error_if(err, 'InternalError');
 
-    await pledge(msg.channel.send({embeds: [ban_embed]}));
+    await pledge(msg.respond({embeds: [ban_embed]}));
 }

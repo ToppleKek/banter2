@@ -60,5 +60,5 @@ module.exports.main = async (bot, args, msg) => {
         }
     };
 
-    msg.channel.send({embeds: [embed]});
+    msg.respond({embeds: [embed]});
 }

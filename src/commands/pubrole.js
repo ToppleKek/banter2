@@ -54,10 +54,13 @@ module.exports.main = async (bot, args, msg) => {
     const member = msg.guild.members.resolve(msg.author);
     const add = !member.roles.cache.has(pubrole.id);
 
-    if (add)
-        member.roles.add(pubrole);
-    else
-        member.roles.remove(pubrole);
+    if (add) {
+        const [err] = await pledge(member.roles.add(pubrole));
+        command_error_if(err, 'APIError');
+    } else {
+        const [err] = await pledge(member.roles.remove(pubrole));
+        command_error_if(err, 'APIError');
+    }
 
     msg.respond_info(`You ${add ? 'now' : 'no longer'} have the \`${pubrole.name}\` role.`);
 }

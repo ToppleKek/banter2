@@ -50,7 +50,7 @@ module.exports.main = async (bot, args, msg) => {
         components: [action_row]
     };
 
-    const interactable_message = await msg.channel.send(opts);
+    const interactable_message = await msg.respond(opts);
     const col = interactable_message.createMessageComponentCollector({time: 20000});
 
     const do_unban_all = async (progress_message) => {

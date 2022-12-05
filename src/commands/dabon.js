@@ -58,7 +58,7 @@ module.exports.main = async (bot, args, msg) => {
         .catch((err) => msg.respond_error(`Warn: failed to DM user: ${err}`));
 
     member.kick(reason)
-        .then(() => msg.channel.send({embeds: [kick_embed]}))
+        .then(() => msg.respond({embeds: [kick_embed]}))
         .catch((err) => msg.respond_error(`API Error: \`\`\`${err}\`\`\``));
 
     bot.guilds.get(msg.guild.id).mod_log('dabon (kick)', msg.author, member.user, args.get('reason'));

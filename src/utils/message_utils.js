@@ -1,8 +1,12 @@
 const Logger = require("../logger");
 
 module.exports = {
+    respond: function (data) {
+        return this.channel.send(data);
+    },
+
     respond_info: function (msg, header) {
-        this.channel.send({embeds: [{
+        this.respond({embeds: [{
             color: 0x259EF5,
             title: header,
             description: msg,
@@ -33,7 +37,7 @@ module.exports = {
             });
         }
 
-        this.channel.send({embeds: [{
+        this.respond({embeds: [{
             author: {
                 name: `Command executed by ${this.author.username}#${this.author.discriminator}`,
                 iconURL: this.author.displayAvatarURL()
@@ -46,7 +50,7 @@ module.exports = {
     },
 
     respond_error: function (msg) {
-        this.channel.send({embeds: [{
+        this.respond({embeds: [{
             color: 0xFF6640,
             description: msg,
         }]});

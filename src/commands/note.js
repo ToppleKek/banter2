@@ -100,7 +100,7 @@ module.exports.main = async (bot, args, msg) => {
             command_error_if(err, 'APIError');
 
             const timestamp = Number.parseInt(note.timestamp);
-            msg.channel.send({ embeds: [{
+            msg.respond({ embeds: [{
                 title: `Note #${note_id} for \`${target.tag}\` at <t:${Math.floor(timestamp / 1000)}>`,
                 author: {
                     name: author.tag,
@@ -141,7 +141,7 @@ module.exports.main = async (bot, args, msg) => {
             if (page > pages.length)
                 throw new CommandError('ArgumentError', 'Page not found');
 
-            msg.channel.send({ embeds: [{
+            msg.respond({ embeds: [{
                 title: `Notes for ${target.tag}`,
                 fields: pages[page - 1],
                 footer: {

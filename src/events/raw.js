@@ -1,4 +1,5 @@
 const Https = require('https');
+const { Message } = require("discord.js");
 const CommandUtils = require('../utils/command_utils');
 const CommandError = require('../command_error');
 const Logger = require('../logger');
@@ -54,52 +55,54 @@ async function handle_slash_command(bot, data) {
         return;
     }
 
-    const cmd_payload = {
-        type: 4,
-        data: {
-            embeds: [{
-                description: `**${data.member.user.username}**: Your interaction was successfully handed off to the main bot.`,
-                color: 0x03fca1
-            }]
-        }
-    };
-
-    const payload = JSON.stringify(cmd_payload);
-    let [err, response] = await pledge(interaction_respond(payload, data.id, data.token));
-
-    if (err) {
-        Logger.error(`Failed to respond to interaction: ${err}`);
-        return;
-    }
-
     const cmd = data.data.name;
 
     let guild, channel, author, member;
-    [err, guild] = await pledge(bot.client.guilds.fetch(data.guild_id));
 
-    if (err) {
-        Logger.error(err);
-        return;
-    }
-
-    [err, channel] = await pledge(bot.client.channels.fetch(data.channel_id));
-
-    if (err) {
-        Logger.error(err);
+    [err, [guild, channel]] = await pledge([bot.client.guilds.fetch(data.guild_id), bot.client.channels.fetch(data.channel_id)]);
+    if (err.length) {
+        Logger.error(err.toString());
         return;
     }
 
     [err, author] = await pledge(bot.client.users.fetch(data.member.user.id));
-
     if (err) {
         Logger.error(err);
         return;
     }
 
     [err, member] = await pledge(guild.members.fetch(author.id));
-
     if (err) {
         Logger.error(err);
+        return;
+    }
+
+    if (!check_permissions(member, bot.commands[cmd].required_permissions)) {
+        const payload = {
+            type: 4,
+            data: {
+                embeds: [{
+                    title: `Command Error`,
+                    fields: [{
+                        name: 'Type',
+                        value: 'Permission Error',
+                        inline: false
+                    }, {
+                        name: 'Details',
+                        value: `You must have ${bot.commands[cmd].required_permissions.join(' or ')} to execute this command`,
+                        inline: false
+                    }],
+                    color: 0xFF6640,
+                    timestamp: new Date().toISOString()
+                }],
+            }
+        };
+
+        const [err, response] = await pledge(interaction_respond(JSON.stringify(payload), data.id, data.token));
+
+        if (err)
+            Logger.error(`Failed to respond to permission error: ${err} ${response}`);
+
         return;
     }
 
@@ -111,12 +114,10 @@ async function handle_slash_command(bot, data) {
         member
     };
 
-    msg.respond_info = MessageUtils.respond_info.bind(msg);
-    msg.respond_command_error = MessageUtils.respond_command_error.bind(msg);
-    msg.respond_error = MessageUtils.respond_error.bind(msg);
-
     const args = new Map();
 
+    // Fetch any args that were passed to us by the interaction (the slash command 'options')
+    // TODO: Skip ID type detection because we should already know that from the option data
     if (data.data.options) {
         for (let option of data.data.options) {
             const token = await CommandUtils.get_token(bot, msg, option.value);
@@ -124,6 +125,60 @@ async function handle_slash_command(bot, data) {
         }
     }
 
+    // Callback to override the 'msg.respond' function for messages. This callback responds to the interaction,
+    // and then resets the function to its original found in MessageUtils (just sends the message).
+    const cmd_respond = async (msg_data) => {
+        // d.js hack
+        if (msg_data.embeds) {
+            for (let embed of msg_data.embeds) {
+                if (embed.author)
+                embed.author.icon_url = embed.author.iconURL;
+            }
+        }
+
+        // Setup payload to respond to the interaction with the message data passed from the command
+        if ((typeof msg_data) === 'string') {
+            msg_data = {
+                content: msg_data
+            };
+        }
+
+        const response_payload = {
+            type: 4,
+            data: msg_data
+        };
+
+        // Respond to the interaction
+        let err, interaction_message;
+        [err] = await pledge(interaction_respond(JSON.stringify(response_payload), data.id, data.token));
+
+        if (err) {
+            Logger.error(err);
+            return;
+        }
+
+        // Get the message we just sent so we can return it here
+        // (some commands like 'whipall' use the message return to setup a interaction collector for instance)
+        [err, interaction_message] = await pledge(interaction_get_msg(bot.appid, data.token));
+
+        if (err) {
+            Logger.error(err);
+            return;
+        }
+
+        interaction_message = new Message(bot.client, JSON.parse(interaction_message));
+        // Reset respond handler
+        msg.respond = MessageUtils.respond.bind(msg);
+        return interaction_message;
+    };
+
+    // Setup response handlers for this fake message
+    msg.respond_info = MessageUtils.respond_info.bind(msg);
+    msg.respond_command_error = MessageUtils.respond_command_error.bind(msg);
+    msg.respond_error = MessageUtils.respond_error.bind(msg);
+    msg.respond = cmd_respond;
+
+    // Execute the command
     try {
         await bot.commands[cmd].main(bot, args, msg);
     } catch (err) {
@@ -132,7 +187,6 @@ async function handle_slash_command(bot, data) {
         else
             Logger.error(`handle_slash_command: error: ${err}\n${err.stack}`);
     }
-
 }
 
 async function handle_other_command(bot, data) {
@@ -279,6 +333,34 @@ function interaction_respond(payload, id, token) {
         });
 
         request.write(payload);
+        request.end();
+    });
+}
+
+function interaction_get_msg(appid, token) {
+    return new Promise((resolve, reject) => {
+        const options = {
+            method: 'GET',
+            headers: {
+                'User-Agent': 'DiscordBot (https://github.com/ToppleKek/banter2)'
+            }
+        };
+
+        let response_data = '';
+        const request = Https.request(`https://discord.com/api/v10/webhooks/${appid}/${token}/messages/@original`, options, (response) => {
+            response.on('data', (chunk) => {
+                response_data += chunk;
+            });
+
+            response.on('end', () => {
+                resolve(response_data);
+            });
+
+            response.on('error', (err) => {
+                reject(err);
+            });
+        });
+
         request.end();
     });
 }

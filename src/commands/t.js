@@ -34,5 +34,5 @@ module.exports.main = async (bot, args, msg) => {
     if (!tag)
         throw new CommandError('ArgumentError', 'Tag not found.');
 
-    msg.channel.send(tag.content);
+    msg.respond(tag.content);
 }

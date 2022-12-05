@@ -47,8 +47,11 @@ module.exports.main = async (bot, args, msg) => {
         throw new CommandError('ArgumentError', 'User not in guild');
 
     if (member.isCommunicationDisabled()) {
-        const [err] = await pledge(member.timeout(null, `Unmute issued by: ${msg.author.tag}`));
-        command_error_if(err, 'APIError');
+        const [errs] = await pledge([
+            member.timeout(null, `Unmute issued by: ${msg.author.tag}`),
+            bot.guilds.get(msg.guild.id).mod_log('unmute', msg.author, member.user)
+        ]);
+        command_error_if(errs, 'APIError');
 
         msg.respond_info(`Unmuted ${member.user.tag}`);
     } else if (args.get('time')) {

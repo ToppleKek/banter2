@@ -26,11 +26,17 @@ module.exports.args_list = {
  */
 module.exports.main = async (bot, args, msg) => {
     const role = args.get('role');
-    let err, target;
-    [err, target] = await pledge(
+    let errs, target, author;
+    [errs, [target, author]] = await pledge([
         msg.guild.members.fetch(args.get('target')),
-    );
-    command_error_if(err, 'APIError');
+        msg.guild.members.fetch(msg.author)
+    ]);
+    command_error_if(errs, 'APIError');
+
+    if (role.comparePositionTo(author.roles.highest) > 0) {
+        msg.respond_error(`You cannot manage the role **${role.name}** because it has a higher position than your highest role.`);
+        return;
+    }
 
     if (target.roles.resolve(role.id) !== null) {
         [err] = await pledge(target.roles.remove(role));

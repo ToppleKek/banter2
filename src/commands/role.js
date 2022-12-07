@@ -33,8 +33,8 @@ module.exports.main = async (bot, args, msg) => {
     ]);
     command_error_if(errs, 'APIError');
 
-    if (role.comparePositionTo(author.roles.highest) > 0) {
-        msg.respond_error(`You cannot manage the role **${role.name}** because it has a higher position than your highest role.`);
+    if (role.comparePositionTo(author.roles.highest) >= 0) {
+        msg.respond_error(`You cannot manage the role **${role.name}** because it has a higher or equal position than your highest role.`);
         return;
     }
 

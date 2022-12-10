@@ -3,7 +3,7 @@ const Bot = require('../bot');
 const CommandError = require('../command_error');
 
 module.exports.help = 'Ban a member from the guild';
-module.exports.usage = '#PREFIXnaenae <target> <?days> <?reason>';
+module.exports.usage = '#PREFIXnaenae <target> <?reason>';
 module.exports.required_permissions = ['BAN_MEMBERS'];
 module.exports.args_list = {
     position_independent: false,
@@ -16,10 +16,6 @@ module.exports.args_list = {
         name: 'reason',
         type: 'string',
         description: 'A reason for the ban'
-    }, {
-        name: 'days',
-        type: 'number',
-        description: 'The number of days worth of messages to delete (default=0)'
     }]
 };
 
@@ -31,7 +27,6 @@ module.exports.args_list = {
 module.exports.main = async (bot, args, msg) => {
     const member = msg.guild.members.resolve(args.get('target'));
     const opts = {
-        deleteMessageDays: args.get('days') ?? 0,
         reason: `Ban issued by: ${msg.author.tag} - ${args.get('reason') ?? '(no reason provided)'}`
     };
 

@@ -66,16 +66,18 @@ class Interaction {
 
         command_error_if(err, 'APIError');
 
+        let modal_timeout_id;
         const modal_interact = (data) => {
             if (data.data.custom_id === custom_id) {
                 this.bot.client.removeListener('banter_modalInteraction', modal_interact);
                 modal_dialog.modal_submit(data);
+                clearTimeout(modal_timeout_id);
             }
         };
 
         // Discord does not tell us if the modal was cancelled, so we will automatically timeout and remove all
         // listeners after 10 minutes.
-        setTimeout(() => {
+        modal_timeout_id = setTimeout(() => {
             Logger.info(`Modal timeout (id=${this.id})`);
             modal_dialog.removeAllListeners();
             this.bot.client.removeListener('banter_modalInteraction', modal_interact);

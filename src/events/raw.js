@@ -3,10 +3,10 @@ const { Message } = require("discord.js");
 const CommandUtils = require('../utils/command_utils');
 const CommandError = require('../command_error');
 const Logger = require('../logger');
-const { pledge, check_permissions } = require('../utils/utils');
+const { pledge, check_permissions, command_error_if } = require('../utils/utils');
 const MessageUtils = require('../utils/message_utils');
-
 const INTERACTION_MAP = require('../../interaction_map.json');
+const { Interaction } = require('../interactions');
 
 async function main(event) {
     try {
@@ -14,12 +14,20 @@ async function main(event) {
             await handle_slash_command(this, event.d);
         else if (event.t === 'INTERACTION_CREATE' && (event.d?.data?.type === 2 || event.d?.data?.type === 3))
             await handle_other_command(this, event.d, event.d);
+        else if (event.t === 'INTERACTION_CREATE' && event.d?.type === 5) {
+            const data = {
+                interaction: new Interaction(this, event.d.id, event.d.token),
+                data: event.d.data
+            };
+
+            this.client.emit('banter_modalInteraction', data);
+        }
     } catch (err) {
         Logger.error(`Failed to handle interaction: ${err}`);
     }
 }
 
-async function deny_request(data) {
+async function deny_request(interaction) {
     const cmd_payload = {
         type: 4,
         data: {
@@ -30,10 +38,12 @@ async function deny_request(data) {
         }
     };
 
-    await pledge(interaction_respond(JSON.stringify(cmd_payload), data.id, data.token));
+    await pledge(interaction.respond(cmd_payload));
 }
 
 async function handle_slash_command(bot, data) {
+    const interaction = new Interaction(bot, data.id, data.token);
+
     if (!data.member) {
         const cmd_payload = {
             type: 4,
@@ -45,18 +55,16 @@ async function handle_slash_command(bot, data) {
             }
         };
 
-        const payload = JSON.stringify(cmd_payload);
-        await pledge(interaction_respond(payload, data.id, data.token));
+        await pledge(interaction.respond(cmd_payload));
         return;
     }
 
     if (!bot.enabled_guilds.includes(data.guild_id) && bot.enabled_guilds.length > 0) {
-        await deny_request(data);
+        await deny_request(interaction);
         return;
     }
 
     const cmd = data.data.name;
-
     let guild, channel, author, member;
 
     [err, [guild, channel]] = await pledge([bot.client.guilds.fetch(data.guild_id), bot.client.channels.fetch(data.channel_id)]);
@@ -98,7 +106,7 @@ async function handle_slash_command(bot, data) {
             }
         };
 
-        const [err, response] = await pledge(interaction_respond(JSON.stringify(payload), data.id, data.token));
+        const [err, response] = await pledge(interaction.respond(payload));
 
         if (err)
             Logger.error(`Failed to respond to permission error: ${err} ${response}`);
@@ -150,7 +158,7 @@ async function handle_slash_command(bot, data) {
 
         // Respond to the interaction
         let err, interaction_message;
-        [err] = await pledge(interaction_respond(JSON.stringify(response_payload), data.id, data.token));
+        [err] = await pledge(interaction.respond(response_payload));
 
         if (err) {
             Logger.error(err);
@@ -190,13 +198,12 @@ async function handle_slash_command(bot, data) {
 }
 
 async function handle_other_command(bot, data) {
+    const interaction = new Interaction(bot, data.id, data.token);
     if (!bot.enabled_guilds.includes(data.guild_id) && bot.enabled_guilds.length > 0) {
-        await deny_request(data);
+        await deny_request(interaction);
         return;
     }
 
-    // Allow the interaction's main function to respond to the interaction
-    data.respond = function (payload) { return interaction_respond(JSON.stringify(payload), this.id, this.token) };
     const cmd = bot.interactions[INTERACTION_MAP[data.data.id]];
 
     if (!cmd) {
@@ -220,7 +227,7 @@ async function handle_other_command(bot, data) {
     }
 
     if (!check_permissions(executor, cmd.required_permissions)) {
-        data.respond({
+        [err] = await pledge(interaction.respond({
             type: 4,
             data: {
                 embeds: [{
@@ -239,7 +246,10 @@ async function handle_other_command(bot, data) {
                 }],
                 flags: 1 << 6
             }
-        });
+        }));
+
+        if (err)
+            Logger.error(err);
 
         return;
     }
@@ -253,7 +263,7 @@ async function handle_other_command(bot, data) {
             target_member = {user: target_user};
         }
 
-        [err] = await pledge(cmd.main(bot, executor, target_member, data));
+        [err] = await pledge(cmd.main(bot, executor, target_member, interaction));
     } else if (data.data.type === 3) {
         let context_channel;
         [err, context_channel] = await pledge(guild.channels.fetch(data.channel_id));
@@ -270,12 +280,12 @@ async function handle_other_command(bot, data) {
             return;
         }
 
-        [err] = await pledge(cmd.main(bot, executor, target_msg, data));
+        [err] = await pledge(cmd.main(bot, executor, target_msg, interaction));
     }
 
 
     if (err instanceof CommandError) {
-        data.respond({
+        interaction.respond({
             type: 4,
             data: {
                 embeds: [{
@@ -297,44 +307,6 @@ async function handle_other_command(bot, data) {
         });
     } else if (err)
         Logger.error(err);
-}
-
-function interaction_respond(payload, id, token) {
-    return new Promise((resolve, reject) => {
-        // Escape all unicode characters
-        payload = payload.split('').map((char) =>
-            /[\u0080-\uFFFF]/g.test(char) ? `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}` : char
-        ).join('');
-
-        Logger.info(`Responding to interaction id=${id}`);
-
-        const options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': payload.length,
-                'User-Agent': 'DiscordBot (https://github.com/ToppleKek/banter2)'
-            }
-        };
-
-        let response_data = '';
-        const request = Https.request(`https://discord.com/api/v10/interactions/${id}/${token}/callback`, options, (response) => {
-            response.on('data', (chunk) => {
-                response_data += chunk;
-            });
-
-            response.on('end', () => {
-                resolve(response_data);
-            });
-
-            response.on('error', (err) => {
-                reject(err);
-            });
-        });
-
-        request.write(payload);
-        request.end();
-    });
 }
 
 function interaction_get_msg(appid, token) {

@@ -305,6 +305,9 @@ const ActionLogger = {
     //       We should hook into 'raw' and fire it anyway so we can
     //       give some kind of message.
     messageDelete(bot, msg) {
+        if (!msg.guild)
+            return;
+
         const bguild = bot.guilds.get(msg.guild.id);
 
         bguild.log({
@@ -319,6 +322,9 @@ const ActionLogger = {
     },
 
     async messageDeleteBulk(bot, msgs, channel) {
+        if (!channel.guild)
+            return;
+
         const bguild = bot.guilds.get(channel.guild.id);
 
         const [err, file_path] = await pledge(generate_message_dump(msgs, channel));
@@ -339,6 +345,9 @@ const ActionLogger = {
     },
 
     async messageUpdate(bot, old_msg, new_msg) {
+        if (!new_msg.guild)
+            return;
+
         const bguild = bot.guilds.get(new_msg.guild.id);
 
         if (old_msg.content === new_msg.content)
@@ -414,6 +423,9 @@ const ActionLogger = {
     },
 
     async voiceStateUpdate(bot, old_state, new_state) {
+        if (!new_state.guild)
+            return;
+
         const bguild = bot.guilds.get(new_state.guild.id);
         const fields = [];
 

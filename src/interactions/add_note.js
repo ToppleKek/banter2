@@ -48,6 +48,8 @@ module.exports.main = async (bot, executor, target_member, interaction) => {
                 flags: 1 << 6
             },
         });
+
+        await bot.guilds.get(executor.guild.id).mod_log('add note', executor.user, target_member.user, elide(submission.components[0].value, 30));
     });
 
 }

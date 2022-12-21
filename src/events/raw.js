@@ -140,7 +140,7 @@ async function handle_slash_command(bot, data) {
         if (msg_data.embeds) {
             for (let embed of msg_data.embeds) {
                 if (embed.author)
-                embed.author.icon_url = embed.author.iconURL;
+                    embed.author.icon_url = embed.author.iconURL;
             }
         }
 

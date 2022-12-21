@@ -61,6 +61,7 @@ module.exports.main = async (bot, args, msg) => {
             command_error_if(err, 'SQLError');
 
             msg.respond_info(`Added note to user \`${target.tag}\``);
+            await bot.guilds.get(msg.guild.id).mod_log('add note', msg.author, target, elide(content, 30));
         } break;
         case 'remove': {
             require_optional('n', args);
@@ -74,6 +75,7 @@ module.exports.main = async (bot, args, msg) => {
             command_error_if(err, 'SQLError');
 
             msg.respond_info('Note removed.');
+            await bot.guilds.get(msg.guild.id).mod_log('remove note', msg.author, target);
         } break;
         case 'remove_mine': {
             const [err] = await pledge(bot.db.runp(
@@ -86,6 +88,7 @@ module.exports.main = async (bot, args, msg) => {
             command_error_if(err, 'SQLError');
 
             msg.respond_info('Removed all notes created by you for this user.');
+            await bot.guilds.get(msg.guild.id).mod_log('remove my notes', msg.author, target);
         } break;
         case 'view': {
             require_optional('n', args);

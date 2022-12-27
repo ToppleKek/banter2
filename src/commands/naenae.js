@@ -26,8 +26,9 @@ module.exports.args_list = {
  * @param {Message} msg Message Object
  */
 module.exports.main = async (bot, args, msg) => {
-    const member = await pledge(msg.guild.members.fetch(args.get('target')));
-    const author = await pledge(msg.guild.members.fetch(msg.author));
+    let err, member, author;
+    [err, member] = await pledge(msg.guild.members.fetch(args.get('target')));
+    [err, author] = await pledge(msg.guild.members.fetch(msg.author));
 
     const opts = {
         reason: `Ban issued by: ${msg.author.tag} - ${args.get('reason') ?? '(no reason provided)'}`

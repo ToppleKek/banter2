@@ -174,10 +174,14 @@ async function handle_slash_command(bot, data) {
             return;
         }
 
-        interaction_message = new Message(bot.client, JSON.parse(interaction_message));
-        // Reset respond handler
-        msg.respond = MessageUtils.respond.bind(msg);
-        return interaction_message;
+        try {
+            interaction_message = new Message(bot.client, JSON.parse(interaction_message));
+            // Reset respond handler
+            msg.respond = MessageUtils.respond.bind(msg);
+            return interaction_message;
+        } catch (e) {
+            Logger.error(`FIXME: ${e}`);
+        }
     };
 
     // Setup response handlers for this fake message

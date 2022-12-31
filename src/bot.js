@@ -100,7 +100,7 @@ class Bot {
         Discord.Message.prototype.respond = MessageUtils.respond;
 
         /** @type {Discord.Client} */
-        this.client = new Discord.Client({ autoReconnect: true, disableEveryone: true, intents: 0b11111111111111111 });
+        this.client = new Discord.Client({ autoReconnect: true, allowedMentions: { parse: ['roles', 'users'] }, intents: 0b11111111111111111 });
 
         this.client.on('ready', async () => {
             Logger.info('bot is ready');

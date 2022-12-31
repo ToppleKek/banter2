@@ -10,7 +10,7 @@ class Interaction {
         this.token = token;
     }
 
-    respond(payload) {
+    respond(payload, collector_id = null, collector_timeout = null) {
         return new Promise((resolve, reject) => {
             // Escape all unicode characters
             payload = JSON.stringify(payload).split('').map((char) =>
@@ -35,7 +35,7 @@ class Interaction {
                 });
 
                 response.on('end', () => {
-                    resolve(response_data);
+                    resolve({data: response_data, collector: collector_id ? new InteractionCollector(this.bot, collector_id, collector_timeout) : null});
                 });
 
                 response.on('error', (err) => {
@@ -124,6 +124,66 @@ class Interaction {
             request.end();
         });
     }
+
+    async get_message() {
+        return new Promise((resolve, reject) => {
+            const options = {
+                method: 'GET',
+                headers: {
+                    'User-Agent': 'DiscordBot (https://github.com/ToppleKek/banter2)'
+                }
+            };
+
+            let response_data = '';
+            const request = Https.request(`https://discord.com/api/v10/webhooks/${this.bot.appid}/${this.token}/messages/@original`, options, (response) => {
+                response.on('data', (chunk) => {
+                    response_data += chunk;
+                });
+
+                response.on('end', () => {
+                    resolve(response_data);
+                });
+
+                response.on('error', (err) => {
+                    reject(err);
+                });
+            });
+
+            request.end();
+        });
+    }
+
+    async edit_message(payload_obj) {
+        return new Promise((resolve, reject) => {
+            const payload = JSON.stringify(payload_obj);
+            const options = {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': payload.length,
+                    'User-Agent': 'DiscordBot (https://github.com/ToppleKek/banter2)'
+                }
+            };
+
+            let response_data = '';
+            const request = Https.request(`https://discord.com/api/v10/webhooks/${this.bot.appid}/${this.token}/messages/@original`, options, (response) => {
+                response.on('data', (chunk) => {
+                    response_data += chunk;
+                });
+
+                response.on('end', () => {
+                    resolve(response_data);
+                });
+
+                response.on('error', (err) => {
+                    reject(err);
+                });
+            });
+
+            request.write(payload);
+            request.end();
+        });
+    }
 }
 
 class ModalDialog extends EventEmitter {
@@ -139,6 +199,33 @@ class ModalDialog extends EventEmitter {
         };
 
         this.emit('submit', ret);
+    }
+}
+
+class InteractionCollector extends EventEmitter {
+    constructor(bot, custom_id, timeout) {
+        super();
+
+        if (!timeout)
+            throw new Error('InteractionCollector given invalid timeout!');
+
+        const listener = (event) => {
+            if (event.t === 'INTERACTION_CREATE' && event.d.type === 3 && event.d.data.custom_id === custom_id)
+                this.emit('collect', {interaction: new Interaction(this.bot, event.d.id, event.d.token), data: event.d.data});
+        }
+        bot.client.on('raw', listener);
+
+        this.cleanup = (reason = 'timeout') => {
+            bot.client.removeListener('raw', listener);
+            this.emit('stop', reason);
+        };
+
+        this.timeout = setTimeout(this.cleanup, timeout);
+    }
+
+    stop() {
+        this.cleanup('manual');
+        clearTimeout(this.timeout);
     }
 }
 

@@ -167,7 +167,7 @@ async function handle_slash_command(bot, data) {
 
         // Get the message we just sent so we can return it here
         // (some commands like 'whipall' use the message return to setup a interaction collector for instance)
-        [err, interaction_message] = await pledge(interaction_get_msg(bot.appid, data.token));
+        [err, interaction_message] = await pledge(interaction.get_message());
 
         if (err) {
             Logger.error(err);

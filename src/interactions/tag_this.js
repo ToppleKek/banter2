@@ -40,6 +40,7 @@ module.exports.main = async (bot, executor, target_msg, interaction) => {
 
     command_error_if(err, 'APIError');
     collector.once('collect', async ({interaction: followup_interaction, data}) => {
+        const context_link = `https://discord.com/channels/${target_msg.guild.id}/${target_msg.channel.id}/${target_msg.id}`;
         const [errs] = await pledge([
             followup_interaction.respond({
                 type: 7,
@@ -47,17 +48,18 @@ module.exports.main = async (bot, executor, target_msg, interaction) => {
                     content: null,
                     components: [],
                     embeds: [{
-                        description: `Tagged selected message with: \`${data.values}\``,
+                        description: `Tagged selected message with: \`${data.values[0]}\``,
                         color: 0x259EF5
                     }],
                     flags: 1 << 6
                 },
             }),
-            target_msg.reply(tags.find((tag) => tag.key === data.values[0]).content)
+            target_msg.reply(tags.find((tag) => tag.key === data.values[0]).content),
+            bguild.mod_log(`tag with ${data.values[0]}`, executor.user, target_msg.author, `[Jump to Context](${context_link})`)
         ]);
 
-        command_error_if(errs, 'APIError');
         collector.stop();
+        command_error_if(errs, 'APIError');
     });
 
     collector.once('stop', async (reason) => {

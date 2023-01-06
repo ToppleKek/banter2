@@ -8,12 +8,12 @@ module.exports.usage = '#PREFIXinfo <user>';
 module.exports.required_permissions = [];
 module.exports.args_list =  {
     position_independent: false,
-    args: [{
+    args: [],
+    optional_args: [{
         name: 'user',
         type: 'user',
         description: 'The user to probe'
-    }],
-    optional_args: []
+    }]
 };
 
 /**

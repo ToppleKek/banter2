@@ -102,6 +102,7 @@ async function edit_channels(bguild, stat_channels, total_users_text, unique_aut
         [err] = await pledge(total_users_channel.edit({ name: total_users_text }));
 
         if (err) {
+            Logger.debug(`Invalid stat channel in server id=${bguild.id}`);
             Logger.error(err);
             return;
         }

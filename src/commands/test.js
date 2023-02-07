@@ -8,15 +8,15 @@ module.exports.required_permissions = ['BOT_OWNER'];
 module.exports.args_list =  {
     position_independent: false,
     args: [{
-        name: 'arg1',
-        type: 'string',
-        description: 'Arg1 test is a string'
-    }, {
         name: 'arg2',
         type: 'user',
         description: 'Arg1 test is a user mention (user for slash commands)'
     }],
-    optional_args: []
+    optional_args: [{
+        name: 'arg1',
+        type: 'string',
+        description: 'Arg1 test is a string'
+    }]
 };
 
 /**

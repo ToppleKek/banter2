@@ -111,7 +111,7 @@ const ActionLogger = {
         if (role_diff.size > 0) {
             bguild.log({
                 title: '👤🎭 Member roles changed',
-                description: `${new_member.user.tag} (${new_member.id})\n\nOld: ${old_roles}\nNew:${new_roles}`,
+                description: `${new_member.user.tag} (${new_member.id})\n\nOld: ${old_roles}\nNew: ${new_roles}`,
                 color: 0xFFFFFF
             });
         }

@@ -4,7 +4,7 @@ const CommandError = require("../command_error");
 const { ms_to_hhmmss, pledge, command_error_if, parse_time } = require("../utils/utils");
 
 module.exports.help = 'Mute a user';
-module.exports.usage = '#PREFIXmute <target> ?<time> ?<reason>';
+module.exports.usage = '#PREFIXmute <target> <?time> <?reason>';
 module.exports.required_permissions = ['MODERATE_MEMBERS'];
 module.exports.args_list =  {
     position_independent: false,
@@ -16,7 +16,7 @@ module.exports.args_list =  {
     optional_args: [{
         name: 'time',
         type: 'word',
-        description: 'Time to mute'
+        description: 'Time to mute in timestr format (eg. 1d4h23m55s)'
     }, {
         name: 'reason',
         type: 'string',

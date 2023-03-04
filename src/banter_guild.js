@@ -180,7 +180,7 @@ class BanterGuild {
         };
 
         Object.assign(embed, embed_options);
-        await log_channel.send({embeds: [embed]});
+        await pledge(log_channel.send({embeds: [embed]}));
     }
 
     async mod_log(action, mod, target, reason) {
@@ -219,7 +219,7 @@ class BanterGuild {
             color: 0x0084ff,
         };
 
-        await mod_log_channel.send({embeds: [embed]});
+        await pledge(mod_log_channel.send({embeds: [embed]}));
     }
 
     async temp_ban(user, author, duration, days, reason = 'No reason provided') {

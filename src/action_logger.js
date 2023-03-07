@@ -22,7 +22,7 @@ const ActionLogger = {
         });
     },
 
-    banter_guildMemberAdd(bot, member) {
+    async banter_guildMemberAdd(bot, member) {
         const bguild = bot.guilds.get(member.guild.id);
 
         bguild.log({
@@ -45,7 +45,7 @@ const ActionLogger = {
         });
     },
 
-    guildMemberRemove(bot, member) {
+    async guildMemberRemove(bot, member) {
         const bguild = bot.guilds.get(member.guild.id);
 
         bguild.log({
@@ -93,7 +93,7 @@ const ActionLogger = {
         });
     },
 
-    guildMemberUpdate(bot, old_member, new_member) {
+    async guildMemberUpdate(bot, old_member, new_member) {
         const bguild = bot.guilds.get(new_member.guild.id);
 
         if (old_member.nickname !== new_member.nickname) {
@@ -117,7 +117,7 @@ const ActionLogger = {
         }
     },
 
-    channelCreate(bot, channel) {
+    async channelCreate(bot, channel) {
         if (!channel.guild) // Ignore DM's
             return;
 
@@ -136,7 +136,7 @@ const ActionLogger = {
         });
     },
 
-    channelDelete(bot, channel) {
+    async channelDelete(bot, channel) {
         if (!channel.guild) // Ignore DM's
             return;
 
@@ -206,7 +206,7 @@ const ActionLogger = {
         }
     },
 
-    roleCreate(bot, role) {
+    async roleCreate(bot, role) {
         const bguild = bot.guilds.get(role.guild.id);
         const extra_permissions = role.permissions.toArray().filter((permission) =>
             !role.guild.roles.everyone.permissions.has(permission)
@@ -228,7 +228,7 @@ const ActionLogger = {
         });
     },
 
-    roleDelete(bot, role) {
+    async roleDelete(bot, role) {
         const bguild = bot.guilds.get(role.guild.id);
         const extra_permissions = role.permissions.toArray().filter((permission) =>
             !role.guild.roles.everyone.permissions.has(permission)
@@ -250,7 +250,7 @@ const ActionLogger = {
         });
     },
 
-    roleUpdate(bot, old_role, new_role) {
+    async roleUpdate(bot, old_role, new_role) {
         const old_permissions = old_role.permissions.toArray();
         const new_permissions = new_role.permissions.toArray();
         const fields = [];
@@ -304,7 +304,7 @@ const ActionLogger = {
     // TODO: This event only fires when the message has been cached.
     //       We should hook into 'raw' and fire it anyway so we can
     //       give some kind of message.
-    messageDelete(bot, msg) {
+    async messageDelete(bot, msg) {
         if (!msg.guild)
             return;
 

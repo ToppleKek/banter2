@@ -165,13 +165,14 @@ class BanterGuild {
 
             const entry = audit.entries.find((a) => a.target.id === relog_id);
 
-            await log_channel.send({embeds: [{
+            await pledge(log_channel.send({embeds: [{
                 title: `${entry?.executor?.tag ?? 'Someone'} tried to delete a log entry!`,
                 description: `Attempting to resend entry in next message`,
                 color: 0xFFAA00
-            }]});
+            }]}));
 
-            await log_channel.send({embeds: [embed_options]});
+            console.dir(embed_options);
+            await pledge(log_channel.send({embeds: [embed_options]}));
             return;
         }
 

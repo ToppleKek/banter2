@@ -16,6 +16,36 @@ function sleep(t) {
     return new Promise((resolve) => setTimeout(resolve, t));
 }
 
+function delete_command(command_id) {
+    return new Promise((resolve, reject) => {
+        const options = {
+            method: 'DELETE',
+            headers: {
+                'User-Agent': 'DiscordBot (https://github.com/ToppleKek/banter2)',
+                Authorization: `Bot ${TOKEN}`
+            }
+        };
+
+        let response_data = '';
+        const request = Https.request(`https://discord.com/api/v10/applications/${APPID}/commands/${command_id}`, options, async (response) => {
+            console.log(`X-RateLimit-Remaining: ${response.headers['x-ratelimit-remaining']} X-RateLimit-Reset-After: ${response.headers['x-ratelimit-reset-after']}`);
+            if (response.headers['x-ratelimit-remaining'] === '0')
+                await sleep(Number.parseFloat(response.headers['x-ratelimit-reset-after']) * 1000);
+
+            response.on('data', (chunk) => {
+                response_data += chunk;
+            });
+
+            response.on('end', () => {
+                console.log(`Request end: ${response_data}`);
+                resolve(response_data);
+            });
+        });
+
+        request.end();
+    });
+}
+
 function post_registration(payload, options) {
     return new Promise((resolve, reject) => {
         let response_data = '';

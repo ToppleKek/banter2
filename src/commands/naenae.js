@@ -1,7 +1,8 @@
-const { Message } = require('discord.js');
 const Bot = require('../bot');
 const CommandError = require('../command_error');
-const { pledge } = require('../utils/utils');
+const { pledge, command_error_if } = require('../utils/utils');
+const { Message, ActionRowBuilder, ButtonBuilder } = require('discord.js');
+const { BUTTON_DANGER, BUTTON_PRIMARY } = require('../constants');
 
 module.exports.help = 'Ban a member from the guild';
 module.exports.usage = '#PREFIXnaenae <target> <?reason>';
@@ -35,21 +36,66 @@ module.exports.main = async (bot, args, msg) => {
     };
 
     if (!member) {
-        const ban_embed = {
-            color: 1571692,
-            title: `${args.get('target').tag} JUST GOT HACKNAENAED`,
-            description: 'GET FRICKED KIDDO',
-            thumbnail: {
-                url: 'https://topplekek.xyz/lmao.gif',
-            },
-            timestamp: new Date().toISOString(),
-        };
+        const target = args.get('target');
+        const do_hacknaenae = (send_func) => {
+            const ban_embed = {
+                color: 1571692,
+                title: `${target.tag} JUST GOT HACKNAENAED`,
+                description: 'GET FRICKED KIDDO',
+                thumbnail: {
+                    url: 'https://topplekek.xyz/lmao.gif',
+                },
+                timestamp: new Date().toISOString(),
+            };
 
-        msg.guild.bans.create(args.get('target'), opts)
-            .then(() => msg.respond({embeds:[ban_embed]}))
+            msg.guild.bans.create(target, opts)
+            .then(() => send_func({embeds:[ban_embed]}))
             .catch((err) => msg.respond_error(`API Error: \`\`\`${err}\`\`\``));
 
-        bot.guilds.get(msg.guild.id).mod_log('hacknaenae (ban)', msg.author, args.get('target'), args.get('reason'));
+            bot.guilds.get(msg.guild.id).mod_log('hacknaenae (ban)', msg.author, target, args.get('reason'));
+        };
+        const [err, existing_ban] = await pledge(msg.guild.bans.fetch(target));
+
+        if (!err && existing_ban) {
+            const yes_button = ButtonBuilder.from({label: 'Yes', style: BUTTON_DANGER, customId: 'yes_button'});
+            const no_button = ButtonBuilder.from({label: 'No', style: BUTTON_PRIMARY, customId: 'no_button'});
+            const action_row = ActionRowBuilder.from({components: [yes_button, no_button]});
+            const opts = {
+                embeds: [{
+                    title: 'Confirmation',
+                    description: `**${target.tag}** is already banned. Do you want to update the ban reason/author?`,
+                    color: 0xBA211C
+                }],
+                components: [action_row]
+            };
+
+            const interactable_message = await msg.respond(opts);
+            const col = interactable_message.createMessageComponentCollector({time: 20000});
+
+            col.on('collect', async (interaction) => {
+                if (interaction.user.id !== msg.author.id)
+                    return;
+
+                if (interaction.customId === 'yes_button') {
+                    col.stop('interact_yes');
+                    const [err] = await pledge(msg.guild.bans.remove(target, 'Ban reason update'));
+                    command_error_if(err);
+                    do_hacknaenae(interaction.reply.bind(interaction));
+                } else if (interaction.customId === 'no_button') {
+                    col.stop('interact_no');
+                    interaction.reply({embeds: [{
+                        description: 'Aborted.'
+                    }]});
+                }
+            });
+
+            col.on('end', async (collected, reason) => {
+                opts.components = [];
+                interactable_message.edit(opts);
+            });
+        } else
+            do_hacknaenae(msg.respond.bind(msg));
+
         return;
     }
 

@@ -1,7 +1,8 @@
-const { Message } = require('discord.js');
+const { Message, ButtonBuilder, ActionRowBuilder } = require('discord.js');
 const Bot = require('../bot');
 const CommandError = require('../command_error');
 const { pledge, command_error_if } = require('../utils/utils');
+const { BUTTON_SECONDARY } = require('../constants');
 
 module.exports.help = 'Role yourself';
 module.exports.usage = '#PREFIXpubrole <pubrole>';
@@ -42,7 +43,57 @@ module.exports.main = async (bot, args, msg) => {
             return p.role.name;
         }).filter((p) => p !== null);
 
-        msg.respond_info(`${human_roles.join('\n') || '**None.**'}`, `Public roles for ${msg.guild.name}`);
+        const pages = [];
+        let page = 0;
+
+        while (human_roles.length)
+            pages.push(human_roles.splice(0, 12));
+
+        const next_button = ButtonBuilder.from({ label: '->' , style: BUTTON_SECONDARY, custom_id: 'next_button'});
+        const prev_button = ButtonBuilder.from({ label: '<-' , style: BUTTON_SECONDARY, custom_id: 'prev_button'});
+        const action_row = ActionRowBuilder.from({components: [prev_button, next_button]});
+
+        const opts = {
+            embeds: [{
+                title: `Public roles on ${msg.guild.name}`,
+                description: pages[page].join('\n'),
+                color: 0x9284FA,
+                footer: {
+                    text: `Page ${page + 1}/${pages.length}`
+                },
+            }],
+            components: [action_row]
+        };
+
+        const interactable_message = await msg.respond(opts);
+        const col = interactable_message.createMessageComponentCollector({ time: 60000 });
+
+        col.on('collect', async (interaction) => {
+            if (interaction.user.id !== msg.author.id) {
+                await interaction.reply({embeds: [{
+                    description: `These buttons are only valid for ${msg.author.tag}`,
+                    color: 0xFF6640
+                }], flags: 1 << 6});
+
+                return;
+            }
+
+            if (interaction.customId === 'next_button' && page < pages.length - 1) {
+                opts.embeds[0].description = pages[++page].join('\n'),
+                opts.embeds[0].footer.text = `Page ${page + 1}/${pages.length}`;
+            } else if (interaction.customId === 'prev_button' && page > 0) {
+                opts.embeds[0].description = pages[--page].join('\n'),
+                opts.embeds[0].footer.text = `Page ${page + 1}/${pages.length}`;
+            }
+
+            await interaction.update(opts);
+        });
+
+        col.on('end', async () => {
+            opts.components = [];
+            await interactable_message.edit(opts);
+        });
+
         return;
     }
 

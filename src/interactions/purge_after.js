@@ -20,7 +20,7 @@ module.exports.main = async (bot, executor, target_msg, interaction) => {
     if (bguild.config_get('logNoP') && !err && log_id === target_msg.channel.id)
         throw new CommandError('PermissionError', 'This command is disabled in this channel.');
 
-    [err, msgs] = await pledge(target_msg.channel.messages.fetch({ after: interaction.data.target_id }));
+    [err, msgs] = await pledge(target_msg.channel.messages.fetch({ after: target_msg.id }));
     command_error_if(err, 'APIError');
 
     if (msgs.size === 0)

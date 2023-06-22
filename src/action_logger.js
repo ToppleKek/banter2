@@ -327,6 +327,9 @@ const ActionLogger = {
 
         const bguild = bot.guilds.get(channel.guild.id);
 
+        if (!bguild.config_get('logMassDelHaste'))
+            return;
+
         const [err, file_path] = await pledge(generate_message_dump(msgs, channel));
 
         if (err) {

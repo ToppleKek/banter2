@@ -223,7 +223,7 @@ class BanterGuild {
         await pledge(mod_log_channel.send({embeds: [embed]}));
     }
 
-    async temp_ban(user, author, duration, days, reason = 'No reason provided') {
+    async temp_ban(user, author, duration, seconds, reason = 'No reason provided') {
         let member;
 
         if ((member = (await this.dguild.members.fetch(user).catch(() => {}))) && !member.bannable)
@@ -238,7 +238,7 @@ class BanterGuild {
         if (existing_ban)
             throw new Error(`Member ${user.tag} is already temp banned`);
 
-        this.dguild.bans.create(user, { deleteMessageDays: days, reason });
+        this.dguild.bans.create(user, { deleteMessageSeconds: seconds, reason });
 
         this.bot.db.runp(
             'INSERT INTO temp_bans (guild_id, user_id, author_id, duration, start_timestamp) VALUES (?, ?, ?, ?, ?)',

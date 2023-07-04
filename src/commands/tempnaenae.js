@@ -4,7 +4,7 @@ const CommandError = require('../command_error');
 const { pledge, parse_time, command_error_if } = require('../utils/utils');
 
 module.exports.help = 'Temporarily ban a member from the guild';
-module.exports.usage = '#PREFIXtempnaenae <target> <length> <?days> <?reason>';
+module.exports.usage = '#PREFIXtempnaenae <target> <length> <?reason>';
 module.exports.required_permissions = ['BAN_MEMBERS'];
 module.exports.args_list = {
     position_independent: false,
@@ -18,10 +18,6 @@ module.exports.args_list = {
         description: 'A length time string'
     }],
     optional_args: [{
-        name: 'days',
-        type: 'number',
-        description: 'The number of days worth of messages to delete (default=7)'
-    }, {
         name: 'reason',
         type: 'string',
         description: 'A reason for the temp ban'
@@ -46,7 +42,7 @@ module.exports.main = async (bot, args, msg) => {
     length *= 1000;
 
     const opts = {
-        deleteMessageDays: args.get('days') ?? 7,
+        deleteMessageSeconds: 0,
         reason: `Temp ban for ${length}ms issued by: ${msg.author.tag} - ${args.get('reason') || '(no reason provided)'}`
     };
 
@@ -61,7 +57,7 @@ module.exports.main = async (bot, args, msg) => {
             timestamp: new Date().toISOString(),
         };
 
-        const [err] = await pledge(bot.guilds.get(msg.guild.id).temp_ban(args.get('target'), msg.author, length, opts.deleteMessageDays, opts.reason));
+        const [err] = await pledge(bot.guilds.get(msg.guild.id).temp_ban(args.get('target'), msg.author, length, opts.deleteMessageSeconds, opts.reason));
         command_error_if(err, 'InternalError');
         msg.respond({embeds:[ban_embed]});
         return;
@@ -93,7 +89,7 @@ module.exports.main = async (bot, args, msg) => {
     await member.createDM().then((dm_channel) => dm_channel.send({embeds:[dm_embed]}))
         .catch((err) => msg.respond_error(`Warn: failed to DM user: ${err}`));
 
-    [err] = await pledge(bot.guilds.get(msg.guild.id).temp_ban(args.get('target'), msg.author, length, opts.deleteMessageDays, opts.reason));
+    [err] = await pledge(bot.guilds.get(msg.guild.id).temp_ban(args.get('target'), msg.author, length, opts.deleteMessageSeconds, opts.reason));
     command_error_if(err, 'InternalError');
 
     await pledge(msg.respond({embeds: [ban_embed]}));

@@ -80,7 +80,7 @@ class BanterGuild {
             this.db.serialize(() => {
                 this.db.run('DELETE FROM servers WHERE id = ?', this.id, (err) => {
                     if (err)
-                        reject(new Error(err));
+                        Logger.error(err);
                 });
 
                 this.db.run('INSERT INTO servers (id) VALUES (?)', this.id, (err) => {

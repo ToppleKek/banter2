@@ -16,6 +16,7 @@ async function add_banter_guild(bot, guild) {
     Logger.info(`Joined new server. Setting up: ${guild.name} - ${guild.id}`);
     const bguild = new BanterGuild(bot, guild.id);
 
+    await bguild.db_reset();
     await bguild._reload_config();
     bguild.temp_storage().set('spam_data', {});
     bot.guilds.set(guild.id, bguild);

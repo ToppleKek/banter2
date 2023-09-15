@@ -35,7 +35,7 @@ module.exports.main = async (bot, args, msg) => {
         ]);
         command_error_if(errs, 'APIError');
 
-        msg.respond_info(`Unmuted ${member.user.tag}`);
+        msg.respond_info(`Unmuted ${member.user.toString()}`);
     } else
-        msg.respond_error(`${member.user.tag} is not muted.`);
+        msg.respond_error(`${member.user.toString()} is not muted.`);
 };

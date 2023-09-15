@@ -38,11 +38,11 @@ module.exports.main = async (bot, args, msg) => {
         throw new CommandError('BotPermissionError', 'This user is not kickable by the bot');
 
     if (member.roles.highest.rawPosition >= author.roles.highest.rawPosition)
-        throw new CommandError('PermissionError', `${member.user.tag} has a higher or equal role`);
+        throw new CommandError('PermissionError', `${member.user.displayName} has a higher or equal role`);
 
     const kick_embed = {
         color: 1571692,
-        title: `${member.user.tag} JUST GOT DABBED ON`,
+        title: `${member.user.displayName} JUST GOT DABBED ON`,
         description: 'GET FRICKED KIDDO',
         thumbnail: {
             url: 'https://topplekek.xyz/breaddab.gif',

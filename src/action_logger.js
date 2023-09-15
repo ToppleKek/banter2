@@ -19,6 +19,17 @@ const ActionLogger = {
                     }
                 });
             }
+
+            if (old_user.displayName !== new_user.displayName) {
+                bguild.log({
+                    title: '👤 User display name updated',
+                    description: `${old_user.displayName} --> ${new_user.displayName}`,
+                    color: 0xFFFFFF,
+                    thumbnail: {
+                        url: new_user.displayAvatarURL({ size: 2048, dynamic: true, format: 'png' })
+                    }
+                });
+            }
         });
     },
 
@@ -27,7 +38,7 @@ const ActionLogger = {
 
         bguild.log({
             title: '✅ Member joined',
-            description: `${member.user.tag} (${member.user.id})`,
+            description: `${member.user.toString()} (${member.user.tag} - ${member.user.id})`,
             color: 0xFFFFFF,
             fields: [{
                 name: 'Account Creation Date',
@@ -50,7 +61,7 @@ const ActionLogger = {
 
         bguild.log({
             title: '👤❌ Member left',
-            description: `${member.user.tag} (${member.user.id})`,
+            description: `${member.user.toString()} (${member.user.tag} - ${member.user.id})`,
             color: 0xFFFFFF,
             thumbnail: {
                 url: member.user.displayAvatarURL({ size: 2048, dynamic: true, format: 'png' })
@@ -64,7 +75,7 @@ const ActionLogger = {
 
         bguild.log({
             title: '👤⛔ Member banned',
-            description: `${ban.user.tag} (${ban.user.id})`,
+            description: `${ban.user.toString()} (${member.user.tag} - ${ban.user.id})`,
             fields: [{
                 name: 'Reason',
                 value: ban.reason || 'No reason provided'
@@ -81,7 +92,7 @@ const ActionLogger = {
 
         bguild.log({
             title: '👤☑️ Member unbanned',
-            description: `${ban.user.tag} (${ban.user.id})`,
+            description: `${ban.user.toString()} (${member.user.tag} - ${ban.user.id})`,
             fields: [{
                 name: 'Original Ban Reason',
                 value: ban.reason || 'No reason provided'
@@ -99,7 +110,7 @@ const ActionLogger = {
         if (old_member.nickname !== new_member.nickname) {
             bguild.log({
                 title: '👤 Member nickname changed',
-                description: `${new_member.user.tag} (${new_member.id})\n\n${old_member.nickname} --> ${new_member.nickname}`,
+                description: `${new_member.user.toString()} (${new_member.user.tag} - ${new_member.id})\n\n${old_member.nickname} --> ${new_member.nickname}`,
                 color: 0xFFFFFF,
             });
         }
@@ -111,7 +122,7 @@ const ActionLogger = {
         if (role_diff.size > 0) {
             bguild.log({
                 title: '👤🎭 Member roles changed',
-                description: `${new_member.user.tag} (${new_member.id})\n\nOld: ${old_roles}\nNew: ${new_roles}`,
+                description: `${new_member.user.toString()} (${new_member.user.tag} - ${new_member.id})\n\nOld: ${old_roles}\nNew: ${new_roles}`,
                 color: 0xFFFFFF
             });
         }
@@ -312,7 +323,7 @@ const ActionLogger = {
 
         bguild.log({
             title: '📜❌ Message deleted',
-            description: `By: **${msg.author.tag}** (${msg.author.id}) in **#${msg.channel.name}**`,
+            description: `By: ${msg.author.toString()} (${msg.author.tag} - ${msg.author.id}) in ${msg.channel.toString()}`,
             color: 0xFFFFFF,
             fields: [{
                 name: 'Content',
@@ -342,7 +353,7 @@ const ActionLogger = {
 
         bguild.log({
             title: '📜❌ Messages deleted',
-            description: `In **#${channel.name}**\n\nView the log [here](${CONFIG.msg_log_base_url}/${channel.guild.id}/${file_name})`,
+            description: `In ${channel.toString()}\n\nView the log [here](${CONFIG.msg_log_base_url}/${channel.guild.id}/${file_name})`,
             color: 0xFFFFFF
         });
     },
@@ -408,7 +419,7 @@ const ActionLogger = {
 
         bguild.log({
             title: '📜✏️ Message edited',
-            description: `By: **${new_msg.author.tag}** (${new_msg.author.id}) in **#${new_msg.channel.name}**\n[Jump to Context](${context_link})`,
+            description: `By: ${new_msg.author.toString()} (${new_msg.author.tag} - ${new_msg.author.id}) in ${new_msg.channel.toString()}\n[Jump to Context](${context_link})`,
             color: 0xFFFFFF,
             fields: [{
                 name: 'Old content',
@@ -455,7 +466,7 @@ const ActionLogger = {
 
         bguild.log({
             title: '🗣️ Member voice state updated',
-            description: `**${new_state.member.user.tag}** (${new_state.member.user.id})`,
+            description: `${new_msg.author.toString()} (${new_msg.author.tag} - ${new_msg.author.id})`,
             color: 0xFFFFFF,
             fields
         });

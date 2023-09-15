@@ -40,7 +40,7 @@ module.exports.main = async (bot, args, msg) => {
         command_error_if(err, 'APIError');
 
         bot.guilds.get(msg.guild.id).mod_log(`indefinite mute`, msg.author, member.user, reason);
-        msg.respond_info(`Muted ${member.user.tag} indefinitely - \`${reason}\``);
+        msg.respond_info(`Muted ${member.user.toString()} indefinitely - \`${reason}\``);
     };
 
     if (!member)
@@ -53,7 +53,7 @@ module.exports.main = async (bot, args, msg) => {
         ]);
         command_error_if(errs, 'APIError');
 
-        msg.respond_info(`Unmuted ${member.user.tag}`);
+        msg.respond_info(`Unmuted ${member.user.toString()}`);
     } else if (args.get('time')) {
         const time = parse_time(args.get('time'));
 
@@ -66,7 +66,7 @@ module.exports.main = async (bot, args, msg) => {
             command_error_if(err, 'APIError');
 
             bot.guilds.get(msg.guild.id).mod_log(`timed mute (${ms_to_hhmmss(time * 1000)})`, msg.author, member.user, reason);
-            msg.respond_info(`Muted ${member.user.tag} for ${ms_to_hhmmss(time * 1000)} - \`${reason}\``);
+            msg.respond_info(`Muted ${member.user.toString()} for ${ms_to_hhmmss(time * 1000)} - \`${reason}\``);
         }
     } else
         await indefinite_mute();

@@ -20,7 +20,7 @@ module.exports.main = async (bot, executor, target_member, interaction) => {
 
     const embed = {
         author:  {
-            name: `${target_member.user.tag}`,
+            name: `${target_member.user.displayName} (${target_member.user.tag})`,
             iconURL: target_member.user.displayAvatarURL({ size: 2048, dynamic: true, format: 'png' }),
         },
         description: target_member.nickname ? `AKA: ${target_member.nickname} (${target_member.user.id})` : `(${target_member.user.id})`,

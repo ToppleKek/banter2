@@ -40,7 +40,7 @@ module.exports.main = async (bot, args, msg) => {
         const do_hacknaenae = (send_func) => {
             const ban_embed = {
                 color: 1571692,
-                title: `${target.tag} JUST GOT HACKNAENAED`,
+                title: `${target.displayName} JUST GOT HACKNAENAED`,
                 description: 'GET FRICKED KIDDO',
                 thumbnail: {
                     url: 'https://topplekek.xyz/lmao.gif',
@@ -63,7 +63,7 @@ module.exports.main = async (bot, args, msg) => {
             const opts = {
                 embeds: [{
                     title: 'Confirmation',
-                    description: `**${target.tag}** is already banned. Do you want to update the ban reason/author?`,
+                    description: `${target.toString()} is already banned. Do you want to update the ban reason/author?`,
                     color: 0xBA211C
                 }],
                 components: [action_row]
@@ -103,11 +103,11 @@ module.exports.main = async (bot, args, msg) => {
         throw new CommandError('BotPermissionError', 'This user is not bannable by the bot');
 
     if (member.roles.highest.rawPosition >= author.roles.highest.rawPosition)
-        throw new CommandError('PermissionError', `${member.user.tag} has a higher or equal role`);
+        throw new CommandError('PermissionError', `${member.user.displayName} has a higher or equal role`);
 
     const ban_embed = {
         color: 1571692,
-        title: `${member.user.tag} JUST GOT NAENAED`,
+        title: `${member.user.displayName} JUST GOT NAENAED`,
         description: 'GET FRICKED KIDDO',
         thumbnail: {
             url: 'https://topplekek.xyz/lmao.gif',

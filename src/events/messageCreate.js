@@ -126,7 +126,7 @@ async function check_spam(bot, msg) {
         const embed = {
             color: 0xBA211C,
             title: 'Anti-spam Message',
-            description: `${ping_should_punish ? '(ping spam) ' : ''}Possible spam detected for user: \`${msg.author.tag}\`. *Please contact a moderator to be unmuted.*`
+            description: `${ping_should_punish ? '(ping spam) ' : ''}Possible spam detected for user: \`${msg.author.displayName}\`. *Please contact a moderator to be unmuted.*`
         };
 
         [err] = await pledge(member.timeout(2399999999, 'Possible spam detected, user has been muted'));

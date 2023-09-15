@@ -39,7 +39,7 @@ module.exports = {
 
         this.respond({embeds: [{
             author: {
-                name: `Command executed by ${this.author.username}#${this.author.discriminator}`,
+                name: `Command executed by ${this.author.displayName}`,
                 iconURL: this.author.displayAvatarURL()
             },
             title: 'Command Error',

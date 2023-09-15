@@ -45,6 +45,6 @@ module.exports.main = async (bot, args, msg) => {
 
     command_error_if(err, 'SQLError');
 
-    msg.respond_info(`Added note to user \`${target.tag}\``);
+    msg.respond_info(`Added note to user \`${target.toString()}\``);
     await bot.guilds.get(msg.guild.id).mod_log('add note', msg.author, target, elide(content, 30));
 };

@@ -42,13 +42,13 @@ module.exports.main = async (bot, args, msg) => {
         [err] = await pledge(target.roles.remove(role));
         command_error_if(err, 'APIError');
 
-        msg.respond_info(`Removed **${role.name}** from **${target.user.tag}**`);
+        msg.respond_info(`Removed **${role.name}** from ${target.user.toString()}`);
         bot.guilds.get(msg.guild.id).mod_log(`remove role ${role.name}`, msg.author, target.user);
     } else {
         [err] = await pledge(target.roles.add(role));
         command_error_if(err, 'APIError');
 
-        msg.respond_info(`Added **${role.name}** to **${target.user.tag}**`);
+        msg.respond_info(`Added **${role.name}** to ${target.user.toString()}`);
         bot.guilds.get(msg.guild.id).mod_log(`add role ${role.name}`, msg.author, target.user);
     }
 }

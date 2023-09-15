@@ -49,7 +49,7 @@ module.exports.main = async (bot, args, msg) => {
     if (err) {
         const ban_embed = {
             color: 1571692,
-            title: `${args.get('target').tag} JUST GOT TEMP HACKNAENAED UNTIL ${length_display}`,
+            title: `${args.get('target').displayName} JUST GOT TEMP HACKNAENAED UNTIL ${length_display}`,
             description: 'GET FRICKED KIDDO',
             thumbnail: {
                 url: 'https://topplekek.xyz/lmao.gif',
@@ -67,11 +67,11 @@ module.exports.main = async (bot, args, msg) => {
         throw new CommandError('BotPermissionError', 'This user is not bannable by the bot');
 
     if (member.roles.highest.rawPosition >= msg.guild.members.resolve(msg.author).roles.highest.rawPosition)
-        throw new CommandError('PermissionError', `${member.user.tag} has a higher or equal role`);
+        throw new CommandError('PermissionError', `${member.user.displayName} has a higher or equal role`);
 
     const ban_embed = {
         color: 1571692,
-        title: `${member.user.tag} JUST GOT TEMPNAENAED UNTIL ${length_display}`,
+        title: `${member.user.displayName} JUST GOT TEMPNAENAED UNTIL ${length_display}`,
         description: 'GET FRICKED KIDDO',
         thumbnail: {
             url: 'https://topplekek.xyz/lmao.gif',

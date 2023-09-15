@@ -105,7 +105,7 @@ module.exports = {
     generate_message_dump(msgs, channel) {
         const log_content = msgs.map((msg) => {
             const embed_desc = msg?.embeds.map((embed) => JSON.stringify(embed));
-            return `[${msg.createdAt.toUTCString()}] ${msg.author.tag} - ${msg.content}${embed_desc?.length ? `<br>EMBEDS:<br>${embed_desc}` : ''}`;
+            return `[${msg.createdAt.toUTCString()}] ${msg.author.displayName} (${msg.author.tag}) - ${msg.content}${embed_desc?.length ? `<br>EMBEDS:<br>${embed_desc}` : ''}`;
         });
 
         log_content.push(`***Message log generated at ${new Date().toUTCString()} on guild ${channel.guild.name} in channel #${channel.name}.***`);

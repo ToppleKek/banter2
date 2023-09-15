@@ -129,6 +129,6 @@ module.exports.main = async (bot, args, msg) => {
         interactable_message.edit(opts);
 
         if (!reason.startsWith('interact'))
-            msg.respond_info(`Massdabon prompt executed by ${msg.author.tag} timed out.`);
+            msg.respond_info(`Massdabon prompt executed by ${msg.author.displayName} timed out.`);
     });
 };

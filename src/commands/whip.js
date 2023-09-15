@@ -29,7 +29,7 @@ module.exports.main = async (bot, args, msg) => {
     const target = args.get('target');
     const e = {
         color: 1571692,
-        title: `${target.tag} JUST GOT WHIPPED`,
+        title: `${target.displayName} JUST GOT WHIPPED`,
         description: 'WELCOME BACK KIDDO',
         thumbnail: {
             url: 'https://topplekek.xyz/lmao.gif',

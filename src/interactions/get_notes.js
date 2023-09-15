@@ -31,7 +31,7 @@ module.exports.main = async (bot, executor, target_member, interaction) => {
 
     const embed = {
         color: 0x9284FA,
-        title: `Notes for ${target_member.user.tag}`,
+        title: `Notes for ${target_member.user.displayName}`,
         fields,
         footer: {
             text: `To view ${diff > 0 ? ` the remaining ${diff} notes` : ' details'} or edit notes, use the \`notes\` command`

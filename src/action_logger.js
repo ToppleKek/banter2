@@ -75,7 +75,7 @@ const ActionLogger = {
 
         bguild.log({
             title: '👤⛔ Member banned',
-            description: `${ban.user.toString()} (${member.user.tag} - ${ban.user.id})`,
+            description: `${ban.user.toString()} (${ban.user.tag} - ${ban.user.id})`,
             fields: [{
                 name: 'Reason',
                 value: ban.reason || 'No reason provided'
@@ -92,7 +92,7 @@ const ActionLogger = {
 
         bguild.log({
             title: '👤☑️ Member unbanned',
-            description: `${ban.user.toString()} (${member.user.tag} - ${ban.user.id})`,
+            description: `${ban.user.toString()} (${ban.user.tag} - ${ban.user.id})`,
             fields: [{
                 name: 'Original Ban Reason',
                 value: ban.reason || 'No reason provided'

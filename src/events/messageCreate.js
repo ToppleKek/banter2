@@ -21,12 +21,28 @@ async function main(msg) {
     const results = await Promise.allSettled([
         update_unique_authors(this, msg),
         check_spam(this, msg),
-        run_binds(this, msg)
+        run_binds(this, msg),
+        handle_introduction(this, msg)
     ]);
 
     for (const result of results) {
         if (result.status === 'rejected')
             Logger.error(`Event messageCreate failed to run a task: ${result.reason}`);
+    }
+}
+
+async function handle_introduction(bot, msg) {
+    const bguild = bot.guilds.get(msg.guild.id);
+    let [err, introduction_channel] = await pledge(bguild.db_get('introduction_channel'));
+    if (err)
+        return;
+
+    if (msg.channel.id === introduction_channel && msg.member) {
+        let [err, introduction_role] = await pledge(bguild.db_get('introduction_role'));
+        if (msg.member.roles.cache.has(introduction_role))
+            await pledge(msg.delete());
+        else
+            msg.member.roles.add(introduction_role);
     }
 }
 

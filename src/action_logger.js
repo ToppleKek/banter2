@@ -466,7 +466,7 @@ const ActionLogger = {
 
         bguild.log({
             title: '🗣️ Member voice state updated',
-            description: `${new_state.member.user.toString()} (${new_state.member.user.author.tag} - ${new_state.member.user.author.id})`,
+            description: `${new_state.member.user.toString()} (${new_state.member.user.tag} - ${new_state.member.user.id})`,
             color: 0xFFFFFF,
             fields
         });

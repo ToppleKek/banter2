@@ -27,7 +27,7 @@ module.exports.main = async (bot, args, msg) => {
     let page = 0;
 
     while (fields.length)
-        pages.push(fields.splice(0, 2));
+        pages.push(fields.splice(0, 10));
 
     const next_button = ButtonBuilder.from({ label: '->' , style: BUTTON_SECONDARY, custom_id: 'next_button'});
     const prev_button = ButtonBuilder.from({ label: '<-' , style: BUTTON_SECONDARY, custom_id: 'prev_button'});

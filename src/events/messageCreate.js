@@ -32,6 +32,9 @@ async function main(msg) {
 }
 
 async function handle_introduction(bot, msg) {
+    if (msg.author.id === bot.client.user.id)
+        return;
+
     const bguild = bot.guilds.get(msg.guild.id);
     let [err, introduction_channel] = await pledge(bguild.db_get('introduction_channel'));
     if (err)

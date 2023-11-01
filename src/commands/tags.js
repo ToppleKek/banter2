@@ -64,7 +64,7 @@ module.exports.main = async (bot, args, msg) => {
             color: 0x259EF5,
             fields
         }]});
-    }else {
+    } else {
         throw new CommandError('ArgumentError', 'Invalid command');
     }
 }

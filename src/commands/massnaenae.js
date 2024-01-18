@@ -89,7 +89,7 @@ module.exports.main = async (bot, args, msg) => {
             if (!member.bannable)
                 return;
 
-            const [err] = await pledge(member.ban({deleteMessageDays: 7, reason}));
+            const [err] = await pledge(member.ban({reason}));
 
             if (err)
                 Logger.error(err);
@@ -104,6 +104,7 @@ module.exports.main = async (bot, args, msg) => {
 
         bguild.temp_storage().set('massnaenae_lock', false);
         msg.respond_info(`Finished banning ${members.size} members.`);
+        bguild.add_naenae_stat(msg.author.id, members.size);
     };
 
     col.on('collect', async (interaction) => {

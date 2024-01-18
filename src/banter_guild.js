@@ -296,6 +296,15 @@ class BanterGuild {
         return true;
     }
 
+    async _get_object_backed_db_storage(key) {
+        let [err, db_response] = await pledge(this.db_get(key));
+
+        if (!db_response)
+            db_response = '{}';
+
+        return err ? {} : JSON.parse(db_response);
+    }
+
     async get_auto_roles() {
         return this._get_array_backed_db_storage('autoroles');
     }
@@ -368,6 +377,49 @@ class BanterGuild {
 
     async remove_unique_author(user) {
         return this._remove_array_backed_db_storage('unique_authors', user);
+    }
+
+    async get_naenae_stats() {
+        return this._get_object_backed_db_storage('naenae_stats');
+    }
+
+    async add_naenae_stat(user_id, n) {
+        const naenae_stats = await this.get_naenae_stats();
+
+        if (!naenae_stats[user_id])
+            naenae_stats[user_id] = 0;
+
+        naenae_stats[user_id] += n;
+
+        await this.db_set('naenae_stats', JSON.stringify(naenae_stats));
+    }
+
+    async reset_naenae_stats() {
+        await this.db_set('naenae_stats', '{}');
+    }
+
+    async get_ban_stats() {
+        return this._get_object_backed_db_storage('ban_stats');
+    }
+
+    async set_ban_stats(ban_stats) {
+        await this.db_set('ban_stats', JSON.stringify(ban_stats));
+    }
+
+    async get_archived_ban_stats() {
+        return this._get_array_backed_db_storage('archived_ban_stats');
+    }
+
+    async add_archived_ban_stats(ban_stats) {
+        const values = await this._get_array_backed_db_storage('archived_ban_stats');
+
+        values.push(ban_stats);
+
+        if (values.length > 12)
+            values.splice(0, 1);
+
+        this.db_set('archived_ban_stats', JSON.stringify(values));
+        return true;
     }
 
     async _remove_dead_channel_binds() {

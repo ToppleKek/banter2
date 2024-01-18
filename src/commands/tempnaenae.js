@@ -32,6 +32,7 @@ module.exports.args_list = {
 module.exports.main = async (bot, args, msg) => {
     let err, member;
     [err, member] = await pledge(msg.guild.members.fetch(args.get('target')));
+    const bguild = bot.guilds.get(msg.guild.id);
 
     let length = parse_time(args.get('length'));
 
@@ -57,7 +58,7 @@ module.exports.main = async (bot, args, msg) => {
             timestamp: new Date().toISOString(),
         };
 
-        const [err] = await pledge(bot.guilds.get(msg.guild.id).temp_ban(args.get('target'), msg.author, length, opts.deleteMessageSeconds, opts.reason));
+        const [err] = await pledge(bguild.temp_ban(args.get('target'), msg.author, length, opts.deleteMessageSeconds, opts.reason));
         command_error_if(err, 'InternalError');
         msg.respond({embeds:[ban_embed]});
         return;
@@ -89,8 +90,9 @@ module.exports.main = async (bot, args, msg) => {
     await member.createDM().then((dm_channel) => dm_channel.send({embeds:[dm_embed]}))
         .catch((err) => msg.respond_error(`Warn: failed to DM user: ${err}`));
 
-    [err] = await pledge(bot.guilds.get(msg.guild.id).temp_ban(args.get('target'), msg.author, length, opts.deleteMessageSeconds, opts.reason));
+    [err] = await pledge(bguild.temp_ban(args.get('target'), msg.author, length, opts.deleteMessageSeconds, opts.reason));
     command_error_if(err, 'InternalError');
 
     await pledge(msg.respond({embeds: [ban_embed]}));
+    bguild.add_naenae_stat(msg.author.id, 1);
 }

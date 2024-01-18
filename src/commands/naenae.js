@@ -31,6 +31,8 @@ module.exports.main = async (bot, args, msg) => {
     [err, member] = await pledge(msg.guild.members.fetch(args.get('target')));
     [err, author] = await pledge(msg.guild.members.fetch(msg.author));
 
+    const bguild = bot.guilds.get(msg.guild.id);
+
     const opts = {
         reason: `Ban issued by: ${msg.author.tag} - ${args.get('reason') ?? '(no reason provided)'}`
     };
@@ -52,7 +54,7 @@ module.exports.main = async (bot, args, msg) => {
             .then(() => send_func({embeds:[ban_embed]}))
             .catch((err) => msg.respond_error(`API Error: \`\`\`${err}\`\`\``));
 
-            bot.guilds.get(msg.guild.id).mod_log('hacknaenae (ban)', msg.author, target, args.get('reason'));
+            bguild.mod_log('hacknaenae (ban)', msg.author, target, args.get('reason'));
         };
         const [err, existing_ban] = await pledge(msg.guild.bans.fetch(target));
 
@@ -99,6 +101,8 @@ module.exports.main = async (bot, args, msg) => {
         return;
     }
 
+    msg.channel.sendTyping();
+
     if (!member.bannable)
         throw new CommandError('BotPermissionError', 'This user is not bannable by the bot');
 
@@ -129,5 +133,6 @@ module.exports.main = async (bot, args, msg) => {
         .then(() => msg.respond({embeds: [ban_embed]}))
         .catch((err) => msg.respond_error(`API Error: \`\`\`${err}\`\`\``));
 
-    bot.guilds.get(msg.guild.id).mod_log('naenae (ban)', msg.author, member.user, args.get('reason'));
+    bguild.mod_log('naenae (ban)', msg.author, member.user, args.get('reason'));
+    bguild.add_naenae_stat(msg.author.id, 1);
 };

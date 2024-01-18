@@ -4,24 +4,27 @@ const { pledge } = require("../utils/utils");
 async function main() {
     const bot = this;
     const now = new Date();
-    let err, last_stat_day;
-    [err, last_stat_day] = await pledge(bot.db_get_global('last_stat_day'));
+    let errs, last_stat_day, last_ban_stat_month;
+    [errs, [last_stat_day, last_ban_stat_month]] = await pledge([bot.db_get_global('last_stat_day'), bot.db_get_global('last_ban_stat_month')]);
 
-    if (err) {
-        Logger.error(err);
+    if (errs.length > 0) {
+        Logger.error(errs);
         return;
     }
 
-    [err] = await pledge(bot.db_set_global('last_stat_day', now.getDate()));
+    [errs] = await pledge([bot.db_set_global('last_stat_day', now.getDate()), bot.db_set_global('last_ban_stat_month', now.getMonth())]);
 
-    if (err) {
-        Logger.error(err);
+    if (errs.length > 0) {
+        Logger.error(errs);
         return;
     }
 
     const action = now.getDate() !== last_stat_day ? reset_stats : update_stats;
+    const ban_stat_action = now.getMonth() !== last_ban_stat_month ? reset_ban_stats : update_ban_stats;
 
     for (const [id, bguild] of bot.guilds.entries()) {
+        ban_stat_action(bot, bguild);
+
         let err, stat_channels;
         [err, stat_channels] = await pledge(bguild.get_stat_channels());
 
@@ -36,6 +39,76 @@ async function main() {
 
         await action(bguild, stat_channels);
     }
+}
+
+async function reset_ban_stats(bot, bguild) {
+    const now = new Date();
+
+    // If someone banned someone in the last 5 minutes of the month...
+    await pledge(update_ban_stats(bot, bguild, new Date(Date.now() - 24 * 60 * 60 * 1000)));
+
+    let [err, [ban_stats, naenae_stats]] = await pledge([bguild.get_ban_stats(), bguild.get_naenae_stats()]);
+    if (err.length > 0) {
+        Logger.error(`Failed to get ban stats: ${err}`);
+        return;
+    }
+
+    // Since we need to keep track of naenae commands separate from the audit log (otherwise the bot would take the stats from everyone who used naenae)
+    // we merge them here before archiving them.
+    for (const id in naenae_stats) {
+        if (!ban_stats[id])
+            ban_stats[id] = naenae_stats[id];
+        else
+            ban_stats[id] += naenae_stats[id];
+    }
+
+    let old_month = now.getMonth() - 1;
+    let old_year = now.getFullYear();
+
+    if (old_month < 0) {
+        old_month = 11;
+        --old_year;
+    }
+
+    await pledge(bguild.add_archived_ban_stats({
+        month: old_month,
+        year: old_year,
+        stats: ban_stats
+    }));
+
+    await pledge([update_ban_stats(bot, bguild), bguild.reset_naenae_stats()]);
+}
+
+async function update_ban_stats(bot, bguild, now = new Date()) {
+    const audit_logs = await get_bans_from_audit_log(bguild);
+    if (!audit_logs) {
+        Logger.error(`Failed to get audit logs on bguild=${bguild.id}`);
+        return;
+    }
+
+    const this_months_bans = audit_logs.entries.filter((entry) => entry.createdAt.getMonth() === now.getMonth() && entry.executorId !== bot.client.user.id);
+    const stat_map = {};
+    for (const [entry_id, entry] of this_months_bans) {
+        if (stat_map.hasOwnProperty(entry.executorId))
+            ++stat_map[entry.executorId];
+        else
+            stat_map[entry.executorId] = 1;
+    }
+
+    await pledge(bguild.set_ban_stats(stat_map));
+}
+
+const MEMBER_BAN_ADD_AUDIT_LOG_EVENT = 22;
+async function get_bans_from_audit_log(bguild) {
+    let err, audit_logs;
+    [err, audit_logs] = await pledge(bguild.dguild.fetchAuditLogs({ type: MEMBER_BAN_ADD_AUDIT_LOG_EVENT }));
+
+    if (err) {
+        Logger.error(`Audit log fetch error: ${err}`);
+        return null;
+    }
+
+    return audit_logs;
 }
 
 async function reset_stats(bguild, stat_channels) {

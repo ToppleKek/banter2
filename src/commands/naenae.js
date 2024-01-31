@@ -39,7 +39,7 @@ module.exports.main = async (bot, args, msg) => {
 
     if (!member) {
         const target = args.get('target');
-        const do_hacknaenae = (send_func) => {
+        const do_hacknaenae = (send_func, count_ban_stat) => {
             const ban_embed = {
                 color: 1571692,
                 title: `${target.displayName} JUST GOT HACKNAENAED`,
@@ -55,6 +55,8 @@ module.exports.main = async (bot, args, msg) => {
             .catch((err) => msg.respond_error(`API Error: \`\`\`${err}\`\`\``));
 
             bguild.mod_log('hacknaenae (ban)', msg.author, target, args.get('reason'));
+            if (count_ban_stat)
+                bguild.add_naenae_stat(msg.author.id, 1);
         };
         const [err, existing_ban] = await pledge(msg.guild.bans.fetch(target));
 
@@ -82,7 +84,7 @@ module.exports.main = async (bot, args, msg) => {
                     col.stop('interact_yes');
                     const [err] = await pledge(msg.guild.bans.remove(target, 'Ban reason update'));
                     command_error_if(err);
-                    do_hacknaenae(interaction.reply.bind(interaction));
+                    do_hacknaenae(interaction.reply.bind(interaction), false);
                 } else if (interaction.customId === 'no_button') {
                     col.stop('interact_no');
                     interaction.reply({embeds: [{
@@ -96,7 +98,7 @@ module.exports.main = async (bot, args, msg) => {
                 interactable_message.edit(opts);
             });
         } else
-            do_hacknaenae(msg.respond.bind(msg));
+            do_hacknaenae(msg.respond.bind(msg), true);
 
         return;
     }

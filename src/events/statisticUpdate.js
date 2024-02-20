@@ -82,7 +82,6 @@ async function reset_ban_stats(bot, bguild) {
 async function update_ban_stats(bot, bguild, now = new Date()) {
     const audit_logs = await get_bans_from_audit_log(bguild);
     if (!audit_logs) {
-        Logger.error(`Failed to get audit logs on bguild=${bguild.id}`);
         return;
     }
 
@@ -104,7 +103,7 @@ async function get_bans_from_audit_log(bguild) {
     [err, audit_logs] = await pledge(bguild.dguild.fetchAuditLogs({ type: MEMBER_BAN_ADD_AUDIT_LOG_EVENT }));
 
     if (err) {
-        Logger.error(`Audit log fetch error: ${err}`);
+        Logger.error(`Audit log fetch error (guild=${bguild.id}): ${err}`);
         return null;
     }
 
@@ -167,7 +166,7 @@ async function edit_channels(bguild, stat_channels, total_users_text, unique_aut
 
     if (err || !total_users_channel) {
         Logger.error(err); // TODO: Change to mod message when that is implemented
-        await disable_stats(bguild);
+        // await disable_stats(bguild);
         return;
     }
 
@@ -190,7 +189,7 @@ async function edit_channels(bguild, stat_channels, total_users_text, unique_aut
 
     if (err || !unique_author_channel) {
         Logger.error(err); // TODO: Change to mod message when that is implemented
-        await disable_stats(bguild);
+        // await disable_stats(bguild);
         return;
     }
 

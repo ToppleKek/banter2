@@ -65,7 +65,7 @@ module.exports.main = async (bot, args, msg) => {
     const now = new Date();
     const opts = {
         embeds: [{
-            title: `Ban stats on ${msg.guild.name} (${pages[date_page].month}/${pages[date_page].year})`,
+            title: `Ban stats on ${msg.guild.name} (${pages[date_page].month + 1}/${pages[date_page].year})`,
             fields: pages[date_page].pages[page],
             color: 0x9284FA,
             footer: {
